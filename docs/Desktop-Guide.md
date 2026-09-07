@@ -1,4 +1,4 @@
-# Thermal Lab desktop — DEV5
+# Thermal Lab desktop — DEV6
 
 Launch `thermal-lab` after `python -m pip install ".[desktop]"`, or run
 `python scripts/run_thermal_lab.py` from the repository. Requires Windows x64
@@ -125,8 +125,38 @@ This first player accepts COMPLETE single-camera 256×192 archives with consiste
 indexes/counts and validated frame identities. Incomplete sessions and corrupt
 indexes are rejected; later frame/history errors are surfaced. Indexes are limited
 to one million entries and histories to two million scalar samples. This is
-recorded-frame review; re-analysis with newly drawn regions, multi-session
-comparison and physical-exposure synchronization remain future work.
+recorded-frame review; multi-session comparison and physical-exposure
+synchronization remain future work.
+
+## Add measurements during playback
+
+Choose **Analysis** in the review toolbar. **Point** places a point on the saved
+thermal grid; **Rectangle** draws a region. Use **Select** and drag to move either
+measurement. Select a measurement or table row, edit its name, and click Rename;
+Remove removes it from this analysis. Drawing another rectangle creates another
+region. Placement works in rotated thermal, aligned optical and blended views.
+
+Analysis geometry is fixed across the entire recording. Moving a point or region
+recalculates its history across all frames; this does not track a moving object.
+The current frame table updates immediately. Graphs recalculate in the background;
+export becomes available when the current calculation finishes. Point histories
+contain pixel values; region histories contain minimum, mean and maximum.
+
+**Recorded** restores the original measurements and their per-frame geometry.
+The original numerical grids, optical data and recorded measurement definitions
+are never modified. Optical alignment still follows the recorded frame.
+
+Edits autosave under `~/Thermal-Lab-Analysis/<recording-sha256>.json`. Reopen the
+recording and choose Analysis to restore them. **Save analysis** creates a new
+named copy; **Load analysis** replaces the current analysis with a saved layout
+for this same recording. Binding uses SHA-256 of the manifest, numerical archive
+and numerical index, so a different recording is rejected even from the same
+camera. Save copies and analysis CSVs outside the source recording folder.
+
+**Export history** exports the current Recorded or Analysis histories. CSV fields
+`measurement_basis` and `recording_sha256` distinguish later fixed-geometry
+analysis from original recorded measurements. Save a named copy to retain an
+alternative layout before editing further. See [DEV6 verification](Analysis-Verification.md).
 
 Temperatures are apparent Celsius values without host emissivity/environment
 correction. Absolute accuracy and physical thermal/optical exposure pairing

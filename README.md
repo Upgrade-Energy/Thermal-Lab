@@ -4,7 +4,9 @@ Standalone thermal camera capture, numerical measurements and recording.
 **Power Lab is not required.** This repository owns thermal-camera development;
 Power Lab can integrate with it later through a separate, versioned interface.
 
-Version 0.1.0 DEV5 adds continuous lossless optical recording and optical/blended
+Version 0.1.0 DEV6 adds editable playback points and regions with separate
+autosaved analysis layouts, recalculated histories and labeled CSV export.
+It includes continuous lossless optical recording and optical/blended
 playback alongside numerical thermal frames, temperature-history plots and CSV
 export. It also supports independent windows for multiple TOPDON TC001 Max
 cameras, with verified Windows device selection and separate measurement layouts.
@@ -102,7 +104,7 @@ The `thermal_lab` package is also installable with `python -m pip install .`.
 CI tests parsers, numerical decoding and recording without opening hardware.
 Hardware tests are run explicitly using the commands above.
 
-Next: standard video/image export, new measurements during offline review,
+Next: standard video/image export,
 longer capture and disconnect/recovery tests, and environmental correction.
 A later Power Lab integration should exchange
 run IDs, recording commands and selected measurements with freshness metadata.

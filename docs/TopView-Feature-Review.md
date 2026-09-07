@@ -1,8 +1,11 @@
 # TopView feature review and Thermal Lab priorities
 
+DEV6 adds editable playback points/regions, separate analysis layouts and
+recalculated histories; see [analysis verification](Analysis-Verification.md).
+
 DEV5 adds continuous lossless optical recording and optical/blended review.
 See [optical recording verification](Optical-Recording-Verification.md).
-Image/standard-video export and new playback measurements remain pending.
+Image/standard-video export remains pending.
 
 DEV4 adds thermal recording playback, recorded measurement histories and CSV
 export; see [playback verification](Playback-Verification.md). The historical

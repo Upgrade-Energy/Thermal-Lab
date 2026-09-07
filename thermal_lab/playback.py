@@ -70,11 +70,15 @@ class Recording:
             frame['workspace']=settings
         return frame
 
-    def histories(self, progress=lambda *_:None, cancelled=lambda:False):
+    def histories(self, progress=lambda *_:None, cancelled=lambda:False, settings=None):
+        if settings is not None:
+            settings=validate_settings(settings)
+            if settings['camera_id']!=self.manifest['camera_id']:raise ValueError('Analysis camera identity differs')
         series={};samples=0
         for index in range(len(self.entries)):
             if cancelled():return None
             frame=self.read(index)
+            if settings is not None:frame=dict(frame,workspace=settings,measurements=measurement_values(frame,settings))
             definitions={v['id']:v for kind in ('points','areas') for v in frame.get('workspace',{}).get(kind,[])}
             for identifier,values in frame.get('measurements',{}).items():
                 definition=definitions.get(identifier,{})
@@ -94,15 +98,16 @@ class Recording:
         return series
 
 
-def export_history(path,recording,series):
+def export_history(path,recording,series,analysis_fingerprint=None):
     # Exclusive creation protects an existing export even when used outside the UI.
     with Path(path).open('x',newline='',encoding='utf-8-sig') as stream:
         writer=csv.writer(stream)
-        writer.writerow(['camera_id','source','measurement_id','latest_name','statistic','frame_index','elapsed_s','temperature_c','geometry'])
+        writer.writerow(['camera_id','source','measurement_id','latest_name','statistic','frame_index','elapsed_s','temperature_c','geometry','measurement_basis','recording_sha256'])
         def safe(value):
             value=str(value)
             return "'"+value if value.startswith(('=','+','-','@','\t','\r')) else value
         for (identifier,statistic),entry in series.items():
             for index,elapsed,value,geometry in entry['samples']:
                 writer.writerow([safe(recording.manifest['camera_id']),safe(recording.manifest['source']),
-                                 safe(identifier),safe(entry['name']),statistic,index,elapsed,value,geometry])
+                                 safe(identifier),safe(entry['name']),statistic,index,elapsed,value,geometry,
+                                 'offline_fixed_geometry_all_frames' if analysis_fingerprint else 'original_recorded',analysis_fingerprint or ''])

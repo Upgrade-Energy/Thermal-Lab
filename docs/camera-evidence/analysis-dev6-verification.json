@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "frames": 499,
+  "analysis_samples_checked": 1996,
+  "source_files_unchanged": 7,
+  "recording_sha256": "d9601590f1f9e4d9a0393afc63c639b157e7e762155674eacdd5dab5b85a7cec",
+  "autosave_reloaded": true,
+  "copy_reloaded": true,
+  "csv_basis": "offline_fixed_geometry_all_frames",
+  "point": {
+    "id": "798532ed90654c239e6c8356b2d2ce98",
+    "name": "Surface probe",
+    "x": 0.5103305785123967,
+    "y": 0.42424242424242425
+  },
+  "area": {
+    "id": "754714825ee046fcb52a46f494fdc7d5",
+    "name": "Region 1",
+    "x": 0.4524793388429752,
+    "y": 0.016528925619834656,
+    "x2": 0.5805785123966942,
+    "y2": 0.16804407713498618
+  }
+}
