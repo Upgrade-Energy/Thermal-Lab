@@ -9,6 +9,9 @@ Windows, full-resolution 256×192 temperature recording, point/area measurements
 USB diagnostics and TopView CSV import. A graphical live-view and playback
 interface is planned; it is not included in this first extraction.
 
+See the [TopView feature comparison and proposed UI priorities](docs/TopView-Feature-Review.md)
+for overlay alignment, precise measurement placement and recording/playback scope.
+
 ## Capture on Windows
 
 Use Python 3.12+ x64 and the tested TopView 1.30.003 installation and camera
