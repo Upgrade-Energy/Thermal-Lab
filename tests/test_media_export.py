@@ -55,4 +55,3 @@ class MediaExportTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             r=self.recording(Path(temp));r.times=[0,.01,.11]
             self.assertEqual(video_indices(r),[0,1,1,2])
-
