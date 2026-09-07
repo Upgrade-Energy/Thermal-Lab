@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "recording": "1",
+  "frames": 746,
+  "temperature_values_checked": 36667392,
+  "strictly_increasing_arrivals": true,
+  "first_last_raw_roundtrip_exact": true,
+  "manifest": {
+    "status": "COMPLETE",
+    "frames_written": 746,
+    "camera_id": "UNMAPPED_DLL_INDEX_1",
+    "qualification": "Isolated experiment; index identity requires USB-open trace",
+    "source": "HARDWARE",
+    "dll_sha256": "f7a745d1e056e1dcda6de43ee30483fa5490eeb535bc18bbbd7ff031fcf6d3e6"
+  }
+}

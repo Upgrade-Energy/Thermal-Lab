@@ -1,7 +1,52 @@
 # Two-camera test — 7 September 2026
 
-Status: individual capture verified; simultaneous capture blocked on the tested
-hub connection. Production adapter retains its single-camera guard.
+Status: simultaneous capture and separate numerical recording passed after
+moving one camera to a different USB controller. Production adapter retains its
+single-camera guard pending safe device selection and desktop integration.
+
+## Successful retest on separate controllers
+
+Windows confirmed the location-based camera moved to
+`PCIROOT(0)#PCI(0801)#PCI(0004)#USBROOT(0)#USB(2)` (XHC1), while the serial-based
+camera remained on the hub under XHC0. Both reported problem code zero. The
+location-based instance suffix changed to `6&2A549464&0&2`.
+
+The first traced attempt at 13:14:28 still timed out on index 0; index 1 captured
+295 frames. Observed native file opens now mapped index 0 to the directly
+connected camera and index 1 to the hub camera: **indexes changed after reconnect**.
+
+Two subsequent untraced simultaneous tests passed:
+
+| Run | Index 0 | Index 1 |
+| --- | --- | --- |
+| 13:14:53, capture | 297 distinct frames / 12.015 s | 296 distinct frames / 12.016 s |
+| 13:15:27, numerical recording | 745 distinct frames / 30.031 s | 746 distinct frames / 30.031 s |
+
+Both workers in the recording run started within 31 ms of each other on the
+same host monotonic clock, confirming overlapping acquisition. Each discarded
+two startup buffers and reported no additional rejected buffers. Independent
+indexed archive verification checked all **73,285,632 temperature values**,
+recomputed Center measurements for every frame, verified strictly increasing
+arrival times, matched complete manifest counts, and exactly recovered the
+first/last native temperature planes and raw hashes. Both workers exited zero.
+
+- [Index 0 archive verification](camera-evidence/two-camera-131527-index0-verification.json)
+- [Index 1 archive verification](camera-evidence/two-camera-131527-index1-verification.json)
+
+Optical and thermal images from both last frames were decoded and visually
+inspected: index 0 saw the ceiling, index 1 the desk/keyboard. Local artifacts:
+`runtime/two-camera-probe-131527/{0,1}/`, with the comparison image at
+`runtime/two-camera-probe-131527/verified-pair.png`.
+
+These are isolated diagnostic-worker results, not desktop multi-camera support
+or exposure synchronization. Archives explicitly use `UNMAPPED_DLL_INDEX_*`
+identities: path association was observed in the preceding traced run and the
+distinct scenes were inspected, but recording workers did not directly verify
+physical identity themselves. Safe production selection must not rely on PnP
+list order or assume the observed indexes persist. Startup reliability and a
+longer soak remain unqualified. Earlier shared-hub failures follow for context.
+
+## Original shared-hub tests
 
 Both TC001 Max devices enumerated healthy with WinUSB / oem95.inf. Standard USB
 interface access succeeded for both. Windows reports both attached to the same
