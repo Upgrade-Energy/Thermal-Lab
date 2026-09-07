@@ -11,6 +11,28 @@ from thermal_lab.workspace import validate_settings,measurement_values
 
 
 class PlaybackTests(unittest.TestCase):
+    def test_optical_manifest_and_legacy_compatibility(self):
+        from thermal_lab.optical_recording import OpticalRecorder,CODEC,OPTICAL_BYTES,OPTICAL_OFFSET
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp);frames=self.fixture(root)
+            self.assertIsNone(Recording(root).optical)
+            optical=OpticalRecorder(root);entries=[];offset=0
+            with (root/'thermal.jsonl.gz').open('wb') as stream:
+                for i,frame in enumerate(frames):
+                    frame['arrival_sequence']=i+1
+                    frame['optical_sha256']=optical.ingest(bytes(OPTICAL_OFFSET+OPTICAL_BYTES),frame['elapsed_s'],i+1)
+                    member=gzip.compress(json.dumps([frame]).encode());stream.write(member)
+                    entries.append((frame['elapsed_s'],offset,len(member)));offset+=len(member)
+            optical.close()
+            (root/'thermal.idx').write_bytes(b''.join(FRAME_INDEX.pack(*e) for e in entries))
+            manifest=json.loads((root/'camera-session.json').read_text())
+            manifest.update(optical_video_recorded=True,optical_codec=CODEC,optical_frames_written=4,optical_width=1024,optical_height=768)
+            (root/'camera-session.json').write_text(json.dumps(manifest))
+            r=Recording(root);self.assertEqual(r.optical.read(2,r.read(2)),bytes(OPTICAL_BYTES))
+            for key,value in [('optical_codec','unknown'),('optical_frames_written',3),('optical_width',256)]:
+                (root/'camera-session.json').write_text(json.dumps(dict(manifest,**{key:value})))
+                with self.assertRaises(ValueError):Recording(root)
+
     def fixture(self,root):
         offsets=[];frames=[];offset=0
         with (root/'thermal.jsonl.gz').open('wb') as file:

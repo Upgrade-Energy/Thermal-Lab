@@ -14,7 +14,12 @@ WIDTH, HEIGHT = 256, 192
 def optical_image(raw):
     if len(raw) != FRAME_BYTES:
         raise ValidationError('Optical frame length mismatch')
-    packed = np.frombuffer(raw, np.uint8, offset=OPTICAL_OFFSET).reshape(768, 512, 4).astype(np.float32)
+    return optical_plane_image(raw[OPTICAL_OFFSET:])
+
+
+def optical_plane_image(plane):
+    if len(plane)!=1024*768*2:raise ValidationError('Optical plane length mismatch')
+    packed = np.frombuffer(plane, np.uint8).reshape(768, 512, 4).astype(np.float32)
     y = packed[:, :, [0, 2]].reshape(768, 1024) - 16
     u = np.repeat(packed[:, :, 1] - 128, 2, axis=1)
     v = np.repeat(packed[:, :, 3] - 128, 2, axis=1)

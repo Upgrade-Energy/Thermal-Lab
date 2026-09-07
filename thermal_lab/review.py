@@ -10,12 +10,12 @@ from tkinter import ttk,filedialog,messagebox
 from PIL import Image,ImageTk
 
 from .playback import Recording,export_history
-from .imaging import thermal_image,rotate_image,sensor_to_view,view_to_sensor
+from .imaging import thermal_image,rotate_image,sensor_to_view,view_to_sensor,optical_plane_image,aligned_optical
 
 
 class Review:
     def __init__(self,root,args):
-        self.root=root;self.args=args;self.recording=None;self.frame=None;self.index=0
+        self.root=root;self.args=args;self.recording=None;self.frame=None;self.index=0;self.optical=None
         self.series={};self.keys=[];self.playing=False;self.cancel=threading.Event()
         self.messages=queue.Queue();self.generation=0;self.position=None;self.photo=None
         root.title('Thermal Lab · Recording review');root.geometry('1280x900');root.minsize(1000,750)
@@ -28,6 +28,7 @@ class Review:
         self.status=tk.StringVar(value='Open a finalized recording folder to begin')
         self.info=tk.StringVar(value='OFFLINE · numerical thermal playback · no camera connection')
         self.palette=tk.StringVar(value='Iron');self.rotation=tk.StringVar(value='180')
+        self.mode=tk.StringVar(value='Thermal');self.archive_info=tk.StringVar(value='Measurements and geometry follow the original recording.')
         self.speed=tk.StringVar(value='1');self.position_var=tk.DoubleVar();self.selected=tk.StringVar()
         top=ttk.Frame(root,padding=12);top.pack(fill='x')
         ttk.Label(top,text='THERMAL LAB  /  RECORDING REVIEW',font=('Segoe UI',15,'bold')).pack(side='left')
@@ -50,7 +51,9 @@ class Review:
         self.table=ttk.Treeview(side,columns=('name','value'),show='headings',height=7)
         self.table.heading('name',text='Name');self.table.heading('value',text='Value / min · mean · max')
         self.table.column('name',width=110);self.table.column('value',width=180);self.table.pack(fill='both',expand=True,pady=8)
-        ttk.Label(side,text='Thermal frames only. This archive does not contain continuous optical video.\n\nMeasurements and geometry follow the original recording.',wraplength=290,foreground='#aac0d3').pack(anchor='w',pady=8)
+        self.mode_box=ttk.Combobox(side,textvariable=self.mode,values=['Thermal'],state='readonly')
+        self.mode_box.pack(fill='x');self.mode_box.bind('<<ComboboxSelected>>',lambda e:self.show(self.index))
+        ttk.Label(side,textvariable=self.archive_info,wraplength=290,foreground='#aac0d3').pack(anchor='w',pady=8)
         self.timeline=ttk.Scale(root,variable=self.position_var,from_=0,to=1,command=self.seek);self.timeline.pack(fill='x',padx=12,pady=4)
         ttk.Label(root,textvariable=self.info,padding=(12,3)).pack(fill='x')
         row=ttk.Frame(root,padding=(12,3));row.pack(fill='x')
@@ -69,7 +72,8 @@ class Review:
 
     def open(self,path):
         self.pause();self.cancel.set();self.cancel=threading.Event();self.generation+=1
-        self.recording=None;self.frame=None;self.series={};self.keys=[];self.position=None
+        self.recording=None;self.frame=None;self.optical=None;self.series={};self.keys=[];self.position=None
+        self.mode.set('Thermal');self.mode_box.configure(values=['Thermal'])
         self.history_ready=False
         for item in self.table.get_children():self.table.delete(item)
         self.info.set('OFFLINE · no frame selected')
@@ -77,6 +81,8 @@ class Review:
         self.render();self.plot()
         try:
             recording=Recording(path);self.recording=recording
+            self.mode_box.configure(values=['Thermal','Optical','Blend'] if recording.optical else ['Thermal'])
+            self.archive_info.set(('Lossless optical video paired with each thermal frame. Exposure synchronization is unqualified.' if recording.optical else 'Thermal frames only. This archive has no continuous optical video.')+'\n\nMeasurements and alignment follow the original recording. Blend uses 55% thermal opacity. Optical view is aligned to the thermal sensor.')
             self.timeline.configure(to=max(1,len(recording.entries)-1));self.show(0)
             self.play_button.configure(state='normal');self.root.title('Thermal Lab · Review · '+recording.path.name)
             self.status.set(f"{recording.path.name} · {recording.manifest['camera_id']} · {recording.manifest['source']} · Loading histories…")
@@ -116,6 +122,9 @@ class Review:
         if not self.recording:return
         try:
             frame=self.recording.read(index)
+            self.optical=None
+            if self.mode.get()!='Thermal' and self.recording.optical:
+                self.optical=optical_plane_image(self.recording.optical.read(index,frame))
             self.frame=frame;self.index=index;self.position_var.set(index)
             self.info.set(f"Frame {index+1:,} / {len(self.recording.entries):,} · {frame['elapsed_s']:.3f} / {self.recording.times[-1]:.3f} s · {frame['source']} · apparent °C · host-arrival timeline")
             self.render();self.rows();self.plot_cursor()
@@ -130,14 +139,17 @@ class Review:
         if not self.frame:
             self.canvas.create_text(20,30,text='Open a recording to inspect its thermal frames',fill='#aac0d3',anchor='nw');return
         picture,limits=thermal_image(self.frame['temperatures'],self.palette.get())
+        if self.optical is not None and self.mode.get()!='Thermal':
+            optical=aligned_optical(self.optical,self.frame.get('workspace',{}).get('alignment',{}))
+            picture=optical if self.mode.get()=='Optical' else Image.blend(optical,picture,.55)
         rotation=int(self.rotation.get());picture=rotate_image(picture,rotation)
         width,height=(192,256) if rotation in (90,270) else (256,192)
         cw,ch=self.canvas.winfo_width(),self.canvas.winfo_height()
         scale=max(.01,min((cw-20)/width,(ch-35)/height));x=(cw-width*scale)/2;y=20+(ch-25-height*scale)/2
         self.position=(x,y,scale,width,height)
-        picture=picture.resize((max(1,int(width*scale)),max(1,int(height*scale))),Image.Resampling.NEAREST)
+        picture=picture.resize((max(1,int(width*scale)),max(1,int(height*scale))),Image.Resampling.NEAREST if self.mode.get()=='Thermal' else Image.Resampling.BILINEAR)
         self.photo=ImageTk.PhotoImage(picture);self.canvas.create_image(x,y,image=self.photo,anchor='nw')
-        self.canvas.create_text(10,10,text=f'{limits[0]:.1f} → {limits[1]:.1f} °C · recorded thermal',fill='white',anchor='w')
+        self.canvas.create_text(10,10,text=f'{limits[0]:.1f} → {limits[1]:.1f} °C · recorded {self.mode.get().lower()}',fill='white',anchor='w')
         for kind in ('points','areas'):
             for item in self.frame.get('workspace',{}).get(kind,[]):
                 px,py=sensor_to_view(item['x']*256,item['y']*192,rotation);px=x+px*scale;py=y+py*scale

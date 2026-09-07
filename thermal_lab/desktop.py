@@ -41,6 +41,7 @@ class Desktop:
         for widget in ('TRadiobutton','TCheckbutton'):
             style.map(widget,background=[('active','#233448')],foreground=[('active','#e3ebf5')])
         self.mode=tk.StringVar(value='Blend');self.palette=tk.StringVar(value='Iron');self.rotation=tk.StringVar(value='180')
+        self.record_optical=tk.BooleanVar(value=True)
         self.tool=tk.StringVar(value='Select');self.opacity=tk.DoubleVar(value=.55);self.automatic=tk.BooleanVar(value=True)
         self.low=tk.StringVar(value='20');self.high=tk.StringVar(value='40');self.locked=tk.BooleanVar(value=False)
         self.path=tk.StringVar(value=str(args.topview_directory or ''))
@@ -50,9 +51,11 @@ class Desktop:
         self.name=tk.StringVar();self.alignment={k:tk.StringVar(value=str(v)) for k,v in self.settings['alignment'].items()}
         header=ttk.Frame(root,padding=(18,12));header.pack(fill='x')
         ttk.Label(header,text='THERMAL LAB',font=('Segoe UI',17,'bold')).pack(side='left')
-        ttk.Label(header,text='LIVE INSPECTION  /  DEV4',foreground='#8ba4be').pack(side='left',padx=22)
+        ttk.Label(header,text='LIVE INSPECTION  /  DEV5',foreground='#8ba4be').pack(side='left',padx=22)
         self.connect_button=ttk.Button(header,text='Connect camera',command=self.connect);self.connect_button.pack(side='right')
-        self.record_button=ttk.Button(header,text='Record temperatures',command=self.toggle_record,state='disabled');self.record_button.pack(side='right',padx=8)
+        self.record_button=ttk.Button(header,text='Record session',command=self.toggle_record,state='disabled');self.record_button.pack(side='right',padx=8)
+        self.optical_check=ttk.Checkbutton(header,text='Optical video (~2.4 GB/min)',variable=self.record_optical)
+        self.optical_check.pack(side='right',padx=8)
         connection=ttk.Frame(root,padding=(18,0,18,10));connection.pack(fill='x')
         ttk.Label(connection,text='TopView installation').pack(side='left')
         ttk.Entry(connection,textvariable=self.path).pack(side='left',fill='x',expand=True,padx=10)
@@ -200,7 +203,8 @@ class Desktop:
     def toggle_record(self):
         if self.recording:self.send('finish');self.record_button.configure(state='disabled');return
         name=datetime.now().strftime('%Y%m%d-%H%M%S')+'-'+uuid.uuid4().hex[:6]
-        self.send('record',path=str((self.args.recordings/name).resolve()))
+        self.send('record',path=str((self.args.recordings/name).resolve()),optical=self.record_optical.get())
+        self.optical_check.configure(state='disabled')
         self.record_button.configure(state='disabled')
 
     def poll(self):
@@ -219,7 +223,8 @@ class Desktop:
                         self.recording=True;self.record_path=Path(event['path'])
                         self.record_button.configure(text='Stop recording',state='normal')
                     elif kind=='recording_finished':
-                        self.recording=False;self.record_button.configure(text='Record temperatures',state='normal')
+                        self.recording=False;self.record_button.configure(text='Record session',state='normal')
+                        self.optical_check.configure(state='normal')
                         self.status.set(f"Recording {event['status']}: {event['frames']} frames · {event['path']}")
                     elif kind=='error':self.status.set('CAMERA ERROR · '+event['message'])
                     elif kind=='stopped':
@@ -249,6 +254,7 @@ class Desktop:
                 self.exit_reported=True
                 if self.recording:
                     self.recording=False;self.status.set('Camera worker exited during recording; session is incomplete')
+                self.optical_check.configure(state='normal')
                 if self.closing:self.root.destroy();return
             if self.frame and time.monotonic()-self.received_at>1:
                 self.cursor.set('No fresh frame · measurements unavailable');self.render();self.refresh_values()

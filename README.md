@@ -4,13 +4,15 @@ Standalone thermal camera capture, numerical measurements and recording.
 **Power Lab is not required.** This repository owns thermal-camera development;
 Power Lab can integrate with it later through a separate, versioned interface.
 
-Version 0.1.0 DEV4 adds offline thermal playback, recorded temperature-history
-plots and CSV export. It also supports independent windows for multiple TOPDON TC001 Max
+Version 0.1.0 DEV5 adds continuous lossless optical recording and optical/blended
+playback alongside numerical thermal frames, temperature-history plots and CSV
+export. It also supports independent windows for multiple TOPDON TC001 Max
 cameras, with verified Windows device selection and separate measurement layouts.
 The native interface includes thermal/optical/blended/side-by-side views, optical alignment,
 named temperature points and rectangles, palettes, and numerical recording.
 USB diagnostics and TopView CSV import remain available as command-line tools.
-Continuous optical-video recording and optical playback are still pending.
+Optical storage uses about 2.4 GB/minute per camera at 25 fps. It is an indexed
+app-native archive; standard MP4 export remains pending.
 
 See the [TopView feature comparison and proposed UI priorities](docs/TopView-Feature-Review.md)
 for overlay alignment, precise measurement placement and recording/playback scope.
@@ -31,8 +33,8 @@ camera in an independent window; connect and record there separately. Each windo
 can close without stopping the other. For two Max cameras, use separate USB
 controller paths; the tested shared hub could not sustain both streams.
 TopView itself must be closed. See the [desktop guide](docs/Desktop-Guide.md).
-See [DEV3 hardware verification](docs/Desktop-DEV3-Verification.md) for the two-camera
-recording checks and remaining limits.
+See [DEV5 optical verification](docs/Optical-Recording-Verification.md) for the
+two-camera recording checks and remaining limits.
 
 ## Review a recording
 
@@ -100,9 +102,9 @@ The `thermal_lab` package is also installable with `python -m pip install .`.
 CI tests parsers, numerical decoding and recording without opening hardware.
 Hardware tests are run explicitly using the commands above.
 
-Next: standalone live view, measurement editing and recording/playback UI;
-longer capture and disconnect/recovery tests; environmental correction;
-multi-camera identity and timing. A later Power Lab integration should exchange
+Next: standard video/image export, new measurements during offline review,
+longer capture and disconnect/recovery tests, and environmental correction.
+A later Power Lab integration should exchange
 run IDs, recording commands and selected measurements with freshness metadata.
 No instrument-control code, web server, battery recipes or Power Lab package is
 included here.

@@ -10,10 +10,11 @@ from pathlib import Path
 from .tc001_max import TC001Max, DLL_SHA256
 from .thermal import Recorder
 from .workspace import validate_settings, measurement_values
+from .optical_recording import OpticalRecorder,CODEC
 
 
 def worker(directory, commands, previews, events, camera_id=None):
-    recorder=None; destination=None; manifest=None; last_raw=None; record_origin=0
+    recorder=None; optical=None; destination=None; manifest=None; last_raw=None; record_origin=0
     settings=validate_settings({}); revision=0; camera=None
 
     def event(kind, **data):
@@ -25,10 +26,14 @@ def worker(directory, commands, previews, events, camera_id=None):
         temp.replace(destination/'camera-session.json')
 
     def finish(error=None):
-        nonlocal recorder
+        nonlocal recorder,optical
         if recorder is None:return
         recorder.close()
         error=error or recorder.error
+        if optical:
+            optical.close();error=error or optical.error
+            manifest['optical_frames_written']=optical.count
+            if optical.count!=recorder.count:error=error or 'Optical/thermal recorded frame counts differ'
         if recorder.count==0:error=error or 'No frames were recorded'
         if last_raw is not None:(destination/'last.frame').write_bytes(last_raw)
         manifest.update(status='FAILED' if error else 'COMPLETE',error=error,
@@ -36,6 +41,7 @@ def worker(directory, commands, previews, events, camera_id=None):
         save_manifest()
         event('recording_finished',path=str(destination),status=manifest['status'],frames=recorder.count,error=error)
         recorder=None
+        optical=None
 
     try:
         with (TC001Max(directory, camera_id=camera_id) if camera_id else TC001Max(directory)) as camera:
@@ -64,8 +70,13 @@ def worker(directory, commands, previews, events, camera_id=None):
                                       temperature_basis='apparent_raw_kelvin_64',optical_video_recorded=False,
                                       device_dropped_frames=None,frames_written=0,
                                       started_utc=datetime.now(timezone.utc).isoformat(),initial_workspace=settings)
+                        if command.get('optical',False):
+                            manifest.update(optical_video_recorded=True,optical_codec=CODEC,optical_width=1024,
+                                            optical_height=768,optical_frames_written=0,
+                                            optical_pairing='same_native_buffer; host_arrival; exposure_sync_unqualified')
                         save_manifest();recorder=Recorder([],0,compression_level=1)
                         recorder.start(destination/'thermal.jsonl.gz')
+                        if command.get('optical',False):optical=OpticalRecorder(destination)
                         event('recording_started',path=str(destination))
                     elif action=='finish':finish()
                 if not running:break
@@ -80,6 +91,7 @@ def worker(directory, commands, previews, events, camera_id=None):
                     recorded=dict(frame,camera_elapsed_s=frame['elapsed_s'],
                                   elapsed_s=frame['elapsed_s']-record_origin,workspace_revision=revision,
                                   workspace=settings,measurements=measurement_values(frame,settings))
+                    if optical:recorded['optical_sha256']=optical.ingest(raw,recorded['elapsed_s'],frame['arrival_sequence'])
                     recorder.ingest([recorded])
                     if last_raw is None:(destination/'first.frame').write_bytes(raw)
                     last_raw=raw

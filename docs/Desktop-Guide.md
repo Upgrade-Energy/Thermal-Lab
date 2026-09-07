@@ -1,4 +1,4 @@
-# Thermal Lab desktop — DEV4
+# Thermal Lab desktop — DEV5
 
 Launch `thermal-lab` after `python -m pip install ".[desktop]"`, or run
 `python scripts/run_thermal_lab.py` from the repository. Requires Windows x64
@@ -70,7 +70,7 @@ view orientation currently reset on launch.
 
 ## Recordings
 
-**Record temperatures** starts a uniquely named session under
+**Record session** starts a uniquely named session under
 `~/Thermal-Lab-Recordings`. Stop recording finalizes it. Override the destination
 with `--recordings PATH`.
 
@@ -79,11 +79,16 @@ alignment, revision, calculated values, source identity and host arrival time.
 Display frames may be skipped when rendering falls behind; accepted recording
 frames are queued separately and queue/storage failures are surfaced.
 
-The recording is radiometric numerical data, **not continuous optical video**.
-Only the first/last full native buffers are retained. Optical video,
-synchronized video export and device exposure timestamps remain future
-work. Use `python scripts/verify_recording.py SESSION_DIRECTORY` for independent
-numerical verification. Only `COMPLETE` manifests represent finalized sessions;
+**Optical video** is enabled by default; turn it off before recording to retain
+only numerical thermal frames. The option is fixed for the session. When enabled,
+every accepted thermal frame has a lossless 1024×768 YUYV optical plane in
+`optical.bin`, with timestamp, sequence, offset and SHA-256 in `optical.idx`.
+This uses about 2.4 GB/minute per camera at 25 fps, plus thermal data. Keep enough
+disk space for the intended duration. Storage or queue failures fail the session.
+The first/last full native buffers are also retained for independent comparison.
+This is an app-native video archive; MP4 export remains future work.
+Use `python scripts/verify_recording.py SESSION_DIRECTORY` to check all numerical
+frames and optical pair hashes. Only `COMPLETE` manifests represent finalized sessions;
 `FAILED` and unfinished `RECORDING` sessions remain incomplete.
 
 ## Review and temperature histories
@@ -98,7 +103,11 @@ Play/Pause uses the recorded host-arrival timeline, with 0.25× through 4× spee
 Previous/Next steps one frame; the slider seeks by frame and clicking the history
 graph seeks by elapsed time. Rendering can skip frames to keep up with playback
 time; individual stepping still accesses every saved frame. The image uses the
-recorded temperature grid and recorded point/region geometry. Palettes and view
+recorded temperature grid and recorded point/region geometry. For optical-enabled
+archives, choose Thermal, Optical or Blend in the sidebar. Optical uses the
+alignment saved at that frame; Blend uses 55% thermal opacity. Original optical
+pixels stay unchanged in the archive. Older thermal-only archives remain playable.
+Palettes and view
 rotation change only rendering. Hover over a pixel to inspect its saved value.
 
 Histories load in the background and validate recorded measurements against the
@@ -116,8 +125,8 @@ This first player accepts COMPLETE single-camera 256×192 archives with consiste
 indexes/counts and validated frame identities. Incomplete sessions and corrupt
 indexes are rejected; later frame/history errors are surfaced. Indexes are limited
 to one million entries and histories to two million scalar samples. This is
-recorded thermal review, not optical video, re-analysis with newly drawn regions,
-multi-session comparison, or physical-exposure synchronization.
+recorded-frame review; re-analysis with newly drawn regions, multi-session
+comparison and physical-exposure synchronization remain future work.
 
 Temperatures are apparent Celsius values without host emissivity/environment
 correction. Absolute accuracy and physical thermal/optical exposure pairing
