@@ -1,0 +1,25 @@
+{
+  "settings": {
+    "colorize_id": 1,
+    "correct_dist": 0.30000001192092896,
+    "correct_ems": 1,
+    "correct_ta": 25,
+    "device_type": "TC001MAX",
+    "gain": 1,
+    "isuse_ruler": false,
+    "maxtemp_ruler": 0,
+    "mintemp_ruler": 0,
+    "multiple": 1,
+    "photo_mirror": 0,
+    "photo_rotate": 0,
+    "tempunit_id_ruler": 0
+  },
+  "pixels": 49152,
+  "maximum_difference_C": 0.062499999999978684,
+  "mean_difference_C": 0.027202351888027058,
+  "exact_after_rounding_fraction": 0.8705240885416666,
+  "raw_min_C": 21.100000000000023,
+  "raw_max_C": 31.850000000000023,
+  "vendor_min_C": 21.1,
+  "vendor_max_C": 31.9
+}

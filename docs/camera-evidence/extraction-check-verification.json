@@ -1,0 +1,41 @@
+{
+  "status": "PASS",
+  "recording": "extraction-check",
+  "frames": 160,
+  "temperature_values_checked": 7864320,
+  "strictly_increasing_arrivals": true,
+  "first_last_raw_roundtrip_exact": true,
+  "manifest": {
+    "status": "COMPLETE",
+    "source": "HARDWARE",
+    "adapter": "experimental_tc001_max",
+    "dll_sha256": "f7a745d1e056e1dcda6de43ee30483fa5490eeb535bc18bbbd7ff031fcf6d3e6",
+    "timestamp_basis": "host_monotonic_arrival",
+    "device_dropped_frames": null,
+    "started_utc": "2026-09-07T19:36:14.568322+00:00",
+    "temperature_basis": "apparent_raw_kelvin_64",
+    "host_environment_correction_applied": false,
+    "frames_written": 160,
+    "camera_id": "USB\\VID_3474&PID_4962\\YFDVS000000000001",
+    "accepted_frames": 160,
+    "received_buffers": 162,
+    "rejected_buffers": 2,
+    "distinct_thermal_planes": 160,
+    "first_arrival_s": 0.28099999999994907,
+    "last_arrival_s": 9.905999999999949,
+    "observed_fps": 16.51948051948052,
+    "last_measurements": {
+      "Center": {
+        "value": 24.1,
+        "kind": "point"
+      },
+      "Full frame": {
+        "min": 21.4125,
+        "mean": 24.577443695068364,
+        "max": 32.2875,
+        "kind": "area"
+      }
+    },
+    "finished_utc": "2026-09-07T19:36:29.254623+00:00"
+  }
+}

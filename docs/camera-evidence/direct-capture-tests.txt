@@ -1,0 +1,50 @@
+test_detection_is_not_access (test_camera_diagnostics.CameraDiagnosticsTests.test_detection_is_not_access) ... ok
+test_parent_ok_does_not_hide_missing_interface_driver (test_camera_diagnostics.CameraDiagnosticsTests.test_parent_ok_does_not_hide_missing_interface_driver) ... ok
+test_probe_error_is_not_reported_as_absent (test_camera_diagnostics.CameraDiagnosticsTests.test_probe_error_is_not_reported_as_absent) ... ok
+test_usb_success_never_claims_capture (test_camera_diagnostics.CameraDiagnosticsTests.test_usb_success_never_claims_capture) ... ok
+test_corrupt_exports_rejected (test_topview_import.TopViewImportTests.test_corrupt_exports_rejected) ... ok
+test_file_and_json_roundtrip (test_topview_import.TopViewImportTests.test_file_and_json_roundtrip) ... ok
+test_real_units_and_pixel_measurements (test_topview_import.TopViewImportTests.test_real_units_and_pixel_measurements) ... ok
+test_units_are_explicit_and_converted (test_topview_import.TopViewImportTests.test_units_are_explicit_and_converted) ... ok
+test_acquisition_buffer_reuse_and_lifecycle (test_camera_archive.CameraArchiveTests.test_acquisition_buffer_reuse_and_lifecycle) ... ok
+test_bad_input_marks_failure (test_camera_archive.CameraArchiveTests.test_bad_input_marks_failure) ... ok
+test_indexed_round_trip_and_provenance (test_camera_archive.CameraArchiveTests.test_indexed_round_trip_and_provenance) ... ok
+test_preview_without_enabled_cameras (test_camera_archive.CameraArchiveTests.test_preview_without_enabled_cameras) ... ok
+test_writer_fault_cannot_report_success (test_camera_archive.CameraArchiveTests.test_writer_fault_cannot_report_success) ... ok
+test_celsius_values_preserve_original_codes (test_tc001_max.TC001MaxTests.test_celsius_values_preserve_original_codes) ... ok
+test_closed_camera_does_not_call_native_code (test_tc001_max.TC001MaxTests.test_closed_camera_does_not_call_native_code) ... ok
+test_corrupt_startup_and_truncated_frame_rejected (test_tc001_max.TC001MaxTests.test_corrupt_startup_and_truncated_frame_rejected) ... ok
+test_layout_units_orientation_and_provenance (test_tc001_max.TC001MaxTests.test_layout_units_orientation_and_provenance) ... ok
+test_archive_export_blocked_until_finalized (test_lab_studio.EngineTests.test_archive_export_blocked_until_finalized) ... ok
+test_browser_absence_does_not_stop_controller (test_lab_studio.EngineTests.test_browser_absence_does_not_stop_controller) ... ok
+test_complete_archive_contains_numeric_thermal_and_polarity (test_lab_studio.EngineTests.test_complete_archive_contains_numeric_thermal_and_polarity) ... ok
+test_exact_sensor_fault_sample_is_saved_before_off_event (test_lab_studio.EngineTests.test_exact_sensor_fault_sample_is_saved_before_off_event) ... ok
+test_interrupted_runs_do_not_resume (test_lab_studio.EngineTests.test_interrupted_runs_do_not_resume) ... ok
+test_no_hardware_access_on_prepare (test_lab_studio.EngineTests.test_no_hardware_access_on_prepare) ... ok
+test_optional_camera_failure_records_warning_and_continues_electrical_run (test_lab_studio.EngineTests.test_optional_camera_failure_records_warning_and_continues_electrical_run) ... ok
+test_overtemperature_stops (test_lab_studio.EngineTests.test_overtemperature_stops) ... ok
+test_pre_event_buffer_and_stop_without_start (test_lab_studio.EngineTests.test_pre_event_buffer_and_stop_without_start) ... ok
+test_record_versions_do_not_overwrite_prior_revision (test_lab_studio.EngineTests.test_record_versions_do_not_overwrite_prior_revision) ... ok
+test_run_snapshot_survives_draft_edits (test_lab_studio.EngineTests.test_run_snapshot_survives_draft_edits) ... ok
+test_stale_required_reading_stops (test_lab_studio.EngineTests.test_stale_required_reading_stops) ... ok
+test_tracking_failure_and_camera_failure_are_visible (test_lab_studio.EngineTests.test_tracking_failure_and_camera_failure_are_visible) ... ok
+test_wait_sustain_and_timeout (test_lab_studio.EngineTests.test_wait_sustain_and_timeout) ... ok
+test_bad_numbers_rejected (test_lab_studio.RecipeTests.test_bad_numbers_rejected) ... ok
+test_channel_completeness_and_camera_names (test_lab_studio.RecipeTests.test_channel_completeness_and_camera_names) ... ok
+test_charging_requires_required_temperature_for_both_forms (test_lab_studio.RecipeTests.test_charging_requires_required_temperature_for_both_forms) ... ok
+test_curves_and_sine_endpoints (test_lab_studio.RecipeTests.test_curves_and_sine_endpoints) ... ok
+test_ramp_inherits_previous_commanded_endpoint (test_lab_studio.RecipeTests.test_ramp_inherits_previous_commanded_endpoint) ... ok
+test_rate_and_duration_preserve_controlling_value (test_lab_studio.RecipeTests.test_rate_and_duration_preserve_controlling_value) ... ok
+test_repeats_are_bounded_and_independent (test_lab_studio.RecipeTests.test_repeats_are_bounded_and_independent) ... ok
+test_replay_rejects_extrapolation (test_lab_studio.RecipeTests.test_replay_rejects_extrapolation) ... ok
+test_three_cameras_and_ten_thermistors (test_lab_studio.RecipeTests.test_three_cameras_and_ten_thermistors) ... ok
+test_timing_and_zero_resistance_are_rejected (test_lab_studio.RecipeTests.test_timing_and_zero_resistance_are_rejected) ... ok
+test_identity_diagnostics_never_write_setpoints_and_use_slot_numbers (test_lab_studio.ThermalAndInstrumentTests.test_identity_diagnostics_never_write_setpoints_and_use_slot_numbers) ... ok
+test_point_and_region_values_from_numeric_pixels (test_lab_studio.ThermalAndInstrumentTests.test_point_and_region_values_from_numeric_pixels) ... ok
+test_thermistor_conversion_and_invalid_sensor (test_lab_studio.ThermalAndInstrumentTests.test_thermistor_conversion_and_invalid_sensor) ... ok
+test_unknown_identity_and_enabled_output_stop_probe (test_lab_studio.ThermalAndInstrumentTests.test_unknown_identity_and_enabled_output_stop_probe) ... ok
+
+----------------------------------------------------------------------
+Ran 45 tests in 1.388s
+
+OK

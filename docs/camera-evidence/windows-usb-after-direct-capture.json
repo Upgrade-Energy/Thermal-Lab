@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "utc": "2026-09-07T19:31:47.690723+00:00",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "C:\\Users\\MatthewBarnard\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+  "scope": "TC001 Max only; standard USB metadata; no vendor commands",
+  "devices": [
+    {
+      "instance_id": "USB\\VID_3474&PID_4962\\YFDVS000000000001",
+      "name": "TC001 Max",
+      "status": "OK",
+      "problem_code": 0,
+      "problem_status": null,
+      "service": "WinUSB",
+      "driver_inf": "oem95.inf",
+      "driver_version": "6.1.7600.16385",
+      "compatible_ids": [
+        "USB\\COMPAT_VID_3474&DevClass_00&SubClass_00&Prot00",
+        "USB\\COMPAT_VID_3474&DevClass_00&SubClass_00",
+        "USB\\COMPAT_VID_3474&DevClass_00",
+        "USB\\DevClass_00&SubClass_00&Prot_00",
+        "USB\\DevClass_00&SubClass_00",
+        "USB\\DevClass_00",
+        "USB\\COMPOSITE"
+      ]
+    }
+  ],
+  "interfaces": [
+    {
+      "path": "\\\\?\\USB#VID_3474&PID_4962#YFDVS000000000001#{fe7a2189-e1fa-ae49-d5c9-603519b1cdbb}",
+      "opened": true,
+      "endpoints": [
+        {
+          "type": 2,
+          "id": 130,
+          "max_packet_size": 512,
+          "interval": 0
+        },
+        {
+          "type": 2,
+          "id": 5,
+          "max_packet_size": 512,
+          "interval": 0
+        }
+      ],
+      "interface": {
+        "length": 9,
+        "type": 4,
+        "number": 0,
+        "alternate": 0,
+        "endpoint_count": 2,
+        "interface_class": 255,
+        "subclass": 240,
+        "protocol": 0,
+        "string_index": 4
+      },
+      "associated_interfaces": [
+        {
+          "length": 9,
+          "type": 4,
+          "number": 1,
+          "alternate": 0,
+          "endpoint_count": 0,
+          "interface_class": 255,
+          "subclass": 240,
+          "protocol": 1,
+          "string_index": 5,
+          "endpoints": []
+        },
+        {
+          "length": 9,
+          "type": 4,
+          "number": 1,
+          "alternate": 1,
+          "endpoint_count": 2,
+          "interface_class": 255,
+          "subclass": 240,
+          "protocol": 1,
+          "string_index": 5,
+          "endpoints": [
+            {
+              "type": 2,
+              "id": 129,
+              "max_packet_size": 512,
+              "interval": 0
+            },
+            {
+              "type": 2,
+              "id": 4,
+              "max_packet_size": 512,
+              "interval": 0
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "capture_verified": false,
+  "temperatures_verified": false,
+  "recording_verified": false,
+  "status": "USB_ACCESS_VERIFIED"
+}
