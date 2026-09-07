@@ -5,15 +5,19 @@ from pathlib import Path
 from .workspace import validate_settings
 
 
+def recording_fingerprint(recording):
+    digest=hashlib.sha256()
+    for name in ('camera-session.json','thermal.idx','thermal.jsonl.gz'):
+        digest.update(name.encode())
+        with (recording.path/name).open('rb') as source:
+            while chunk:=source.read(1024*1024):digest.update(chunk)
+    return digest.hexdigest()
+
+
 class Analysis:
     def __init__(self,recording,directory=None):
         self.recording=recording
-        digest=hashlib.sha256()
-        for name in ('camera-session.json','thermal.idx','thermal.jsonl.gz'):
-            digest.update(name.encode())
-            with (recording.path/name).open('rb') as source:
-                while chunk:=source.read(1024*1024):digest.update(chunk)
-        self.fingerprint=digest.hexdigest()
+        self.fingerprint=recording_fingerprint(recording)
         self.path=Path(directory or Path.home()/'Thermal-Lab-Analysis')/(self.fingerprint+'.json')
         self.settings=validate_settings(dict(camera_id=recording.manifest['camera_id']))
         if self.path.exists():self.settings=self.read(self.path)

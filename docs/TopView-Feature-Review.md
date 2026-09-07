@@ -1,11 +1,14 @@
 # TopView feature review and Thermal Lab priorities
 
+DEV7 adds PNG and H.264 MP4 export with optional labels and source mapping;
+see [media export verification](Media-Export-Verification.md).
+
 DEV6 adds editable playback points/regions, separate analysis layouts and
 recalculated histories; see [analysis verification](Analysis-Verification.md).
 
 DEV5 adds continuous lossless optical recording and optical/blended review.
 See [optical recording verification](Optical-Recording-Verification.md).
-Image/standard-video export remains pending.
+This DEV5 paragraph is a historical milestone; later additions are listed above.
 
 DEV4 adds thermal recording playback, recorded measurement histories and CSV
 export; see [playback verification](Playback-Verification.md). The historical

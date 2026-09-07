@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "source_frames": 499,
+  "decoded_video_frames": 500,
+  "width": 1024,
+  "height": 768,
+  "fps": 25.0,
+  "duration_s": 20.0,
+  "source_files_unchanged": 7,
+  "first_last_mapping": [
+    0,
+    498
+  ],
+  "export_and_decode_seconds": 39.88,
+  "mp4_bytes": 4736620,
+  "measurement_basis": "offline_fixed_geometry_all_frames",
+  "ffmpeg_version": "7.1-essentials_build-www.gyan.dev"
+}

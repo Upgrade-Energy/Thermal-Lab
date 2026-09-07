@@ -51,7 +51,7 @@ class Desktop:
         self.name=tk.StringVar();self.alignment={k:tk.StringVar(value=str(v)) for k,v in self.settings['alignment'].items()}
         header=ttk.Frame(root,padding=(18,12));header.pack(fill='x')
         ttk.Label(header,text='THERMAL LAB',font=('Segoe UI',17,'bold')).pack(side='left')
-        ttk.Label(header,text='LIVE INSPECTION  /  DEV6',foreground='#8ba4be').pack(side='left',padx=22)
+        ttk.Label(header,text='LIVE INSPECTION  /  DEV7',foreground='#8ba4be').pack(side='left',padx=22)
         self.connect_button=ttk.Button(header,text='Connect camera',command=self.connect);self.connect_button.pack(side='right')
         self.record_button=ttk.Button(header,text='Record session',command=self.toggle_record,state='disabled');self.record_button.pack(side='right',padx=8)
         self.optical_check=ttk.Checkbutton(header,text='Optical video (~2.4 GB/min)',variable=self.record_optical)

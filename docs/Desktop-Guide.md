@@ -1,4 +1,4 @@
-# Thermal Lab desktop — DEV6
+# Thermal Lab desktop — DEV7
 
 Launch `thermal-lab` after `python -m pip install ".[desktop]"`, or run
 `python scripts/run_thermal_lab.py` from the repository. Requires Windows x64
@@ -86,7 +86,7 @@ every accepted thermal frame has a lossless 1024×768 YUYV optical plane in
 This uses about 2.4 GB/minute per camera at 25 fps, plus thermal data. Keep enough
 disk space for the intended duration. Storage or queue failures fail the session.
 The first/last full native buffers are also retained for independent comparison.
-This is an app-native video archive; MP4 export remains future work.
+This is an app-native video archive; recording review can export a rendered MP4.
 Use `python scripts/verify_recording.py SESSION_DIRECTORY` to check all numerical
 frames and optical pair hashes. Only `COMPLETE` manifests represent finalized sessions;
 `FAILED` and unfinished `RECORDING` sessions remain incomplete.
@@ -161,3 +161,37 @@ alternative layout before editing further. See [DEV6 verification](Analysis-Veri
 Temperatures are apparent Celsius values without host emissivity/environment
 correction. Absolute accuracy and physical thermal/optical exposure pairing
 remain unqualified. This app does not control power instruments.
+
+## PNG snapshots and MP4 export
+
+**Save PNG** exports the currently selected frame. **Export MP4** exports the full
+recording at 1× speed, using Thermal, Optical or Blend, the current palette and
+rotation, and the selected Recorded or Analysis measurements. Toggle **Export
+temperature labels** to include or omit the header, geometry and numerical labels.
+Settings are captured when export begins; further review edits do not change an
+export already running. The playback speed selector does not affect export speed.
+
+Files are 1024×768, or 768×1024 for 90°/270° rotation. Thermal display resolution
+is upscaled from the original 256×192 grid; it adds no measurement resolution.
+PNG stores rendered pixels losslessly. MP4 uses H.264/yuv420p at 25 fps and is a
+lossy presentation file. Keep the source archive for numerical analysis.
+
+MP4 follows host-arrival time by holding the latest source frame at each 40 ms
+output step. It can repeat or skip source frames, and includes the final source
+frame; output duration can extend by less than 80 ms beyond the source time span.
+It provides no physical-exposure synchronization. Exports are limited to 250,000
+output frames (about 2 h 46 min at 25 fps); clip-range export is not yet available.
+
+PNG embeds a `ThermalLab` JSON metadata field with frame identity and measurements.
+MP4 writes an adjacent `.mp4.json` file containing the source recording fingerprint,
+frozen export settings, measurement basis, and frame-by-frame source-index/time
+mapping. Keep that file with the video for traceability.
+
+Choose a new filename outside the source recording folder. Existing files are
+never overwritten. Exports run in the background; **Cancel export** stops MP4
+generation and removes incomplete temporary outputs. Closing review waits for
+export cleanup. Successful completion is shown separately from history progress.
+
+MP4 uses the FFmpeg executable supplied by `imageio-ffmpeg` in the desktop
+dependencies. Update an older installation with `python -m pip install ".[desktop]"`.
+No Windows SDK is required. See [DEV7 verification](Media-Export-Verification.md).

@@ -14,6 +14,7 @@ from PIL import Image,ImageTk
 from .playback import Recording,export_history
 from .analysis import Analysis
 from .workspace import measurement_values
+from .media_export import export_png,export_mp4,ExportCancelled
 from .imaging import thermal_image,rotate_image,sensor_to_view,view_to_sensor,optical_plane_image,aligned_optical
 
 
@@ -23,6 +24,7 @@ class Review:
         self.series={};self.keys=[];self.playing=False;self.cancel=threading.Event()
         self.messages=queue.Queue();self.generation=0;self.position=None;self.photo=None
         self.analysis=None;self.drag=None;self.chosen=None;self.scan_after=None
+        self.media_messages=queue.Queue();self.media_cancel=threading.Event();self.media_busy=False;self.media_closing=False
         root.title('Thermal Lab · Recording review');root.geometry('1280x900');root.minsize(1000,750)
         root.configure(bg='#111923');root.protocol('WM_DELETE_WINDOW',self.close)
         style=ttk.Style();style.theme_use('clam')
@@ -37,10 +39,13 @@ class Review:
         self.mode=tk.StringVar(value='Thermal');self.archive_info=tk.StringVar(value='Measurements and geometry follow the original recording.')
         self.speed=tk.StringVar(value='1');self.position_var=tk.DoubleVar();self.selected=tk.StringVar()
         self.basis=tk.StringVar(value='Recorded');self.tool=tk.StringVar(value='Select');self.edit_name=tk.StringVar()
+        self.export_labels=tk.BooleanVar(value=True);self.media_status=tk.StringVar(value='Export uses current view · MP4: full recording at 1×, 25 fps')
         top=ttk.Frame(root,padding=12);top.pack(fill='x')
         ttk.Label(top,text='THERMAL LAB  /  RECORDING REVIEW',font=('Segoe UI',15,'bold')).pack(side='left')
         ttk.Button(top,text='Open recording…',command=self.browse).pack(side='right')
         self.export=ttk.Button(top,text='Export history…',command=self.export_csv,state='disabled');self.export.pack(side='right',padx=8)
+        self.mp4_button=ttk.Button(top,text='Export MP4…',command=lambda:self.media_export('mp4'));self.mp4_button.pack(side='right',padx=4)
+        self.png_button=ttk.Button(top,text='Save PNG…',command=lambda:self.media_export('png'));self.png_button.pack(side='right',padx=4)
         ttk.Label(root,textvariable=self.status,padding=(12,4),wraplength=1200).pack(fill='x')
         controls=ttk.Frame(root,padding=8);controls.pack(fill='x')
         self.play_button=ttk.Button(controls,text='Play',command=self.play,state='disabled');self.play_button.pack(side='left')
@@ -61,6 +66,9 @@ class Review:
             ttk.Button(editor,text=label,command=command).pack(side='left',padx=3)
         self.analysis_note=tk.StringVar(value='Recorded measurements · select Analysis to add or move points and regions')
         ttk.Label(root,textvariable=self.analysis_note,padding=(12,2)).pack(fill='x')
+        exports=ttk.Frame(root,padding=(12,2));exports.pack(fill='x')
+        ttk.Checkbutton(exports,text='Export temperature labels',variable=self.export_labels).pack(side='left')
+        ttk.Label(exports,textvariable=self.media_status,wraplength=850).pack(side='left',padx=15)
         body=ttk.Frame(root,padding=(12,4));body.pack(fill='both',expand=True)
         self.canvas=tk.Canvas(body,bg='#0b1119',highlightthickness=0);self.canvas.pack(side='left',fill='both',expand=True)
         self.canvas.bind('<Configure>',lambda e:self.render());self.canvas.bind('<Motion>',self.hover)
@@ -106,7 +114,7 @@ class Review:
             self.mode_box.configure(values=['Thermal','Optical','Blend'] if recording.optical else ['Thermal'])
             self.archive_info.set(('Lossless optical video paired with each thermal frame. Exposure synchronization is unqualified.' if recording.optical else 'Thermal frames only. This archive has no continuous optical video.')+'\n\nOptical alignment follows the original recording. Blend uses 55% thermal opacity. Choose Recorded or Analysis for measurements.')
             self.timeline.configure(to=max(1,len(recording.entries)-1));self.show(0)
-            self.play_button.configure(state='normal');self.root.title('Thermal Lab · Review · '+recording.path.name)
+            self.play_button.configure(state='normal');self.root.title('Thermal Lab · Review · '+recording.path.name+' · DEV7')
             self.status.set(f"{recording.path.name} · {recording.manifest['camera_id']} · {recording.manifest['source']} · Loading histories…")
             self.start_histories()
         except Exception as exc:
@@ -380,7 +388,40 @@ class Review:
                 self.status.set('History exported: '+path)
             except Exception as exc:messagebox.showerror('Export failed',str(exc))
 
+    def media_export(self,kind):
+        if self.media_busy:
+            if kind=='mp4':self.media_cancel.set();self.media_status.set('Cancelling export…')
+            return
+        if not self.recording or not self.frame:return
+        self.pause()
+        path=filedialog.asksaveasfilename(title='Export outside the source recording folder',initialdir=self.recording.path.parent,
+                  initialfile=self.recording.path.name+('-frame-'+str(self.index+1) if kind=='png' else '')+'.'+kind,
+                  defaultextension='.'+kind,filetypes=[(kind.upper(),'*.'+kind)])
+        if not path:return
+        recording=self.recording;index=self.index
+        options=dict(mode=self.mode.get(),palette=self.palette.get(),rotation=int(self.rotation.get()),labels=self.export_labels.get(),
+                     settings=copy.deepcopy(self.analysis.settings) if self.basis.get()=='Analysis' and self.analysis else None)
+        self.media_busy=True;self.media_cancel=threading.Event();cancel=self.media_cancel
+        self.png_button.configure(state='disabled');self.mp4_button.configure(text='Cancel export',state='normal' if kind=='mp4' else 'disabled')
+        self.media_status.set('Exporting '+kind.upper()+'…')
+        def work():
+            try:
+                if kind=='png':export_png(recording,index,path,options)
+                else:export_mp4(recording,path,options,cancel.is_set,lambda n,total:self.media_messages.put(('progress',(n,total))))
+                self.media_messages.put(('done','Saved '+str(path)))
+            except ExportCancelled:self.media_messages.put(('done','Export cancelled; no completed MP4 saved'))
+            except Exception as exc:self.media_messages.put(('done','Export failed: '+str(exc)))
+        threading.Thread(target=work,name='Media export').start()
+
     def tick(self):
+        try:
+            while True:
+                kind,data=self.media_messages.get_nowait()
+                if kind=='progress':self.media_status.set(f'Exporting MP4: {data[0]:,} / {data[1]:,} frames')
+                else:
+                    self.media_busy=False;self.media_status.set(data);self.png_button.configure(state='normal');self.mp4_button.configure(text='Export MP4…',state='normal')
+                    if self.media_closing:self.root.destroy();return
+        except queue.Empty:pass
         try:
             while True:
                 generation,kind,data=self.messages.get_nowait()
@@ -403,7 +444,10 @@ class Review:
         self.root.after(40,self.tick)
 
     def close(self):
-        self.cancel.set();self.root.destroy()
+        self.cancel.set()
+        if self.media_busy:
+            self.media_closing=True;self.media_cancel.set();self.media_status.set('Closing after export cleanup…');return
+        self.root.destroy()
 
 
 def main():

@@ -4,7 +4,8 @@ Standalone thermal camera capture, numerical measurements and recording.
 **Power Lab is not required.** This repository owns thermal-camera development;
 Power Lab can integrate with it later through a separate, versioned interface.
 
-Version 0.1.0 DEV6 adds editable playback points and regions with separate
+Version 0.1.0 DEV7 adds PNG snapshots and H.264 MP4 export with optional
+measurement labels and source-frame provenance. It includes editable playback points and regions with separate
 autosaved analysis layouts, recalculated histories and labeled CSV export.
 It includes continuous lossless optical recording and optical/blended
 playback alongside numerical thermal frames, temperature-history plots and CSV
@@ -14,7 +15,7 @@ The native interface includes thermal/optical/blended/side-by-side views, optica
 named temperature points and rectangles, palettes, and numerical recording.
 USB diagnostics and TopView CSV import remain available as command-line tools.
 Optical storage uses about 2.4 GB/minute per camera at 25 fps. It is an indexed
-app-native archive; standard MP4 export remains pending.
+app-native archive; use Export MP4 in recording review to create a shareable video.
 
 See the [TopView feature comparison and proposed UI priorities](docs/TopView-Feature-Review.md)
 for overlay alignment, precise measurement placement and recording/playback scope.
@@ -104,8 +105,8 @@ The `thermal_lab` package is also installable with `python -m pip install .`.
 CI tests parsers, numerical decoding and recording without opening hardware.
 Hardware tests are run explicitly using the commands above.
 
-Next: standard video/image export,
-longer capture and disconnect/recovery tests, and environmental correction.
+Next: longer capture and disconnect/recovery tests, advanced measurement tools,
+and environmental correction.
 A later Power Lab integration should exchange
 run IDs, recording commands and selected measurements with freshness metadata.
 No instrument-control code, web server, battery recipes or Power Lab package is
