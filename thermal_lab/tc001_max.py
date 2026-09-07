@@ -2,7 +2,7 @@
 
 The ABI was observed in TopView 1.30.003 and checked against that exact binary.
 No SDK or TopView process is required at capture time. Never distribute the DLL
-with this module. Only one camera and one acquisition worker are qualified here.
+with this module. Use one isolated acquisition worker per camera.
 The decoder returns apparent temperatures; host emissivity/distance corrections
 are not applied. See docs/TC001-Max-Direct-Capture.md for evidence and limitations.
 """
@@ -16,6 +16,8 @@ from pathlib import Path
 
 from .camera_diagnostics import pnp_devices
 from .validation import ValidationError
+from .windows_identity import handles, opened_camera_id
+from .device_hints import DeviceHints, ordered_indexes
 
 FRAME_BYTES = 1770496
 PLANE_BYTES = 98304
@@ -59,9 +61,9 @@ class TC001Max:
     """Use in a dedicated process: native calls have a 2-second frame timeout.
 
     The vendor library contains process-global streaming state. This adapter
-    rejects multiple connected Max devices rather than assign unstable indexes.
+    verifies the opened Windows device identity rather than trusting indexes.
     """
-    def __init__(self, topview_directory):
+    def __init__(self, topview_directory, camera_id=None):
         self.directory = Path(topview_directory).resolve()
         self.handle = None
         self.started = False
@@ -69,30 +71,50 @@ class TC001Max:
         self.dll_paths = []
         self.mutex = None
         self.received = 0
+        self.stream_received = 0
         self.rejected = 0
+        self.requested_id = camera_id
+        self.startup_retries = 0
+        self.accepted = 0
 
     def __enter__(self):
+        self.stream_received = 0
         if sys.platform != 'win32' or c.sizeof(c.c_void_p) != 8:
             raise OSError('TC001 Max adapter requires Windows x64 Python')
         library = self.directory / 'dll/dll_c001max/libirdvs.dll'
         if hashlib.sha256(library.read_bytes()).hexdigest() != DLL_SHA256:
             raise OSError('Unqualified libirdvs.dll version; refusing unknown native ABI')
         devices = pnp_devices()
-        if len(devices) != 1 or devices[0].get('problem_code') != 0:
-            raise OSError('Exactly one healthy TC001 Max must be connected')
-        self.camera_id = devices[0]['instance_id']
+        if self.requested_id is None:
+            if len(devices) != 1:
+                raise OSError('Select a camera when more than one TC001 Max is connected')
+            self.requested_id = devices[0]['instance_id']
+        selected = next((d for d in devices if d['instance_id'].casefold() == self.requested_id.casefold()), None)
+        if not selected or selected.get('problem_code') != 0:
+            raise OSError('Selected TC001 Max is absent or has a Windows driver error')
+        self.camera_id = selected['instance_id']
         self.kernel = c.WinDLL('kernel32', use_last_error=True)
         self.kernel.CreateMutexW.argtypes = [c.c_void_p, c.c_int, c.c_wchar_p]
         self.kernel.CreateMutexW.restype = c.c_void_p
         self.kernel.CloseHandle.argtypes = [c.c_void_p]
-        self.mutex = self.kernel.CreateMutexW(None, False, 'Local\\PowerLabTC001MaxCapture')
+        key = hashlib.sha256(self.camera_id.casefold().encode()).hexdigest()
+        self.mutex = self.kernel.CreateMutexW(None, False, 'Local\\ThermalLabCamera-' + key)
         if not self.mutex:
             raise c.WinError(c.get_last_error())
         if c.get_last_error() == 183:
             self.kernel.CloseHandle(self.mutex)
             self.mutex = None
-            raise OSError('Another Power Lab camera worker is active')
+            raise OSError('This camera is already in use by another Thermal Lab worker')
+        gate = None
+        gate_owned = False
         try:
+            self.kernel.WaitForSingleObject.argtypes = [c.c_void_p, c.c_uint32]
+            self.kernel.ReleaseMutex.argtypes = [c.c_void_p]
+            gate = self.kernel.CreateMutexW(None, False, 'Local\\ThermalLabCameraDiscovery')
+            if not gate:raise c.WinError(c.get_last_error())
+            if self.kernel.WaitForSingleObject(gate, 15000) not in (0, 128):
+                raise OSError('Another camera is still opening; retry shortly')
+            gate_owned = True
             for directory in [self.directory, library.parent]:
                 self.dll_paths.append(os.add_dll_directory(str(directory)))
             self.dll = c.CDLL(str(library))
@@ -114,8 +136,28 @@ class TC001Max:
             self.handle = self.table[0]
             if not self.handle:
                 raise OSError('Camera handle allocation failed')
-            self._check('open', self.dll.irdvs_camera_open(self.handle, c.byref(DeviceInfo(0x4962, 0x3474, 0))))
-            self.opened = True
+            hints = DeviceHints(devices)
+            for index in ordered_indexes(len(devices), self.camera_id, hints.hints):
+                before = handles()
+                result = self.dll.irdvs_camera_open(self.handle, c.byref(DeviceInfo(0x4962, 0x3474, index)))
+                if result != 0:
+                    continue
+                self.opened = True
+                actual = opened_camera_id(before, devices)
+                hints.observe(index, actual)
+                if actual.casefold() == self.camera_id.casefold():
+                    self.device_index = index
+                    break
+                self._check('close unselected camera', self.dll.irdvs_camera_close(self.handle))
+                self.opened = False
+                self.dll.irdvs_camera_handle_delete(self.handle)
+                self.handle = None
+                self.table = (c.c_void_p * 8)()
+                self.dll.irdvs_camera_handle_create(self.table)
+                self.handle = self.table[0]
+                if not self.handle:raise OSError('Camera handle allocation failed')
+            else:
+                raise OSError('Could not open and verify the selected camera; close other camera applications')
             self._check('init', self.dll.irdvs_camera_init(self.handle, None))
             self._check('start', self.dll.irdvs_camera_start_stream(
                 self.handle, c.byref(StreamInfo(b'YUYV', 256, 3458, FRAME_BYTES, 25, 2000, 0))))
@@ -126,6 +168,9 @@ class TC001Max:
         except Exception:
             self.close()
             raise
+        finally:
+            if gate_owned:self.kernel.ReleaseMutex(gate)
+            if gate:self.kernel.CloseHandle(gate)
 
     @staticmethod
     def _check(operation, result):
@@ -133,6 +178,20 @@ class TC001Max:
             raise OSError(f'TC001 Max {operation} failed ({result}); close TopView if it owns the camera')
 
     def read(self):
+        while True:
+            try:
+                result = self._read()
+                self.accepted += 1
+                return result
+            except OSError:
+                if self.accepted or self.startup_retries >= 2:
+                    raise
+                self.startup_retries += 1
+                self.close()
+                time.sleep(.4)
+                self.__enter__()
+
+    def _read(self):
         if not self.started:
             raise RuntimeError('Camera stream is closed')
         # Discard the first two buffers after every open, then validate alignment
@@ -141,13 +200,16 @@ class TC001Max:
             self._check('frame_get', self.dll.irdvs_camera_frame_get(self.handle, 0, self.buffer, FRAME_BYTES))
             elapsed = time.monotonic() - self.origin
             self.received += 1
+            self.stream_received += 1
             data = self.buffer.raw
-            if self.received <= 2:
+            if self.stream_received <= 2:
                 self.rejected += 1
                 continue
             try:
                 frame = decode_frame(data, camera_id=self.camera_id,
                                      elapsed_s=elapsed, sequence=self.received - 1)
+                frame['identity_basis'] = 'opened_windows_device_object'
+                frame['startup_retries'] = self.startup_retries
             except ValidationError:
                 self.rejected += 1
                 continue

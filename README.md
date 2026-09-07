@@ -4,8 +4,9 @@ Standalone thermal camera capture, numerical measurements and recording.
 **Power Lab is not required.** This repository owns thermal-camera development;
 Power Lab can integrate with it later through a separate, versioned interface.
 
-Version 0.1.0 DEV2 adds a native Windows live-inspection interface for one
-TOPDON TC001 Max: thermal/optical/blended/side-by-side views, optical alignment,
+Version 0.1.0 DEV3 supports independent windows for multiple TOPDON TC001 Max
+cameras, with verified Windows device selection and separate measurement layouts.
+The native interface includes thermal/optical/blended/side-by-side views, optical alignment,
 named temperature points and rectangles, palettes, and numerical recording.
 USB diagnostics and TopView CSV import remain available as command-line tools.
 Graphical playback and continuous optical-video recording are still pending.
@@ -23,8 +24,14 @@ python scripts/run_thermal_lab.py --topview-directory 'C:\path\to\TopView'
 ```
 
 After installation, `thermal-lab` also launches the interface. Choose the
-TopView installation with Browse if no path was provided, then Connect camera.
+TopView installation with Browse if no path was provided, select a camera, then
+Connect camera. **Open another camera window** selects the other connected
+camera in an independent window; connect and record there separately. Each window
+can close without stopping the other. For two Max cameras, use separate USB
+controller paths; the tested shared hub could not sustain both streams.
 TopView itself must be closed. See the [desktop guide](docs/Desktop-Guide.md).
+See [DEV3 hardware verification](docs/Desktop-DEV3-Verification.md) for the two-camera
+recording checks and remaining limits.
 
 The desktop uses NumPy and Pillow; the original capture/import CLI remains
 standard-library-only. No Power Lab application or Windows SDK is required.
@@ -43,8 +50,10 @@ python scripts/check_tc001.py --output recordings/usb-check-01.json
 python scripts/capture_tc001.py --topview-directory 'C:\path\to\TopView' --output recordings/session-01 --seconds 45
 ```
 
-Use new output paths each time. Capture supports 1–600 seconds and one healthy
-camera. It records full numerical frames in `thermal.jsonl.gz`, a seek index in
+Use new output paths each time. Capture supports 1–600 seconds per camera.
+When multiple cameras are connected, pass `--camera-id` with the Windows instance
+ID reported by the diagnostic command. Run separate processes for concurrent CLI
+capture. It records full numerical frames in `thermal.jsonl.gz`, a seek index in
 `thermal.idx`, first/last raw frames, and `camera-session.json`. A successful
 session has status `COMPLETE`. `FAILED` or unfinished `RECORDING` sessions are
 incomplete. Times are host arrivals, not physical exposure times.

@@ -6,13 +6,16 @@ from thermal_lab.tc001_max import decode_frame,PLANE_BYTES
 from thermal_lab.workspace import measurement_values
 if not __debug__: raise SystemExit("Verification requires assertions enabled; do not use python -O")
 root=Path(sys.argv[1]);entries=list(FRAME_INDEX.iter_unpack((root/'thermal.idx').read_bytes()));times=[];first=None;last=None
+manifest=json.loads((root/'camera-session.json').read_text())
 with (root/'thermal.jsonl.gz').open('rb') as f:
  for elapsed,offset,size in entries:
   f.seek(offset);frame=json.loads(gzip.decompress(f.read(size)))[0]
   assert frame['elapsed_s']==elapsed
   assert len(frame['temperatures'])==49152 and all(math.isfinite(v) for v in frame['temperatures'])
   assert frame['source']=='HARDWARE' and frame['capture_timestamp'] is None
+  assert frame['camera_id']==manifest['camera_id']
   if 'workspace' in frame:
+   assert frame['workspace']['camera_id']==manifest['camera_id']
    assert measurement_values(frame,frame['workspace'])==frame['measurements']
   else:
    assert measurements(frame,dict(points=[dict(name='Center',x=.5,y=.5)],areas=[]))['Center']==frame['measurements']['Center']
@@ -25,7 +28,7 @@ for label,frame in [('first',first),('last',last)]:
  assert frame['raw_sha256']==decoded['raw_sha256']
  codes=struct.unpack('<49152H',raw[PLANE_BYTES:PLANE_BYTES*2])
  assert tuple(round((v+273.15)*64) for v in frame['temperatures'])==codes
-manifest=json.loads((root/'camera-session.json').read_text());assert manifest['status']=='COMPLETE' and manifest['frames_written']==len(entries)
+assert manifest['status']=='COMPLETE' and manifest['frames_written']==len(entries)
 result=dict(status='PASS',recording=root.name,frames=len(entries),temperature_values_checked=len(entries)*49152,strictly_increasing_arrivals=True,first_last_raw_roundtrip_exact=True,manifest=manifest)
 Path('docs/camera-evidence',root.name+'-verification.json').write_text(json.dumps(result,indent=2))
 print(json.dumps({k:v for k,v in result.items() if k!='manifest'},indent=2))

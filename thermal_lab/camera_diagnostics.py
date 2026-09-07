@@ -31,6 +31,7 @@ $items = @(Get-PnpDevice -PresentOnly | Where-Object {
     }
     [ordered]@{
         instance_id = $device.InstanceId
+        pdo_name = $props['DEVPKEY_Device_PDOName']
         name = $device.FriendlyName
         status = $device.Status
         problem_code = $props['DEVPKEY_Device_ProblemCode']

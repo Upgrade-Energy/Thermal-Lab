@@ -1,0 +1,41 @@
+{
+  "status": "PASS",
+  "recording": "camera1",
+  "frames": 498,
+  "temperature_values_checked": 24477696,
+  "strictly_increasing_arrivals": true,
+  "first_last_raw_roundtrip_exact": true,
+  "manifest": {
+    "status": "COMPLETE",
+    "source": "HARDWARE",
+    "camera_id": "USB\\VID_3474&PID_4962\\6&2A549464&0&2",
+    "dll_sha256": "f7a745d1e056e1dcda6de43ee30483fa5490eeb535bc18bbbd7ff031fcf6d3e6",
+    "timestamp_basis": "host_monotonic_arrival",
+    "temperature_basis": "apparent_raw_kelvin_64",
+    "optical_video_recorded": false,
+    "device_dropped_frames": null,
+    "frames_written": 498,
+    "started_utc": "2026-09-07T20:27:58.610133+00:00",
+    "initial_workspace": {
+      "schema": 1,
+      "alignment": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "scale": 1.0,
+        "angle": 0.0
+      },
+      "points": [
+        {
+          "id": "p1",
+          "name": "Camera 1 probe",
+          "x": 0.5,
+          "y": 0.5
+        }
+      ],
+      "areas": [],
+      "camera_id": "USB\\VID_3474&PID_4962\\6&2A549464&0&2"
+    },
+    "error": null,
+    "finished_utc": "2026-09-07T20:28:18.612584+00:00"
+  }
+}

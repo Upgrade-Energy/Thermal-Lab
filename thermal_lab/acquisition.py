@@ -12,7 +12,7 @@ from .thermal import Recorder
 from .workspace import validate_settings, measurement_values
 
 
-def worker(directory, commands, previews, events):
+def worker(directory, commands, previews, events, camera_id=None):
     recorder=None; destination=None; manifest=None; last_raw=None; record_origin=0
     settings=validate_settings({}); revision=0; camera=None
 
@@ -38,8 +38,9 @@ def worker(directory, commands, previews, events):
         recorder=None
 
     try:
-        with TC001Max(directory) as camera:
-            event('connected',camera_id=camera.camera_id)
+        with (TC001Max(directory, camera_id=camera_id) if camera_id else TC001Max(directory)) as camera:
+            first_sample=camera.read() if camera_id else None
+            event('connected',camera_id=camera.camera_id,startup_retries=getattr(camera,'startup_retries',0))
             running=True; last_preview=0; previous_digest=None; last_change=time.monotonic()
             while running:
                 while True:
@@ -47,11 +48,16 @@ def worker(directory, commands, previews, events):
                     except queue.Empty:break
                     action=command['action']
                     if action=='stop':running=False;break
-                    if action=='settings':settings=validate_settings(command['settings']);revision+=1
+                    if action=='settings':
+                        candidate=validate_settings(command['settings'])
+                        if candidate['camera_id'] and candidate['camera_id'].casefold()!=camera.camera_id.casefold():
+                            raise ValueError('Measurement layout belongs to another camera')
+                        candidate['camera_id']=camera.camera_id
+                        settings=candidate;revision+=1
                     elif action=='record':
                         if recorder is not None:continue
                         destination=Path(command['path']);destination.mkdir(parents=True,exist_ok=False)
-                        record_origin=time.monotonic()-camera.origin
+                        record_origin=first_sample[0]['elapsed_s'] if first_sample else time.monotonic()-camera.origin
                         last_raw=None
                         manifest=dict(status='RECORDING',source='HARDWARE',camera_id=camera.camera_id,
                                       dll_sha256=DLL_SHA256,timestamp_basis='host_monotonic_arrival',
@@ -63,7 +69,8 @@ def worker(directory, commands, previews, events):
                         event('recording_started',path=str(destination))
                     elif action=='finish':finish()
                 if not running:break
-                frame,raw=camera.read()
+                frame,raw=first_sample if first_sample else camera.read()
+                first_sample=None
                 digest=hashlib.sha256(raw[98304:196608]).digest()
                 now=time.monotonic()
                 if digest!=previous_digest:last_change=now

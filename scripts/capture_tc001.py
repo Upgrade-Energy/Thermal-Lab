@@ -17,6 +17,7 @@ def main():
     parser.add_argument('--topview-directory', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--seconds', type=float, default=10)
+    parser.add_argument('--camera-id', help='Windows PnP instance ID; required with multiple cameras')
     args = parser.parse_args()
     if not 1 <= args.seconds <= 600:
         parser.error('--seconds must be between 1 and 600')
@@ -32,7 +33,7 @@ def main():
         temporary.replace(args.output / 'camera-session.json')
     save()
     recorder = Recorder([], 0, compression_level=1)
-    camera = TC001Max(args.topview_directory)
+    camera = TC001Max(args.topview_directory, camera_id=args.camera_id)
     count = 0
     times = []
     distinct = set()

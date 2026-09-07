@@ -1,5 +1,8 @@
 # Two-camera test — 7 September 2026
 
+This is the initial diagnostic report. [DEV3 desktop verification](Desktop-DEV3-Verification.md)
+documents the subsequent integrated camera selection and concurrent desktop recordings.
+
 Status: simultaneous capture and separate numerical recording passed after
 moving one camera to a different USB controller. Production adapter retains its
 single-camera guard pending safe device selection and desktop integration.

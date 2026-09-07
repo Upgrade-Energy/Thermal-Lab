@@ -1,15 +1,31 @@
-# Thermal Lab desktop — DEV2
+# Thermal Lab desktop — DEV3
 
 Launch `thermal-lab` after `python -m pip install ".[desktop]"`, or run
 `python scripts/run_thermal_lab.py` from the repository. Requires Windows x64
 Python 3.12+ with Tcl/Tk, NumPy, Pillow, the tested TopView installation and its
 camera driver. The native acquisition ABI remains experimental and hash-locked.
 
-Select the TopView installation folder, close TopView, and click **Connect
-camera**. Native acquisition runs in a separate process. Disconnect releases
+Select the TopView installation folder, close TopView, choose a camera from the
+list, and click **Connect camera**. Refresh rescans connected devices while
+disconnected. Native acquisition runs in a separate process. Disconnect releases
 the camera. Closing the window requests shutdown and finalizes any numerical
 recording; an unresponsive worker is terminated after a bounded wait and its
 unfinished recording must be treated as incomplete.
+
+## Two cameras
+
+Click **Open another camera window** to open an independent workspace with the
+other detected camera selected. Connect it there. Each window has independent
+view controls, alignment, points/regions and Record/Stop controls. A camera
+already owned by another window cannot be acquired a second time. Closing either
+window finalizes its recording and leaves the other running.
+
+Use separate USB controller paths for two TC001 Max units. Our shared-hub tests
+failed; moving one camera to another controller enabled concurrent recordings.
+The Windows instance suffix in each title identifies that window's device.
+Location-based IDs may change when ports change, in which case a fresh layout
+is used. Device indexes are never saved as camera identities. Physical exposure
+synchronization is not provided by concurrent capture.
 
 ## Live views and alignment
 
@@ -46,9 +62,11 @@ measurement geometry. A stale/disconnected image is clearly labeled and its
 live measurements become unavailable.
 
 Layouts preserve named measurement IDs, geometry, camera identity and optical
-alignment. They autosave to `~/.thermal-lab/workspace.json`; Save layout and
+alignment. They autosave to `~/.thermal-lab/workspace-<camera-hash>.json`; Save layout and
 Load layout manage named JSON presets. `--workspace PATH` selects an alternate
-autosave file. Palettes, opacity and view orientation currently reset on launch.
+autosave basename; a camera-specific suffix is added. Existing single-camera
+layouts migrate only when their camera identity matches. Palettes, opacity and
+view orientation currently reset on launch.
 
 ## Recordings
 

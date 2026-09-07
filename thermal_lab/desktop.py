@@ -9,12 +9,16 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 from datetime import datetime
 import uuid
+import hashlib
+import subprocess
+import sys
 
 from PIL import Image, ImageTk
 
 from .acquisition import worker
 from .imaging import optical_image, aligned_optical, thermal_image, rotate_image, sensor_to_view, canvas_to_sensor
 from .workspace import validate_settings, read_settings, save_settings, measurement_values
+from .camera_diagnostics import pnp_devices
 
 
 class Desktop:
@@ -24,7 +28,9 @@ class Desktop:
         self.settings=validate_settings({});self.recording=False;self.record_path=None
         self.selected=None;self.zoom=1;self.pan=[0,0];self.photos=[]
         self.ctx=mp.get_context('spawn');self.commands=None
-        root.title('Thermal Lab · Live inspection');root.geometry('1440x920');root.minsize(1080,860)
+        self.workspace_path=args.workspace
+        self.camera_choice=tk.StringVar(value=args.camera_id or '')
+        root.title('Thermal Lab · Live inspection');root.geometry('1440x960');root.minsize(1080,900)
         root.configure(bg='#111923');root.protocol('WM_DELETE_WINDOW',self.close)
         style=ttk.Style();style.theme_use('clam')
         style.configure('.',background='#172331',foreground='#e3ebf5',fieldbackground='#233448',font=('Segoe UI',10))
@@ -44,13 +50,20 @@ class Desktop:
         self.name=tk.StringVar();self.alignment={k:tk.StringVar(value=str(v)) for k,v in self.settings['alignment'].items()}
         header=ttk.Frame(root,padding=(18,12));header.pack(fill='x')
         ttk.Label(header,text='THERMAL LAB',font=('Segoe UI',17,'bold')).pack(side='left')
-        ttk.Label(header,text='LIVE INSPECTION  /  DEV2',foreground='#8ba4be').pack(side='left',padx=22)
+        ttk.Label(header,text='LIVE INSPECTION  /  DEV3',foreground='#8ba4be').pack(side='left',padx=22)
         self.connect_button=ttk.Button(header,text='Connect camera',command=self.connect);self.connect_button.pack(side='right')
         self.record_button=ttk.Button(header,text='Record temperatures',command=self.toggle_record,state='disabled');self.record_button.pack(side='right',padx=8)
         connection=ttk.Frame(root,padding=(18,0,18,10));connection.pack(fill='x')
         ttk.Label(connection,text='TopView installation').pack(side='left')
         ttk.Entry(connection,textvariable=self.path).pack(side='left',fill='x',expand=True,padx=10)
         ttk.Button(connection,text='Browse…',command=self.browse).pack(side='left')
+        cameras=ttk.Frame(root,padding=(18,0,18,6));cameras.pack(fill='x')
+        ttk.Label(cameras,text='Camera').pack(side='left')
+        self.camera_box=ttk.Combobox(cameras,textvariable=self.camera_choice,state='readonly',width=65)
+        self.camera_box.pack(side='left',fill='x',expand=True,padx=10)
+        self.camera_box.bind('<<ComboboxSelected>>',lambda e:self.select_camera_layout())
+        self.refresh_button=ttk.Button(cameras,text='Refresh',command=self.refresh_cameras);self.refresh_button.pack(side='left')
+        ttk.Button(cameras,text='Open another camera window',command=self.another_camera).pack(side='left',padx=8)
         ttk.Label(root,textvariable=self.status,padding=(18,9),foreground='#72d7c5').pack(fill='x')
         body=ttk.Panedwindow(root,orient='horizontal');body.pack(fill='both',expand=True,padx=12,pady=8)
         left=ttk.Frame(body);right=ttk.Frame(body,padding=12);body.add(left,weight=4);body.add(right,weight=1)
@@ -109,6 +122,45 @@ class Desktop:
             try:self.settings=read_settings(args.workspace);self.sync_alignment();self.refresh_rows()
             except Exception as exc:self.status.set(f'Layout not loaded: {exc}')
         root.after(80,self.poll)
+        self.refresh_cameras()
+
+    def refresh_cameras(self):
+        if self.process and self.process.is_alive():return
+        try:
+            devices=[d['instance_id'] for d in pnp_devices() if d.get('problem_code')==0]
+            self.camera_box.configure(values=devices)
+            if self.camera_choice.get() not in devices:self.camera_choice.set(devices[0] if devices else '')
+            if self.camera_choice.get():self.select_camera_layout()
+            if not devices:self.status.set('No healthy TC001 Max detected; connect it and press Refresh')
+        except Exception as exc:self.status.set('Camera discovery failed: '+str(exc))
+
+    def select_camera_layout(self):
+        if self.process and self.process.is_alive():return
+        try:
+            self.prepare_camera_layout(self.camera_choice.get())
+            self.frame=None;self.optical=None;self.received_at=0;self.render()
+        except Exception as exc:self.status.set('Layout error: '+str(exc))
+
+    def another_camera(self):
+        others=[d for d in self.camera_box['values'] if d!=self.camera_choice.get()]
+        command=[sys.executable,'-m','thermal_lab.desktop','--topview-directory',self.path.get(),
+                 '--recordings',str(self.args.recordings),'--workspace',str(self.args.workspace)]
+        if others:command+=['--camera-id',others[0]]
+        subprocess.Popen(command,cwd=str(Path(__file__).resolve().parents[1]),
+                         creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
+
+    def prepare_camera_layout(self, camera_id):
+        key=hashlib.sha256(camera_id.casefold().encode()).hexdigest()[:16]
+        self.workspace_path=self.args.workspace.with_name(self.args.workspace.stem+'-'+key+'.json')
+        if self.workspace_path.exists():
+            candidate=read_settings(self.workspace_path)
+            if candidate['camera_id'].casefold()!=camera_id.casefold():raise ValueError('Saved camera layout identity mismatch')
+        elif self.settings.get('camera_id','').casefold()==camera_id.casefold():candidate=self.settings
+        else:
+            legacy=read_settings(self.args.workspace) if self.args.workspace.exists() else validate_settings({})
+            candidate=legacy if legacy.get('camera_id','').casefold()==camera_id.casefold() else validate_settings({})
+        self.settings=dict(candidate,camera_id=camera_id);self.selected=None;self.name.set('')
+        self.sync_alignment();self.refresh_rows()
 
     def browse(self):
         path=filedialog.askdirectory(title='Select TopView installation')
@@ -124,12 +176,19 @@ class Desktop:
             self.send('stop');self.stop_deadline=time.monotonic()+7
             self.status.set('Stopping camera and finalizing any recording…');return
         if self.process:self.process.join(timeout=0)
+        camera_id=self.camera_choice.get()
+        if not camera_id:self.status.set('Select a connected camera first');return
+        try:self.prepare_camera_layout(camera_id)
+        except Exception as exc:self.status.set('Layout error: '+str(exc));return
         self.commands=self.ctx.Queue(32);self.previews=self.ctx.Queue(1);self.events=self.ctx.Queue()
         self.frame=None;self.optical=None;self.received_at=0;self.stop_deadline=None
         self.exit_reported=False
-        self.process=self.ctx.Process(target=worker,args=(self.path.get(),self.commands,self.previews,self.events),daemon=True)
+        self.process=self.ctx.Process(target=worker,args=(self.path.get(),self.commands,self.previews,self.events,camera_id),daemon=True)
         self.process.start();self.send('settings',settings=self.settings)
+        self.start_deadline=time.monotonic()+30
         self.connect_button.configure(text='Disconnect');self.status.set('CONNECTING · Opening TC001 Max…');self.render()
+        self.camera_box.configure(state='disabled');self.refresh_button.configure(state='disabled')
+        self.root.title('Thermal Lab · '+camera_id.rsplit('\\',1)[-1])
 
     def toggle_record(self):
         if self.recording:self.send('finish');self.record_button.configure(state='disabled');return
@@ -143,6 +202,7 @@ class Desktop:
                 while True:
                     event=self.events.get_nowait();kind=event['kind']
                     if kind=='connected':
+                        self.start_deadline=None
                         previous=self.settings.get('camera_id')
                         if previous and previous!=event['camera_id']:
                             self.status.set('Layout belongs to another camera; verify alignment before use')
@@ -169,8 +229,13 @@ class Desktop:
             except queue.Empty:pass
             except Exception as exc:self.status.set('DISPLAY ERROR · '+str(exc))
             if self.stop_deadline and time.monotonic()>self.stop_deadline and self.process.is_alive():
-                self.process.terminate();self.status.set('Camera stop timed out; worker terminated. Recording is incomplete.')
+                self.process.terminate();self.exit_reported=True;self.stop_deadline=None
+                self.status.set('Camera stop timed out; worker terminated. Recording is incomplete.')
+            if self.start_deadline and time.monotonic()>self.start_deadline and self.process.is_alive():
+                self.process.terminate();self.start_deadline=None;self.exit_reported=True
+                self.status.set('Camera startup timed out; worker terminated. Reconnect to retry.')
             if not self.process.is_alive():
+                self.camera_box.configure(state='readonly');self.refresh_button.configure(state='normal')
                 self.process.join(timeout=0);self.connect_button.configure(text='Connect camera');self.record_button.configure(state='disabled')
                 if not self.exit_reported and self.process.exitcode:
                     self.status.set(f'Camera worker exited unexpectedly ({self.process.exitcode}); reconnect to retry')
@@ -327,7 +392,7 @@ class Desktop:
 
     def changed(self):
         try:
-            self.settings=validate_settings(self.settings);save_settings(self.args.workspace,self.settings)
+            self.settings=validate_settings(self.settings);save_settings(self.workspace_path,self.settings)
             self.send('settings',settings=self.settings)
         except Exception as exc:self.status.set('Layout error: '+str(exc))
 
@@ -375,8 +440,10 @@ class Desktop:
         if path:
             try:
                 value=read_settings(path)
-                if self.frame and value.get('camera_id') and value['camera_id']!=self.frame['camera_id']:
+                target=self.camera_choice.get()
+                if target and value.get('camera_id') and value['camera_id'].casefold()!=target.casefold():
                     raise ValueError('This layout belongs to another camera')
+                if target:value['camera_id']=target
                 self.settings=value;self.selected=None;self.sync_alignment();self.changed();self.refresh_rows();self.render()
             except Exception as exc:messagebox.showerror('Load failed',str(exc))
 
@@ -392,6 +459,7 @@ def main():
     parser.add_argument('--topview-directory',type=Path)
     parser.add_argument('--recordings',type=Path,default=Path.home()/'Thermal-Lab-Recordings')
     parser.add_argument('--workspace',type=Path,default=Path.home()/'.thermal-lab/workspace.json')
+    parser.add_argument('--camera-id',help='Windows PnP camera identity; indexes are never persisted')
     args=parser.parse_args();root=tk.Tk();Desktop(root,args);root.mainloop()
 
 

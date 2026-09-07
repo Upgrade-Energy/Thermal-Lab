@@ -1,0 +1,39 @@
+{
+  "status": "PASS",
+  "identity_checked_every_frame": true,
+  "independent_measurement_ids": true,
+  "approximate_recorded_overlap_seconds": 35.722233,
+  "exposure_synchronization_verified": false,
+  "sessions": [
+    {
+      "session": "20260907-133339-c9c4e1",
+      "camera_id": "USB\\VID_3474&PID_4962\\YFDVS000000000001",
+      "frames": 2771,
+      "fps": 24.954954954954953,
+      "first_arrival_utc": "2026-09-07T20:33:39.418245+00:00",
+      "last_arrival_utc": "2026-09-07T20:35:30.418245+00:00",
+      "measurement_ids": [
+        "62267bb46237452093adb4ccec46b977"
+      ],
+      "startup_retries": [
+        0
+      ],
+      "workspace_states": 1
+    },
+    {
+      "session": "20260907-133454-6b6c4f",
+      "camera_id": "USB\\VID_3474&PID_4962\\6&2A549464&0&2",
+      "frames": 1211,
+      "fps": 24.980903028676476,
+      "first_arrival_utc": "2026-09-07T20:34:54.696012+00:00",
+      "last_arrival_utc": "2026-09-07T20:35:43.133012+00:00",
+      "measurement_ids": [
+        "03155e2ebb214aab845c628f9bceeebe"
+      ],
+      "startup_retries": [
+        0
+      ],
+      "workspace_states": 1
+    }
+  ]
+}
