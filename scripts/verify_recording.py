@@ -3,6 +3,7 @@ from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from thermal_lab.thermal import FRAME_INDEX,measurements
 from thermal_lab.tc001_max import decode_frame,PLANE_BYTES
+from thermal_lab.workspace import measurement_values
 if not __debug__: raise SystemExit("Verification requires assertions enabled; do not use python -O")
 root=Path(sys.argv[1]);entries=list(FRAME_INDEX.iter_unpack((root/'thermal.idx').read_bytes()));times=[];first=None;last=None
 with (root/'thermal.jsonl.gz').open('rb') as f:
@@ -11,7 +12,10 @@ with (root/'thermal.jsonl.gz').open('rb') as f:
   assert frame['elapsed_s']==elapsed
   assert len(frame['temperatures'])==49152 and all(math.isfinite(v) for v in frame['temperatures'])
   assert frame['source']=='HARDWARE' and frame['capture_timestamp'] is None
-  assert measurements(frame,dict(points=[dict(name='Center',x=.5,y=.5)],areas=[]))['Center']==frame['measurements']['Center']
+  if 'workspace' in frame:
+   assert measurement_values(frame,frame['workspace'])==frame['measurements']
+  else:
+   assert measurements(frame,dict(points=[dict(name='Center',x=.5,y=.5)],areas=[]))['Center']==frame['measurements']['Center']
   if first is None:first=frame
   last=frame;times.append(elapsed)
 assert all(b>a for a,b in zip(times,times[1:]))

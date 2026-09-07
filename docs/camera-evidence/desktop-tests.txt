@@ -1,0 +1,31 @@
+test_camera_failure_cannot_complete_recording (test_acquisition.AcquisitionTests.test_camera_failure_cannot_complete_recording) ... ok
+test_stop_finalizes_recording_and_preserves_measurements (test_acquisition.AcquisitionTests.test_stop_finalizes_recording_and_preserves_measurements) ... ok
+test_acquisition_buffer_reuse_and_lifecycle (test_camera_archive.CameraArchiveTests.test_acquisition_buffer_reuse_and_lifecycle) ... ok
+test_bad_input_marks_failure (test_camera_archive.CameraArchiveTests.test_bad_input_marks_failure) ... ok
+test_indexed_round_trip_and_provenance (test_camera_archive.CameraArchiveTests.test_indexed_round_trip_and_provenance) ... ok
+test_preview_without_enabled_cameras (test_camera_archive.CameraArchiveTests.test_preview_without_enabled_cameras) ... ok
+test_writer_fault_cannot_report_success (test_camera_archive.CameraArchiveTests.test_writer_fault_cannot_report_success) ... ok
+test_detection_is_not_access (test_camera_diagnostics.CameraDiagnosticsTests.test_detection_is_not_access) ... ok
+test_parent_ok_does_not_hide_missing_interface_driver (test_camera_diagnostics.CameraDiagnosticsTests.test_parent_ok_does_not_hide_missing_interface_driver) ... ok
+test_probe_error_is_not_reported_as_absent (test_camera_diagnostics.CameraDiagnosticsTests.test_probe_error_is_not_reported_as_absent) ... ok
+test_usb_success_never_claims_capture (test_camera_diagnostics.CameraDiagnosticsTests.test_usb_success_never_claims_capture) ... ok
+test_alignment_moves_optical_landmark_in_thermal_pixel_units (test_imaging.ImagingTests.test_alignment_moves_optical_landmark_in_thermal_pixel_units) ... ok
+test_rotation_edges_and_scale_limits (test_imaging.ImagingTests.test_rotation_edges_and_scale_limits) ... ok
+test_transform_inverse_roundtrip_and_temperature_independence (test_imaging.ImagingTests.test_transform_inverse_roundtrip_and_temperature_independence) ... ok
+test_yuyv_luma_chroma_layout (test_imaging.ImagingTests.test_yuyv_luma_chroma_layout) ... ok
+test_zoomed_panels_cannot_claim_neighboring_pixels (test_imaging.ImagingTests.test_zoomed_panels_cannot_claim_neighboring_pixels) ... ok
+test_celsius_values_preserve_original_codes (test_tc001_max.TC001MaxTests.test_celsius_values_preserve_original_codes) ... ok
+test_closed_camera_does_not_call_native_code (test_tc001_max.TC001MaxTests.test_closed_camera_does_not_call_native_code) ... ok
+test_corrupt_startup_and_truncated_frame_rejected (test_tc001_max.TC001MaxTests.test_corrupt_startup_and_truncated_frame_rejected) ... ok
+test_layout_units_orientation_and_provenance (test_tc001_max.TC001MaxTests.test_layout_units_orientation_and_provenance) ... ok
+test_corrupt_exports_rejected (test_topview_import.TopViewImportTests.test_corrupt_exports_rejected) ... ok
+test_file_and_json_roundtrip (test_topview_import.TopViewImportTests.test_file_and_json_roundtrip) ... ok
+test_real_units_and_pixel_measurements (test_topview_import.TopViewImportTests.test_real_units_and_pixel_measurements) ... ok
+test_units_are_explicit_and_converted (test_topview_import.TopViewImportTests.test_units_are_explicit_and_converted) ... ok
+test_duplicate_names_use_stable_ids_and_preserve_geometry (test_workspace.WorkspaceTests.test_duplicate_names_use_stable_ids_and_preserve_geometry) ... ok
+test_invalid_geometry_rejected_before_display_or_recording (test_workspace.WorkspaceTests.test_invalid_geometry_rejected_before_display_or_recording) ... ok
+
+----------------------------------------------------------------------
+Ran 26 tests in 0.385s
+
+OK

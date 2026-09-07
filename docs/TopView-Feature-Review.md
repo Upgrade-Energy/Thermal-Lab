@@ -1,5 +1,9 @@
 # TopView feature review and Thermal Lab priorities
 
+Update: the first native live workspace is now implemented in DEV2. See the
+[desktop guide](Desktop-Guide.md) and [verification results](Desktop-Verification.md).
+The comparison below retains the pre-implementation baseline and proposed scope.
+
 Reviewed 7 September 2026 against installed TopView 1.30.003 on Windows with
 the connected TC001 Max. Thermal Lab baseline: initial standalone extraction,
 commit `d56bf8a`. This is a feature review and proposed implementation scope,

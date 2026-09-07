@@ -4,13 +4,30 @@ Standalone thermal camera capture, numerical measurements and recording.
 **Power Lab is not required.** This repository owns thermal-camera development;
 Power Lab can integrate with it later through a separate, versioned interface.
 
-Version 0.1.0 DEV1 provides command-line tools for one TOPDON TC001 Max on
-Windows, full-resolution 256×192 temperature recording, point/area measurements,
-USB diagnostics and TopView CSV import. A graphical live-view and playback
-interface is planned; it is not included in this first extraction.
+Version 0.1.0 DEV2 adds a native Windows live-inspection interface for one
+TOPDON TC001 Max: thermal/optical/blended/side-by-side views, optical alignment,
+named temperature points and rectangles, palettes, and numerical recording.
+USB diagnostics and TopView CSV import remain available as command-line tools.
+Graphical playback and continuous optical-video recording are still pending.
 
 See the [TopView feature comparison and proposed UI priorities](docs/TopView-Feature-Review.md)
 for overlay alignment, precise measurement placement and recording/playback scope.
+
+## Open the desktop app
+
+Install Python 3.12+ x64 with Tcl/Tk support, then install the desktop dependencies:
+
+```powershell
+python -m pip install ".[desktop]"
+python scripts/run_thermal_lab.py --topview-directory 'C:\path\to\TopView'
+```
+
+After installation, `thermal-lab` also launches the interface. Choose the
+TopView installation with Browse if no path was provided, then Connect camera.
+TopView itself must be closed. See the [desktop guide](docs/Desktop-Guide.md).
+
+The desktop uses NumPy and Pillow; the original capture/import CLI remains
+standard-library-only. No Power Lab application or Windows SDK is required.
 
 ## Capture on Windows
 

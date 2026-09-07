@@ -1,0 +1,50 @@
+{
+  "status": "PASS",
+  "recording": "20260907-125117-d97685",
+  "frames": 950,
+  "temperature_values_checked": 46694400,
+  "strictly_increasing_arrivals": true,
+  "first_last_raw_roundtrip_exact": true,
+  "manifest": {
+    "status": "COMPLETE",
+    "source": "HARDWARE",
+    "camera_id": "USB\\VID_3474&PID_4962\\YFDVS000000000001",
+    "dll_sha256": "f7a745d1e056e1dcda6de43ee30483fa5490eeb535bc18bbbd7ff031fcf6d3e6",
+    "timestamp_basis": "host_monotonic_arrival",
+    "temperature_basis": "apparent_raw_kelvin_64",
+    "optical_video_recorded": false,
+    "device_dropped_frames": null,
+    "frames_written": 950,
+    "started_utc": "2026-09-07T19:51:17.656867+00:00",
+    "initial_workspace": {
+      "schema": 1,
+      "alignment": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "scale": 1.0,
+        "angle": 0.0
+      },
+      "points": [
+        {
+          "id": "62267bb46237452093adb4ccec46b977",
+          "name": "Ceiling light",
+          "x": 0.68393536121673,
+          "y": 0.5665399239543726
+        }
+      ],
+      "areas": [
+        {
+          "id": "5c8f015d9a284026a6a54b46eb0ed877",
+          "name": "Region 1",
+          "x": 0.5727186311787071,
+          "y": 0.3650190114068441,
+          "x2": 0.7937262357414449,
+          "y2": 0.923954372623574
+        }
+      ],
+      "camera_id": "USB\\VID_3474&PID_4962\\YFDVS000000000001"
+    },
+    "error": null,
+    "finished_utc": "2026-09-07T19:51:55.675295+00:00"
+  }
+}
