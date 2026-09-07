@@ -1,4 +1,4 @@
-# Thermal Lab desktop — DEV3
+# Thermal Lab desktop — DEV4
 
 Launch `thermal-lab` after `python -m pip install ".[desktop]"`, or run
 `python scripts/run_thermal_lab.py` from the repository. Requires Windows x64
@@ -80,11 +80,44 @@ Display frames may be skipped when rendering falls behind; accepted recording
 frames are queued separately and queue/storage failures are surfaced.
 
 The recording is radiometric numerical data, **not continuous optical video**.
-Only the first/last full native buffers are retained. Optical video, graphical
-playback, synchronized video export and device exposure timestamps remain future
+Only the first/last full native buffers are retained. Optical video,
+synchronized video export and device exposure timestamps remain future
 work. Use `python scripts/verify_recording.py SESSION_DIRECTORY` for independent
 numerical verification. Only `COMPLETE` manifests represent finalized sessions;
 `FAILED` and unfinished `RECORDING` sessions remain incomplete.
+
+## Review and temperature histories
+
+**Review recordings** opens an independent offline player. If the current window
+has a stopped recording, it opens that session; otherwise choose **Open recording**
+and select its folder. You can also run `thermal-lab-review` after installation,
+or `python -m thermal_lab.review --session PATH` directly from the repository.
+Review does not acquire a camera and can run alongside live windows.
+
+Play/Pause uses the recorded host-arrival timeline, with 0.25× through 4× speeds.
+Previous/Next steps one frame; the slider seeks by frame and clicking the history
+graph seeks by elapsed time. Rendering can skip frames to keep up with playback
+time; individual stepping still accesses every saved frame. The image uses the
+recorded temperature grid and recorded point/region geometry. Palettes and view
+rotation change only rendering. Hover over a pixel to inspect its saved value.
+
+Histories load in the background and validate recorded measurements against the
+numerical grids. The history list provides point values and region minimum,
+mean and maximum. A line breaks when a measurement is missing or its geometry
+changes. The list uses its most recent recorded name; the image/table retain
+the name recorded at the selected frame. No interpolation fills missing samples.
+
+**Export history** writes all histories into a new UTF-8 CSV, with camera/source,
+stable measurement ID, most recent name, statistic, zero-based frame index,
+elapsed seconds, Celsius value and geometry. Existing files are not overwritten.
+The numerical values preserve stored precision, independent of display rounding.
+
+This first player accepts COMPLETE single-camera 256×192 archives with consistent
+indexes/counts and validated frame identities. Incomplete sessions and corrupt
+indexes are rejected; later frame/history errors are surfaced. Indexes are limited
+to one million entries and histories to two million scalar samples. This is
+recorded thermal review, not optical video, re-analysis with newly drawn regions,
+multi-session comparison, or physical-exposure synchronization.
 
 Temperatures are apparent Celsius values without host emissivity/environment
 correction. Absolute accuracy and physical thermal/optical exposure pairing

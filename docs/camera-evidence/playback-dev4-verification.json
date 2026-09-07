@@ -1,0 +1,41 @@
+{
+  "status": "PASS",
+  "sessions": [
+    {
+      "session": "20260907-133454-6b6c4f",
+      "frames": 1211,
+      "series": 1,
+      "csv_rows": 1211,
+      "first_last_pixels_exact": true,
+      "seek_exact": true,
+      "all_recorded_measurements_recomputed": true,
+      "csv_values_exact": true,
+      "source_files_unchanged": true,
+      "source_sha256": {
+        "camera-session.json": "58d597a7a7da97204d96b0c892dbeb548249a119a8c61d71987bf8f76b699281",
+        "first.frame": "3cde5c9ced1cd725d70d523436016ffa43d47aae159aaf6a27c1805279243a9d",
+        "last.frame": "3b0009014b4fc9f1591adcc36439895adf4176aee44db1bf77def7b2510b6768",
+        "thermal.idx": "f89cbf9557cb5be6e14e2a5e8125d828a3e7e27f2175485b46ffa3ec00ad252e",
+        "thermal.jsonl.gz": "06f5fd0754272a1a98a20797e09afe72c565ed46c08aaa069a8e5407a3caf27e"
+      }
+    },
+    {
+      "session": "20260907-133339-c9c4e1",
+      "frames": 2771,
+      "series": 4,
+      "csv_rows": 11084,
+      "first_last_pixels_exact": true,
+      "seek_exact": true,
+      "all_recorded_measurements_recomputed": true,
+      "csv_values_exact": true,
+      "source_files_unchanged": true,
+      "source_sha256": {
+        "camera-session.json": "7c12a57a9699f31acbe41243325d933cd9077602bf7176a04c34474b72a8246a",
+        "first.frame": "66edc9135356a7f3d6a94acf785afe79ebed0354734d0167c0aad69d2bef83e7",
+        "last.frame": "365929608ae790791bc86e9ffdd6ee0667b1ec7c769470844c1ee1f3294faf39",
+        "thermal.idx": "d678089eb9b9552f079031e0469ca6aa12740c45a4315dd82684db76a2908f4b",
+        "thermal.jsonl.gz": "18211ad4aa2bfc7771b722a11249791867286ca880b9b30af1e914c7659f33eb"
+      }
+    }
+  ]
+}

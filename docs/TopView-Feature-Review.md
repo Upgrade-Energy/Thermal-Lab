@@ -1,5 +1,9 @@
 # TopView feature review and Thermal Lab priorities
 
+DEV4 adds thermal recording playback, recorded measurement histories and CSV
+export; see [playback verification](Playback-Verification.md). The historical
+feature comparison below remains a record of the initial review.
+
 Update: the first native live workspace is now implemented in DEV2. See the
 [desktop guide](Desktop-Guide.md) and [verification results](Desktop-Verification.md).
 The comparison below retains the pre-implementation baseline and proposed scope.

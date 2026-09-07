@@ -4,12 +4,13 @@ Standalone thermal camera capture, numerical measurements and recording.
 **Power Lab is not required.** This repository owns thermal-camera development;
 Power Lab can integrate with it later through a separate, versioned interface.
 
-Version 0.1.0 DEV3 supports independent windows for multiple TOPDON TC001 Max
+Version 0.1.0 DEV4 adds offline thermal playback, recorded temperature-history
+plots and CSV export. It also supports independent windows for multiple TOPDON TC001 Max
 cameras, with verified Windows device selection and separate measurement layouts.
 The native interface includes thermal/optical/blended/side-by-side views, optical alignment,
 named temperature points and rectangles, palettes, and numerical recording.
 USB diagnostics and TopView CSV import remain available as command-line tools.
-Graphical playback and continuous optical-video recording are still pending.
+Continuous optical-video recording and optical playback are still pending.
 
 See the [TopView feature comparison and proposed UI priorities](docs/TopView-Feature-Review.md)
 for overlay alignment, precise measurement placement and recording/playback scope.
@@ -32,6 +33,21 @@ controller paths; the tested shared hub could not sustain both streams.
 TopView itself must be closed. See the [desktop guide](docs/Desktop-Guide.md).
 See [DEV3 hardware verification](docs/Desktop-DEV3-Verification.md) for the two-camera
 recording checks and remaining limits.
+
+## Review a recording
+
+Choose **Review recordings** in the live app, or launch the review interface
+without connecting any camera:
+
+```powershell
+python -m thermal_lab.review --session recordings/session-01
+```
+
+After installation, `thermal-lab-review` launches the same player. Open a
+finalized session folder, play/pause, step frames, drag the timeline or click a
+history plot to seek. Choose a point or region statistic from the history list.
+**Export history** writes all recorded measurement histories to a new CSV file.
+The source recording stays unchanged. See [playback verification](docs/Playback-Verification.md).
 
 The desktop uses NumPy and Pillow; the original capture/import CLI remains
 standard-library-only. No Power Lab application or Windows SDK is required.

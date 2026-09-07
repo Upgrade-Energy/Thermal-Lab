@@ -50,7 +50,7 @@ class Desktop:
         self.name=tk.StringVar();self.alignment={k:tk.StringVar(value=str(v)) for k,v in self.settings['alignment'].items()}
         header=ttk.Frame(root,padding=(18,12));header.pack(fill='x')
         ttk.Label(header,text='THERMAL LAB',font=('Segoe UI',17,'bold')).pack(side='left')
-        ttk.Label(header,text='LIVE INSPECTION  /  DEV3',foreground='#8ba4be').pack(side='left',padx=22)
+        ttk.Label(header,text='LIVE INSPECTION  /  DEV4',foreground='#8ba4be').pack(side='left',padx=22)
         self.connect_button=ttk.Button(header,text='Connect camera',command=self.connect);self.connect_button.pack(side='right')
         self.record_button=ttk.Button(header,text='Record temperatures',command=self.toggle_record,state='disabled');self.record_button.pack(side='right',padx=8)
         connection=ttk.Frame(root,padding=(18,0,18,10));connection.pack(fill='x')
@@ -63,6 +63,7 @@ class Desktop:
         self.camera_box.pack(side='left',fill='x',expand=True,padx=10)
         self.camera_box.bind('<<ComboboxSelected>>',lambda e:self.select_camera_layout())
         self.refresh_button=ttk.Button(cameras,text='Refresh',command=self.refresh_cameras);self.refresh_button.pack(side='left')
+        ttk.Button(cameras,text='Review recordings',command=self.review_recordings).pack(side='left',padx=5)
         ttk.Button(cameras,text='Open another camera window',command=self.another_camera).pack(side='left',padx=8)
         ttk.Label(root,textvariable=self.status,padding=(18,9),foreground='#72d7c5').pack(fill='x')
         body=ttk.Panedwindow(root,orient='horizontal');body.pack(fill='both',expand=True,padx=12,pady=8)
@@ -146,6 +147,12 @@ class Desktop:
         command=[sys.executable,'-m','thermal_lab.desktop','--topview-directory',self.path.get(),
                  '--recordings',str(self.args.recordings),'--workspace',str(self.args.workspace)]
         if others:command+=['--camera-id',others[0]]
+        subprocess.Popen(command,cwd=str(Path(__file__).resolve().parents[1]),
+                         creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
+
+    def review_recordings(self):
+        command=[sys.executable,'-m','thermal_lab.review','--recordings',str(self.args.recordings)]
+        if self.record_path and not self.recording:command+=['--session',str(self.record_path)]
         subprocess.Popen(command,cwd=str(Path(__file__).resolve().parents[1]),
                          creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
 
