@@ -32,6 +32,8 @@ $items = @(Get-PnpDevice -PresentOnly | Where-Object {
     [ordered]@{
         instance_id = $device.InstanceId
         pdo_name = $props['DEVPKEY_Device_PDOName']
+        parent = $props['DEVPKEY_Device_Parent']
+        location_paths = $props['DEVPKEY_Device_LocationPaths']
         name = $device.FriendlyName
         status = $device.Status
         problem_code = $props['DEVPKEY_Device_ProblemCode']
@@ -92,6 +94,10 @@ def winusb_interfaces():
     usb.WinUsb_Initialize.restype = wt.BOOL
     usb.WinUsb_Free.argtypes = [wt.HANDLE]
     usb.WinUsb_Free.restype = wt.BOOL
+    usb.WinUsb_QueryDeviceInformation.argtypes = [wt.HANDLE, wt.ULONG, ctypes.POINTER(wt.ULONG), wt.LPVOID]
+    usb.WinUsb_QueryDeviceInformation.restype = wt.BOOL
+    usb.WinUsb_GetDescriptor.argtypes = [wt.HANDLE, ctypes.c_ubyte, ctypes.c_ubyte, ctypes.c_ushort, wt.LPVOID, wt.ULONG, ctypes.POINTER(wt.ULONG)]
+    usb.WinUsb_GetDescriptor.restype = wt.BOOL
     usb.WinUsb_QueryInterfaceSettings.argtypes = [wt.HANDLE, ctypes.c_ubyte, ctypes.POINTER(InterfaceDescriptor)]
     usb.WinUsb_QueryInterfaceSettings.restype = wt.BOOL
     usb.WinUsb_QueryPipe.argtypes = [wt.HANDLE, ctypes.c_ubyte, ctypes.c_ubyte, ctypes.POINTER(Pipe)]
@@ -113,6 +119,17 @@ def winusb_interfaces():
         try:
             if not usb.WinUsb_Initialize(handle, ctypes.byref(interface)):
                 raise ctypes.WinError(ctypes.get_last_error())
+            # Standard metadata only. WinUSB's speed code 3 means high-speed
+            # OR HIGHER; preserve the code and descriptor instead of guessing.
+            speed = ctypes.c_ubyte()
+            length = wt.ULONG(1)
+            if usb.WinUsb_QueryDeviceInformation(interface, 1, ctypes.byref(length), ctypes.byref(speed)):
+                item['winusb_speed_code'] = speed.value
+            device_descriptor = (ctypes.c_ubyte * 18)()
+            returned = wt.ULONG()
+            if usb.WinUsb_GetDescriptor(interface, 1, 0, 0, device_descriptor, 18, ctypes.byref(returned)) and returned.value == 18:
+                item['usb_version_bcd'] = f'{device_descriptor[3]:02x}{device_descriptor[2]:02x}'
+                item['device_descriptor_hex'] = bytes(device_descriptor).hex()
             descriptor = InterfaceDescriptor()
             stage = 'WinUsb_QueryInterfaceSettings'
             if not usb.WinUsb_QueryInterfaceSettings(interface, 0, ctypes.byref(descriptor)):

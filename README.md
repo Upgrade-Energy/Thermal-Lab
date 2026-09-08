@@ -35,6 +35,8 @@ Connect camera. **Open another camera window** selects the other connected
 camera in an independent window; connect and record there separately. Each window
 can close without stopping the other. For two Max cameras, use separate USB
 controller paths; the tested shared hub could not sustain both streams.
+The [shared-hub retest](docs/Shared-Hub-Verification.md) confirms the bandwidth
+constraint and shows that the tested native FPS request does not reduce traffic.
 TopView itself must be closed. See the [desktop guide](docs/Desktop-Guide.md).
 See [DEV5 optical verification](docs/Optical-Recording-Verification.md) for the
 two-camera recording checks and remaining limits.
