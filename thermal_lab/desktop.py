@@ -51,6 +51,7 @@ class Desktop:
         self.info=tk.StringVar(value='Apparent temperature · absolute accuracy unqualified')
         self.cursor=tk.StringVar(value='Choose Point or Rectangle, then mark the image')
         self.name=tk.StringVar();self.alignment={k:tk.StringVar(value=str(v)) for k,v in self.settings['alignment'].items()}
+        self.alignment_sliders={k:tk.DoubleVar(value=v) for k,v in self.settings['alignment'].items()}
         header=ttk.Frame(root,padding=(18,12));header.pack(fill='x')
         ttk.Label(header,text='THERMAL LAB',font=('Segoe UI',17,'bold')).pack(side='left')
         ttk.Label(header,text='LIVE INSPECTION  /  DEV10',foreground='#8ba4be').pack(side='left',padx=22)
@@ -94,12 +95,15 @@ class Desktop:
         ttk.Label(right,text='Moves the optical layer; thermal pixels stay fixed.',wraplength=320,foreground='#9aafc3').pack(anchor='w',pady=(4,8))
         ttk.Label(right,text='Thermal opacity').pack(anchor='w')
         ttk.Scale(right,from_=0,to=1,variable=self.opacity,command=lambda _:self.render()).pack(fill='x')
-        for key,label in [('dx','X offset · thermal pixels'),('dy','Y offset · thermal pixels'),('scale','Optical scale'),('angle','Optical rotation · degrees')]:
+        for key,label in [('dx','X offset · px'),('dy','Y offset · px'),('scale','Optical scale'),('angle','Rotation · °')]:
+            low,high,step={'dx':(-512,512,1),'dy':(-384,384,1),'scale':(.1,8,.02),'angle':(-180,180,1)}[key]
             row=ttk.Frame(right);row.pack(fill='x',pady=3)
-            ttk.Label(row,text=label).pack(side='left')
-            spin=ttk.Spinbox(row,textvariable=self.alignment[key],from_=.1 if key=='scale' else -512,
-                             to=8 if key=='scale' else 512,increment=.02 if key=='scale' else 1,width=8,command=self.apply_alignment)
+            ttk.Label(row,text=label,width=17).pack(side='left')
+            spin=ttk.Spinbox(row,textvariable=self.alignment[key],from_=low,
+                             to=high,increment=step,width=8,command=self.apply_alignment)
             spin.pack(side='right');spin.bind('<Return>',lambda e:self.apply_alignment());spin.bind('<FocusOut>',lambda e:self.apply_alignment())
+            ttk.Scale(row,from_=low,to=high,variable=self.alignment_sliders[key],
+                      command=lambda value,k=key:self.slide_alignment(k,value)).pack(side='left',fill='x',expand=True,padx=5)
         row=ttk.Frame(right);row.pack(fill='x',pady=6)
         ttk.Checkbutton(row,text='Lock alignment',variable=self.locked).pack(side='left')
         ttk.Button(row,text='Reset',command=self.reset_alignment).pack(side='right')
@@ -430,13 +434,20 @@ class Desktop:
     def fit(self):self.zoom=1;self.pan=[0,0];self.render()
 
     def sync_alignment(self):
-        for key,var in self.alignment.items():var.set(f"{self.settings['alignment'][key]:.3f}")
+        for key,var in self.alignment.items():
+            var.set(f"{self.settings['alignment'][key]:.3f}")
+            self.alignment_sliders[key].set(self.settings['alignment'][key])
+
+    def slide_alignment(self,key,value):
+        if self.locked.get():self.sync_alignment();return
+        self.settings['alignment'][key]=float(value)
+        self.sync_alignment();self.changed();self.render()
 
     def apply_alignment(self):
         if self.locked.get():self.sync_alignment();return
         try:
             candidate=dict(self.settings,alignment={key:var.get() for key,var in self.alignment.items()})
-            self.settings=validate_settings(candidate);self.changed();self.render()
+            self.settings=validate_settings(candidate);self.sync_alignment();self.changed();self.render()
         except Exception as exc:self.status.set(str(exc))
 
     def reset_alignment(self):

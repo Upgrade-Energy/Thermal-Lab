@@ -35,9 +35,11 @@ both displayed layers together; it never rotates stored temperature arrays.
 Use the mouse wheel to zoom, Pan to drag the view, and Fit to reset the viewport.
 
 Thermal opacity controls the blend. **Align optical** lets you drag the optical
-layer while thermal pixels and measurements stay fixed. X/Y offsets are in
-native thermal pixels, before display rotation; scale and angle adjust only the
-optical layer. Numeric edits apply with Enter or when leaving the field. Lock
+layer while thermal pixels and measurements stay fixed. Drag the X/Y, scale and
+rotation sliders to adjust the overlay by eye; the adjacent number fields remain
+available for fine adjustments. X/Y offsets are in native thermal pixels, before
+display rotation; scale and angle adjust only the optical layer. Numeric edits
+apply with Enter or when leaving the field and keep the sliders synchronized. Lock
 alignment prevents changes; Reset restores the default optical transform.
 This initial transform is not a factory registration calibration. Adjust it
 for the target plane and distance; objects at different depths may not align.
