@@ -1,4 +1,4 @@
-# Thermal Lab desktop — DEV11
+# Thermal Lab desktop — DEV12
 
 Launch `thermal-lab` after `python -m pip install ".[desktop]"`, or run
 `python scripts/run_thermal_lab.py` from the repository. Requires Windows x64
@@ -45,6 +45,9 @@ This initial transform is not a factory registration calibration. Adjust it
 for the target plane and distance; objects at different depths may not align.
 
 ### Auto alignment and working distance
+
+For the experimental continuous regional preview and measured stereo calibration,
+use **Smart / calibrate…** and follow the [Smart overlay guide](Smart-Overlay.md).
 
 Open **Auto-align / distance…** next to Lock alignment. The tool freezes a fresh
 thermal/optical pair while live acquisition continues. Keep the target stationary

@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "upgrade-energy-thermal-lab"
-version = "0.1.0.dev11"
+version = "0.1.0.dev12"
 description = "Standalone thermal camera capture, numerical measurements and recording"
 requires-python = ">=3.12"
 dependencies = []
 
 [project.optional-dependencies]
-desktop = ["numpy>=2.0,<3", "Pillow>=11,<13", "imageio-ffmpeg>=0.6,<0.7", "lz4>=4.4,<5"]
+desktop = ["numpy>=2.0,<3", "Pillow>=11,<13", "imageio-ffmpeg>=0.6,<0.7", "lz4>=4.4,<5", "opencv-python-headless>=4.12,<5"]
 
 [project.scripts]
 thermal-lab = "thermal_lab.desktop:main"

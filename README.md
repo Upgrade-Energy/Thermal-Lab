@@ -4,7 +4,10 @@ Standalone thermal camera capture, numerical measurements and recording.
 **Power Lab is not required.** This repository owns thermal-camera development;
 Power Lab integrates through an optional, versioned local interface.
 
-Version 0.1.0 DEV11 adds a [target auto-alignment tool and near/far profiles](docs/Desktop-Guide.md#auto-alignment-and-working-distance),
+Version 0.1.0 DEV12 adds an experimental [continuous regional overlay and measured camera calibration workflow](docs/Smart-Overlay.md).
+Unsupported regions remain thermal-only. Physical calibration and useful real-scene
+alignment accuracy are still pending a suitable thermal/optical target.
+It includes a [target auto-alignment tool and near/far profiles](docs/Desktop-Guide.md#auto-alignment-and-working-distance),
 with frozen previews, paired-box guidance and working-distance interpolation.
 Automatic matching is experimental; every result requires visual review.
 See [alignment verification and limits](docs/Auto-Alignment-Verification.md).
