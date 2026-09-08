@@ -56,6 +56,15 @@ class IntegrationTests(unittest.TestCase):
         state=self.service.state()['cameras'][0]
         self.assertFalse(state['fresh']);self.assertEqual(state['measurements'],{})
         with self.assertRaisesRegex(ValueError,'Fresh'):self.service.start(dict(session_id=self.owner,run_id='c'*32,run_origin_monotonic=time.monotonic()))
+    def test_preview_requires_owner_and_rejects_stale_samples(self):
+        from thermal_lab.integration_review import camera_view
+        camera=self.ready()
+        request=dict(session_id=self.owner,camera_id='camera-a',mode='Thermal')
+        with self.assertRaisesRegex(ValueError,'session'):camera_view(self.service,dict(request,session_id='b'*32))
+        result=camera_view(self.service,request)
+        self.assertTrue(result['fresh']);self.assertEqual(len(result['frame']['temperatures']),49152)
+        camera['sample']['received_at']-=2
+        with self.assertRaisesRegex(ValueError,'stale'):camera_view(self.service,request)
     def test_run_idempotency_and_stop_acknowledgement(self):
         camera=self.ready();body=dict(session_id=self.owner,run_id='c'*32,run_origin_monotonic=time.monotonic())
         first=self.service.start(body);self.assertEqual(first,self.service.start(body))

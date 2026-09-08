@@ -113,8 +113,29 @@ The crash run `244d6a4e95534d6a9f8bab3ac3dcf8c7` faulted the simulation and reta
 both incomplete archive paths. Both orphan camera workers exited. The restart
 run `99605a4afbca4a08ad05878645d41e96` recorded another 159 pairs per camera and
 completed. No power instrument was commanded. Physical unplug tests, long-run
-integration qualification, external pre-event buffers, browser UI integration,
+integration qualification, external pre-event buffers,
 absolute temperature calibration and physical protection remain pending.
+
+## Power Lab browser views
+
+Authenticated `POST /v1/view` accepts `camera_id` and `mode` (Thermal, Optical or
+Blend). Live requests require the owning `session_id` and a fresh camera sample.
+Recorded requests instead require a 32-hex `run_id` and finite `elapsed_s` on
+Power Lab's shared run clock. Archive lookup is confined to the service's
+recording root and verifies camera/run identities and COMPLETE manifests. It
+works after service restart without relying on in-memory run history.
+
+The reply contains the complete numerical frame and a lossless 1024 × 768 PNG
+display image. Optical conversion/alignment are display-only. Stored original
+YUYV and temperatures remain unchanged. Seeking uses the camera's recorded time
+offset and reports the actual frame time and difference from the requested time;
+it does not claim simultaneous exposure. Early/late seeks clamp to the first/last
+frame with the difference still visible.
+
+Power Lab proxies these calls through its session-authenticated HTTP server.
+Service credentials remain server-side, and browser origins remain rejected by
+Thermal Lab. Rendering happens outside the acquisition lock; preview requests do
+not renew camera ownership leases or change recording settings.
 
 Thermal Lab: **64 tests passed**. Power Lab: **92 of 93 tests passed**, including
 all four new integration tests. The legacy `test_browser_loss_stops` assertion
@@ -125,3 +146,17 @@ were not changed.
 Machine-readable evidence: `docs/camera-evidence/powerlab-integration-dev9.json`.
 Repeat the hardware run with Power Lab's `scripts/test_thermal_integration.py`,
 then audit its exported ZIP with `scripts/verify_powerlab_integration.py` here.
+
+## Browser qualification, DEV10
+
+Power Lab browser selection, measurement settings, preparation, recording, live
+blended previews, linked Thermal/Optical/Blend review, event seeking, play/pause
+and numerical pixel inspection were tested with both real cameras. Service loss
+cleared the browser frames; restarting the service restored archived review.
+The complete run retained 1,125 / 1,127 paired frames at 24.85 / 24.89 fps.
+All 110,690,304 temperatures, 2,252 optical hashes and 386 Power Lab observations
+passed audit; native first/last buffers matched and source files were unchanged.
+Evidence: "docs/camera-evidence/powerlab-browser-dev10.json". Screenshots and
+full camera recordings remain local. Thermal Lab: 66 tests pass. Power Lab: 95
+tests pass, plus the DOM/API camera-selection workflow. No power instruments
+were commanded. Browser refresh rate is independent of native recording rate.

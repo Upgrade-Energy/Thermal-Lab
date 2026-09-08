@@ -1,0 +1,44 @@
+{
+  "status": "PASS",
+  "run_id": "1188a045356e49bc810a94150dc7c838",
+  "electrical_source": "SIMULATION",
+  "electrical_samples": 193,
+  "camera_sample_comparisons": 386,
+  "cameras": [
+    {
+      "camera_id": "USB\\VID_3474&PID_4962\\YFDVS000000000001",
+      "frames": 1125,
+      "temperature_values_checked": 55296000,
+      "fps": 24.848565238537176,
+      "duration_s": 45.23400000000038,
+      "optical_hashes_checked": 1125,
+      "source_hashes": {
+        "camera-session.json": "3b5af5efaacfb5f435c1662a7bc6511643b7bc591ac0adfbb568c212895224be",
+        "first.frame": "a3898aff441eaf39f038a6071a3e8e209a7d5190feee0899db686146ad89e0da",
+        "last.frame": "601fd0517cad6d5e3be42c1cda1cf246beb02a11b3c2f18450edef2e713bedbc",
+        "optical.bin": "299d3559e37a2b0fa972d607cb03268e325dd3a45c6cba7be4e67f2b68957b6e",
+        "optical.idx": "087e29dc4090f385749f0467b306de0c65605471ad3bc7c70a4923a0c8ad2e4a",
+        "thermal.idx": "322537cd0fde15c63b804c8fb2d9915dfec6de8e25ccf07d16ec4b7402e9d5cb",
+        "thermal.jsonl.gz": "3af9c789576b7ee68663cb87efc3969ad08b941ba769d62041d7db5bd1830f43"
+      }
+    },
+    {
+      "camera_id": "USB\\VID_3474&PID_4962\\6&32455EC1&0&2",
+      "frames": 1127,
+      "temperature_values_checked": 55394304,
+      "fps": 24.892229468331724,
+      "duration_s": 45.23500000000058,
+      "optical_hashes_checked": 1127,
+      "source_hashes": {
+        "camera-session.json": "dd4fb3a6adfab96345712d4d47b463bdd657e798bda2ab41616296d7c1135b07",
+        "first.frame": "e471914942ee02f41fee7e908c45a56880338107bef18fc9d8d2439a29d18869",
+        "last.frame": "4ea793532f592dfcb5693613014f3da9623ba5a4a5d2dd5bce9c49dc2c23a565",
+        "optical.bin": "4b9250d36e83d7f566c5c339b15ab2d0a5ea67b4956c779c850293b3298dbe12",
+        "optical.idx": "737439a5e94237b2f3e8587648a728bc4666f7d2bbf2447cf80bd2fe02af4302",
+        "thermal.idx": "c101a582b214290d9daacc62892e9708b597df1ed74acafbc7c36f6df233bf56",
+        "thermal.jsonl.gz": "ac36de30b2e263af02a3c455296df9fbd3845452818551d3fd6b5f8a8605fe23"
+      }
+    }
+  ],
+  "source_files_unchanged": true
+}

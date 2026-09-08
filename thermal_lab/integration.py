@@ -224,6 +224,9 @@ class Handler(BaseHTTPRequestHandler):
                 if not 0<length<=65536:raise ValueError('Request must be at most 64 KiB')
                 body=json.loads(self.rfile.read(length))
                 if not isinstance(body,dict):raise ValueError('JSON object required')
+                if self.path=='/v1/view':
+                    from .integration_review import camera_view
+                    self.reply(200,camera_view(service,body));return
                 if self.path=='/v1/shutdown':
                     with service.lock:
                         if service.owner or service.active:raise ValueError('Disconnect cameras before shutting down the service')
