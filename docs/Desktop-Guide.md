@@ -83,13 +83,29 @@ frames are queued separately and queue/storage failures are surfaced.
 only numerical thermal frames. The option is fixed for the session. When enabled,
 every accepted thermal frame has a lossless 1024×768 YUYV optical plane in
 `optical.bin`, with timestamp, sequence, offset and SHA-256 in `optical.idx`.
-This uses about 2.4 GB/minute per camera at 25 fps, plus thermal data. Keep enough
-disk space for the intended duration. Storage or queue failures fail the session.
+DEV8 uses lossless LZ4 compression of the original YUYV bytes, with no resizing,
+frame-rate reduction or pixel changes. Savings depend on the scene; budget at
+least the uncompressed 2.4 GB/minute per camera at 25 fps, plus thermal data.
+The reader verifies the original optical SHA-256 after bounded decompression.
+Existing raw archives remain readable. Storage or queue failures fail the session.
 The first/last full native buffers are also retained for independent comparison.
 This is an app-native video archive; recording review can export a rendered MP4.
 Use `python scripts/verify_recording.py SESSION_DIRECTORY` to check all numerical
 frames and optical pair hashes. Only `COMPLETE` manifests represent finalized sessions;
 `FAILED` and unfinished `RECORDING` sessions remain incomplete.
+
+The connection line identifies cameras sharing a hub's upstream USB path,
+including nested hubs. For two TC001 Max cameras at full quality, use separate
+USB controllers. Different root ports on one controller remain unverified.
+Click **Refresh** after moving cables; this is a topology check, not a bandwidth
+reservation or proof that a camera will stream.
+
+Camera errors immediately clear the image and temperature readings. A stream
+that stops delivering previews for eight seconds is terminated so the UI remains
+usable; any unfinished recording stays incomplete. Reconnect the selected camera
+to recover, then start a new recording. Failed recordings are never silently
+resumed or spliced into a new stream. If Windows assigns a new location-based
+camera identity after moving ports, select it and verify its measurement layout.
 
 ## Review and temperature histories
 

@@ -8,7 +8,7 @@ from thermal_lab.optical_recording import OpticalRecording,OPTICAL_OFFSET
 if not __debug__: raise SystemExit("Verification requires assertions enabled; do not use python -O")
 root=Path(sys.argv[1]);entries=list(FRAME_INDEX.iter_unpack((root/'thermal.idx').read_bytes()));times=[];first=None;last=None
 manifest=json.loads((root/'camera-session.json').read_text())
-optical=OpticalRecording(root,entries) if manifest.get('optical_video_recorded') else None
+optical=OpticalRecording(root,entries,manifest['optical_codec']) if manifest.get('optical_video_recorded') else None
 optical_hashes=set()
 with (root/'thermal.jsonl.gz').open('rb') as f:
  for index,(elapsed,offset,size) in enumerate(entries):

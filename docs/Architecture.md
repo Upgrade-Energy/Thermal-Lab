@@ -23,6 +23,15 @@ recording and identity-keyed layout. Closing one does not terminate another.
 Startup read retries are limited to two and stop after the first accepted frame;
 an established-stream failure is reported instead of splicing a restarted stream
 into a recording. The desktop bounds native startup and shutdown hangs.
+DEV8 also bounds established preview silence to eight seconds and immediately
+invalidates displayed frames/measurements on an error or worker exit.
+
+Optical recording compresses each original YUYV422 plane independently with
+LZ4 blocks (no stored size header), indexed by its compressed length. The
+manifest codec is `lz4-yuyv422-v1`; SHA-256 remains over uncompressed original
+bytes. Reads bound decompression to 1,572,864 bytes and require the exact length
+and hash. Legacy `raw-yuyv422-v1` and experimental `zlib-yuyv422-v1` remain
+readable. A bounded writer queue fails explicitly rather than dropping frames.
 
 Archive compatibility is preserved during extraction. No live IPC interface is
 implemented yet. Historical Power Lab camera copies are migration references;

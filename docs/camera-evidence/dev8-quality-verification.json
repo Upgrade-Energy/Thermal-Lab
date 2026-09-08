@@ -1,0 +1,611 @@
+{
+  "status": "PASS",
+  "verified_utc": "2026-09-08T02:15:41.712398+00:00",
+  "version": "0.1.0.dev8",
+  "codec": "lz4-yuyv422-v1",
+  "lz4_version": "4.4.5",
+  "usb_diagnostics": {
+    "schema_version": 1,
+    "utc": "2026-09-08T02:02:51.379952+00:00",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "C:\\Users\\MatthewBarnard\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+    "scope": "TC001 Max only; standard USB metadata; no vendor commands",
+    "devices": [
+      {
+        "instance_id": "USB\\VID_3474&PID_4962\\YFDVS000000000001",
+        "pdo_name": "\\Device\\USBPDO-4",
+        "parent": "USB\\ROOT_HUB30\\5&64ae7e1&0&0",
+        "location_paths": [
+          "PCIROOT(0)#PCI(0801)#PCI(0004)#USBROOT(0)#USB(2)",
+          "ACPI(_SB_)#ACPI(PCI0)#ACPI(GP17)#ACPI(XHC1)#ACPI(RHUB)#ACPI(PRT2)"
+        ],
+        "name": "TC001 Max",
+        "status": "OK",
+        "problem_code": 0,
+        "problem_status": null,
+        "service": "WinUSB",
+        "driver_inf": "oem95.inf",
+        "driver_version": "6.1.7600.16385",
+        "compatible_ids": [
+          "USB\\COMPAT_VID_3474&DevClass_00&SubClass_00&Prot00",
+          "USB\\COMPAT_VID_3474&DevClass_00&SubClass_00",
+          "USB\\COMPAT_VID_3474&DevClass_00",
+          "USB\\DevClass_00&SubClass_00&Prot_00",
+          "USB\\DevClass_00&SubClass_00",
+          "USB\\DevClass_00",
+          "USB\\COMPOSITE"
+        ]
+      },
+      {
+        "instance_id": "USB\\VID_3474&PID_4962\\6&32455EC1&0&2",
+        "pdo_name": "\\Device\\USBPDO-6",
+        "parent": "USB\\ROOT_HUB30\\5&23e317ad&0&0",
+        "location_paths": [
+          "PCIROOT(0)#PCI(0801)#PCI(0003)#USBROOT(0)#USB(2)",
+          "ACPI(_SB_)#ACPI(PCI0)#ACPI(GP17)#ACPI(XHC0)#ACPI(RHUB)#ACPI(PRT2)"
+        ],
+        "name": "TC001 Max",
+        "status": "OK",
+        "problem_code": 0,
+        "problem_status": null,
+        "service": "WinUSB",
+        "driver_inf": "oem95.inf",
+        "driver_version": "6.1.7600.16385",
+        "compatible_ids": [
+          "USB\\COMPAT_VID_3474&DevClass_00&SubClass_00&Prot00",
+          "USB\\COMPAT_VID_3474&DevClass_00&SubClass_00",
+          "USB\\COMPAT_VID_3474&DevClass_00",
+          "USB\\DevClass_00&SubClass_00&Prot_00",
+          "USB\\DevClass_00&SubClass_00",
+          "USB\\DevClass_00",
+          "USB\\COMPOSITE"
+        ]
+      }
+    ],
+    "interfaces": [
+      {
+        "path": "\\\\?\\USB#VID_3474&PID_4962#YFDVS000000000001#{fe7a2189-e1fa-ae49-d5c9-603519b1cdbb}",
+        "opened": true,
+        "endpoints": [
+          {
+            "type": 2,
+            "id": 130,
+            "max_packet_size": 512,
+            "interval": 0
+          },
+          {
+            "type": 2,
+            "id": 5,
+            "max_packet_size": 512,
+            "interval": 0
+          }
+        ],
+        "winusb_speed_code": 3,
+        "usb_version_bcd": "0200",
+        "device_descriptor_hex": "12010002ef02014074346249000201020301",
+        "interface": {
+          "length": 9,
+          "type": 4,
+          "number": 0,
+          "alternate": 0,
+          "endpoint_count": 2,
+          "interface_class": 255,
+          "subclass": 240,
+          "protocol": 0,
+          "string_index": 4
+        },
+        "associated_interfaces": [
+          {
+            "length": 9,
+            "type": 4,
+            "number": 1,
+            "alternate": 0,
+            "endpoint_count": 0,
+            "interface_class": 255,
+            "subclass": 240,
+            "protocol": 1,
+            "string_index": 5,
+            "endpoints": []
+          },
+          {
+            "length": 9,
+            "type": 4,
+            "number": 1,
+            "alternate": 1,
+            "endpoint_count": 2,
+            "interface_class": 255,
+            "subclass": 240,
+            "protocol": 1,
+            "string_index": 5,
+            "endpoints": [
+              {
+                "type": 2,
+                "id": 129,
+                "max_packet_size": 512,
+                "interval": 0
+              },
+              {
+                "type": 2,
+                "id": 4,
+                "max_packet_size": 512,
+                "interval": 0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "path": "\\\\?\\USB#VID_3474&PID_4962#6&32455ec1&0&2#{fe7a2189-e1fa-ae49-d5c9-603519b1cdbb}",
+        "opened": true,
+        "endpoints": [
+          {
+            "type": 2,
+            "id": 130,
+            "max_packet_size": 512,
+            "interval": 0
+          },
+          {
+            "type": 2,
+            "id": 5,
+            "max_packet_size": 512,
+            "interval": 0
+          }
+        ],
+        "winusb_speed_code": 3,
+        "usb_version_bcd": "0200",
+        "device_descriptor_hex": "12010002ef02014074346249000201020301",
+        "interface": {
+          "length": 9,
+          "type": 4,
+          "number": 0,
+          "alternate": 0,
+          "endpoint_count": 2,
+          "interface_class": 255,
+          "subclass": 240,
+          "protocol": 0,
+          "string_index": 4
+        },
+        "associated_interfaces": [
+          {
+            "length": 9,
+            "type": 4,
+            "number": 1,
+            "alternate": 0,
+            "endpoint_count": 0,
+            "interface_class": 255,
+            "subclass": 240,
+            "protocol": 1,
+            "string_index": 5,
+            "endpoints": []
+          },
+          {
+            "length": 9,
+            "type": 4,
+            "number": 1,
+            "alternate": 1,
+            "endpoint_count": 2,
+            "interface_class": 255,
+            "subclass": 240,
+            "protocol": 1,
+            "string_index": 5,
+            "endpoints": [
+              {
+                "type": 2,
+                "id": 129,
+                "max_packet_size": 512,
+                "interval": 0
+              },
+              {
+                "type": 2,
+                "id": 4,
+                "max_packet_size": 512,
+                "interval": 0
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "errors": [],
+    "capture_verified": false,
+    "temperatures_verified": false,
+    "recording_verified": false,
+    "status": "USB_ACCESS_VERIFIED"
+  },
+  "capture_result": {
+    "status": "CAPTURE_FINISHED",
+    "error": null,
+    "requested_seconds": 120,
+    "output": "C:\\Users\\MatthewBarnard\\Documents\\ChatGPT\\Thermal-Lab\\recordings\\lossless-20260907-lz4-dual"
+  },
+  "cameras": [
+    {
+      "verification": {
+        "status": "PASS",
+        "camera_id": "USB\\VID_3474&PID_4962\\YFDVS000000000001",
+        "frames": 3047,
+        "duration_s": 121.875,
+        "fps": 24.99282051282051,
+        "max_arrival_gap_s": 0.0470000000022992,
+        "median_arrival_gap_s": 0.0459999999984575,
+        "p99_arrival_gap_s": 0.0470000000022992,
+        "accepted_sequence_gaps": 0,
+        "optical_pairs_checked": 3047,
+        "unique_optical_frames": 3015,
+        "temperature_values_checked": 149766144,
+        "temperature_range_c": [
+          17.2875,
+          37.9125
+        ],
+        "history_values_checked": 15235,
+        "first_last_raw_exact": true,
+        "source_files_unchanged": 7,
+        "source_hashes": {
+          "camera-session.json": "e4395b00e45295dcf8a2c736ba93d6e6a34892fd698a394d0565d523dda3b77e",
+          "first.frame": "d363952716cd6569ee3db15c5e830fec779dd73910943d60d7fb09a80e0f1e61",
+          "last.frame": "28427f5cb2f751536dca963f65a081c98d5b77992fb68385eaa2d6688d7e5a73",
+          "optical.bin": "ba830f1920e20177c37e748779b10a74820379b216aae7841203e19ab1691947",
+          "optical.idx": "daa7165b8aca083ad1389636185381abcf7e4ebbd887113f6314fadc54b70efa",
+          "thermal.idx": "26eaa0cd1eaae9838aeae02e91dbbaaead539dc562c18434f44fd332640c8b49",
+          "thermal.jsonl.gz": "1df9cb224fa90726fb349afc4da045aaf50293f45fe6b497eefe6b0a598ea39b"
+        },
+        "mp4_frames_decoded": 3048,
+        "mp4_duration_s": 121.92,
+        "mp4_bytes": 14444177
+      },
+      "manifest": {
+        "status": "COMPLETE",
+        "source": "HARDWARE",
+        "camera_id": "USB\\VID_3474&PID_4962\\YFDVS000000000001",
+        "dll_sha256": "f7a745d1e056e1dcda6de43ee30483fa5490eeb535bc18bbbd7ff031fcf6d3e6",
+        "timestamp_basis": "host_monotonic_arrival",
+        "temperature_basis": "apparent_raw_kelvin_64",
+        "optical_video_recorded": true,
+        "device_dropped_frames": null,
+        "frames_written": 3047,
+        "started_utc": "2026-09-08T02:08:09.159220+00:00",
+        "initial_workspace": {
+          "schema": 1,
+          "alignment": {
+            "dx": 0.0,
+            "dy": 0.0,
+            "scale": 1.0,
+            "angle": 0.0
+          },
+          "points": [
+            {
+              "id": "center",
+              "name": "Center",
+              "x": 0.5,
+              "y": 0.5
+            },
+            {
+              "id": "upper",
+              "name": "Upper quarter",
+              "x": 0.25,
+              "y": 0.25
+            }
+          ],
+          "areas": [
+            {
+              "id": "region",
+              "name": "Center region",
+              "x": 0.4,
+              "y": 0.4,
+              "x2": 0.6,
+              "y2": 0.6
+            }
+          ],
+          "camera_id": "USB\\VID_3474&PID_4962\\YFDVS000000000001"
+        },
+        "optical_codec": "lz4-yuyv422-v1",
+        "optical_width": 1024,
+        "optical_height": 768,
+        "optical_frames_written": 3047,
+        "optical_pairing": "same_native_buffer; host_arrival; exposure_sync_unqualified",
+        "error": null,
+        "finished_utc": "2026-09-08T02:10:11.099392+00:00"
+      },
+      "events": {
+        "events": [
+          {
+            "kind": "connected",
+            "camera_id": "USB\\VID_3474&PID_4962\\YFDVS000000000001",
+            "startup_retries": 0
+          },
+          {
+            "kind": "recording_started",
+            "path": "recordings\\lossless-20260907-lz4-dual\\camera0"
+          },
+          {
+            "kind": "recording_finished",
+            "path": "recordings\\lossless-20260907-lz4-dual\\camera0",
+            "status": "COMPLETE",
+            "frames": 3047,
+            "error": null
+          },
+          {
+            "kind": "stopped"
+          }
+        ],
+        "exitcode": 0
+      },
+      "optical_uncompressed_bytes": 4792516608,
+      "optical_compressed_bytes": 3215685139,
+      "optical_reduction_percent": 32.901951061950285
+    },
+    {
+      "verification": {
+        "status": "PASS",
+        "camera_id": "USB\\VID_3474&PID_4962\\6&32455EC1&0&2",
+        "frames": 3048,
+        "duration_s": 121.92199999999866,
+        "fps": 24.99138793654987,
+        "max_arrival_gap_s": 0.0470000000022992,
+        "median_arrival_gap_s": 0.0459999999984575,
+        "p99_arrival_gap_s": 0.0470000000022992,
+        "accepted_sequence_gaps": 0,
+        "optical_pairs_checked": 3048,
+        "unique_optical_frames": 3016,
+        "temperature_values_checked": 149815296,
+        "temperature_range_c": [
+          21.6625,
+          31.725
+        ],
+        "history_values_checked": 15240,
+        "first_last_raw_exact": true,
+        "source_files_unchanged": 7,
+        "source_hashes": {
+          "camera-session.json": "43657645f694eb698798018d1dd48f3a4be923855a19c96a662b8c7ed99a7538",
+          "first.frame": "4ba936eeb760c5c6c60e8a308899f8a23f8e764cee38c777eb1a793a7a2cf14a",
+          "last.frame": "82a63e556406b457c8f86b0a2cb8d27c7a60b1a2e348a9f63216b265c2915fcc",
+          "optical.bin": "329135629b0654cc2630b01e5062f9937ac5f086fd5fa3c0731dc779b7d73531",
+          "optical.idx": "4456c00832aa4e385c08efb150471f78858bd3cb000bec5d2bcea2038d695b9c",
+          "thermal.idx": "a02e4492583752777ee70f6c247067f4b97e163e77b76a11c7aee24324659bd5",
+          "thermal.jsonl.gz": "8e0f77fbe33706734b5c961835afa24c036757551349498bd3cf376f9d0ec808"
+        },
+        "mp4_frames_decoded": 3050,
+        "mp4_duration_s": 122.0,
+        "mp4_bytes": 19638151
+      },
+      "manifest": {
+        "status": "COMPLETE",
+        "source": "HARDWARE",
+        "camera_id": "USB\\VID_3474&PID_4962\\6&32455EC1&0&2",
+        "dll_sha256": "f7a745d1e056e1dcda6de43ee30483fa5490eeb535bc18bbbd7ff031fcf6d3e6",
+        "timestamp_basis": "host_monotonic_arrival",
+        "temperature_basis": "apparent_raw_kelvin_64",
+        "optical_video_recorded": true,
+        "device_dropped_frames": null,
+        "frames_written": 3048,
+        "started_utc": "2026-09-08T02:08:09.145344+00:00",
+        "initial_workspace": {
+          "schema": 1,
+          "alignment": {
+            "dx": 0.0,
+            "dy": 0.0,
+            "scale": 1.0,
+            "angle": 0.0
+          },
+          "points": [
+            {
+              "id": "center",
+              "name": "Center",
+              "x": 0.5,
+              "y": 0.5
+            },
+            {
+              "id": "upper",
+              "name": "Upper quarter",
+              "x": 0.25,
+              "y": 0.25
+            }
+          ],
+          "areas": [
+            {
+              "id": "region",
+              "name": "Center region",
+              "x": 0.4,
+              "y": 0.4,
+              "x2": 0.6,
+              "y2": 0.6
+            }
+          ],
+          "camera_id": "USB\\VID_3474&PID_4962\\6&32455EC1&0&2"
+        },
+        "optical_codec": "lz4-yuyv422-v1",
+        "optical_width": 1024,
+        "optical_height": 768,
+        "optical_frames_written": 3048,
+        "optical_pairing": "same_native_buffer; host_arrival; exposure_sync_unqualified",
+        "error": null,
+        "finished_utc": "2026-09-08T02:10:11.124922+00:00"
+      },
+      "events": {
+        "events": [
+          {
+            "kind": "connected",
+            "camera_id": "USB\\VID_3474&PID_4962\\6&32455EC1&0&2",
+            "startup_retries": 0
+          },
+          {
+            "kind": "recording_started",
+            "path": "recordings\\lossless-20260907-lz4-dual\\camera1"
+          },
+          {
+            "kind": "recording_finished",
+            "path": "recordings\\lossless-20260907-lz4-dual\\camera1",
+            "status": "COMPLETE",
+            "frames": 3048,
+            "error": null
+          },
+          {
+            "kind": "stopped"
+          }
+        ],
+        "exitcode": 0
+      },
+      "optical_uncompressed_bytes": 4794089472,
+      "optical_compressed_bytes": 3317088760,
+      "optical_reduction_percent": 30.808784872006655
+    }
+  ],
+  "recovery": {
+    "fault": "Intentional termination of this app acquisition worker during disposable recording",
+    "unfinished_session": "20260907-191100-13c6dd",
+    "unfinished_status": "RECORDING",
+    "unfinished_source_unchanged": true,
+    "unfinished_rejected_by_playback": true,
+    "recovered_recording": {
+      "status": "PASS",
+      "recording": "20260907-191232-5df80f",
+      "frames": 277,
+      "temperature_values_checked": 13615104,
+      "strictly_increasing_arrivals": true,
+      "first_last_raw_roundtrip_exact": true,
+      "manifest": {
+        "status": "COMPLETE",
+        "source": "HARDWARE",
+        "camera_id": "USB\\VID_3474&PID_4962\\YFDVS000000000001",
+        "dll_sha256": "f7a745d1e056e1dcda6de43ee30483fa5490eeb535bc18bbbd7ff031fcf6d3e6",
+        "timestamp_basis": "host_monotonic_arrival",
+        "temperature_basis": "apparent_raw_kelvin_64",
+        "optical_video_recorded": true,
+        "device_dropped_frames": null,
+        "frames_written": 277,
+        "started_utc": "2026-09-08T02:12:32.378658+00:00",
+        "initial_workspace": {
+          "schema": 1,
+          "alignment": {
+            "dx": 0.0,
+            "dy": 0.0,
+            "scale": 1.0,
+            "angle": 0.0
+          },
+          "points": [],
+          "areas": [],
+          "camera_id": "USB\\VID_3474&PID_4962\\YFDVS000000000001"
+        },
+        "optical_codec": "lz4-yuyv422-v1",
+        "optical_width": 1024,
+        "optical_height": 768,
+        "optical_frames_written": 277,
+        "optical_pairing": "same_native_buffer; host_arrival; exposure_sync_unqualified",
+        "error": null,
+        "finished_utc": "2026-09-08T02:12:43.615954+00:00"
+      },
+      "optical_pairs_checked": 277,
+      "unique_optical_frames": 277,
+      "optical_first_last_raw_exact": true
+    },
+    "physical_unplug_replug_tested": false
+  },
+  "rejected_zlib_trial": [
+    {
+      "status": "FAILED",
+      "source": "HARDWARE",
+      "camera_id": "USB\\VID_3474&PID_4962\\YFDVS000000000001",
+      "dll_sha256": "f7a745d1e056e1dcda6de43ee30483fa5490eeb535bc18bbbd7ff031fcf6d3e6",
+      "timestamp_basis": "host_monotonic_arrival",
+      "temperature_basis": "apparent_raw_kelvin_64",
+      "optical_video_recorded": true,
+      "device_dropped_frames": null,
+      "frames_written": 55,
+      "started_utc": "2026-09-08T02:06:43.601525+00:00",
+      "initial_workspace": {
+        "schema": 1,
+        "alignment": {
+          "dx": 0.0,
+          "dy": 0.0,
+          "scale": 1.0,
+          "angle": 0.0
+        },
+        "points": [
+          {
+            "id": "center",
+            "name": "Center",
+            "x": 0.5,
+            "y": 0.5
+          },
+          {
+            "id": "upper",
+            "name": "Upper quarter",
+            "x": 0.25,
+            "y": 0.25
+          }
+        ],
+        "areas": [
+          {
+            "id": "region",
+            "name": "Center region",
+            "x": 0.4,
+            "y": 0.4,
+            "x2": 0.6,
+            "y2": 0.6
+          }
+        ],
+        "camera_id": "USB\\VID_3474&PID_4962\\YFDVS000000000001"
+      },
+      "optical_codec": "zlib-yuyv422-v1",
+      "optical_width": 1024,
+      "optical_height": 768,
+      "optical_frames_written": 55,
+      "optical_pairing": "same_native_buffer; host_arrival; exposure_sync_unqualified",
+      "error": "Optical recording queue full; session is incomplete",
+      "finished_utc": "2026-09-08T02:06:46.886995+00:00"
+    },
+    {
+      "status": "FAILED",
+      "source": "HARDWARE",
+      "camera_id": "USB\\VID_3474&PID_4962\\6&32455EC1&0&2",
+      "dll_sha256": "f7a745d1e056e1dcda6de43ee30483fa5490eeb535bc18bbbd7ff031fcf6d3e6",
+      "timestamp_basis": "host_monotonic_arrival",
+      "temperature_basis": "apparent_raw_kelvin_64",
+      "optical_video_recorded": true,
+      "device_dropped_frames": null,
+      "frames_written": 55,
+      "started_utc": "2026-09-08T02:06:43.592896+00:00",
+      "initial_workspace": {
+        "schema": 1,
+        "alignment": {
+          "dx": 0.0,
+          "dy": 0.0,
+          "scale": 1.0,
+          "angle": 0.0
+        },
+        "points": [
+          {
+            "id": "center",
+            "name": "Center",
+            "x": 0.5,
+            "y": 0.5
+          },
+          {
+            "id": "upper",
+            "name": "Upper quarter",
+            "x": 0.25,
+            "y": 0.25
+          }
+        ],
+        "areas": [
+          {
+            "id": "region",
+            "name": "Center region",
+            "x": 0.4,
+            "y": 0.4,
+            "x2": 0.6,
+            "y2": 0.6
+          }
+        ],
+        "camera_id": "USB\\VID_3474&PID_4962\\6&32455EC1&0&2"
+      },
+      "optical_codec": "zlib-yuyv422-v1",
+      "optical_width": 1024,
+      "optical_height": 768,
+      "optical_frames_written": 55,
+      "optical_pairing": "same_native_buffer; host_arrival; exposure_sync_unqualified",
+      "error": "Optical recording queue full; session is incomplete",
+      "finished_utc": "2026-09-08T02:06:46.882800+00:00"
+    }
+  ]
+}

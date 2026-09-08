@@ -9,7 +9,7 @@ from pathlib import Path
 
 from .thermal import FRAME_INDEX, validate_frame
 from .workspace import validate_settings, measurement_values
-from .optical_recording import OpticalRecording,CODEC
+from .optical_recording import OpticalRecording,SUPPORTED_CODECS
 
 
 class Recording:
@@ -36,10 +36,10 @@ class Recording:
             raise ValueError('Recording count or file size does not match its index')
         self.optical=None
         if self.manifest.get('optical_video_recorded'):
-            if self.manifest.get('optical_codec')!=CODEC:raise ValueError('Unsupported optical recording format')
+            if self.manifest.get('optical_codec') not in SUPPORTED_CODECS:raise ValueError('Unsupported optical recording format')
             if self.manifest.get('optical_frames_written')!=len(self.entries):raise ValueError('Optical manifest count differs')
             if (self.manifest.get('optical_width'),self.manifest.get('optical_height'))!=(1024,768):raise ValueError('Unsupported optical dimensions')
-            self.optical=OpticalRecording(self.path,self.entries)
+            self.optical=OpticalRecording(self.path,self.entries,self.manifest['optical_codec'])
         self.read(0)
 
     def index_at(self, elapsed):

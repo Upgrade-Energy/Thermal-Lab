@@ -19,12 +19,14 @@ from .acquisition import worker
 from .imaging import optical_image, aligned_optical, thermal_image, rotate_image, sensor_to_view, canvas_to_sensor
 from .workspace import validate_settings, read_settings, save_settings, measurement_values
 from .camera_diagnostics import pnp_devices
+from .connection_guidance import connection_guidance
 
 
 class Desktop:
     def __init__(self, root, args):
         self.root=root;self.args=args;self.process=None;self.closing=False;self.stop_deadline=None
         self.frame=None;self.optical=None;self.received_at=0;self.drag=None;self.viewports=[]
+        self.stream_active=False;self.record_pending=False
         self.settings=validate_settings({});self.recording=False;self.record_path=None
         self.selected=None;self.zoom=1;self.pan=[0,0];self.photos=[]
         self.ctx=mp.get_context('spawn');self.commands=None
@@ -51,10 +53,10 @@ class Desktop:
         self.name=tk.StringVar();self.alignment={k:tk.StringVar(value=str(v)) for k,v in self.settings['alignment'].items()}
         header=ttk.Frame(root,padding=(18,12));header.pack(fill='x')
         ttk.Label(header,text='THERMAL LAB',font=('Segoe UI',17,'bold')).pack(side='left')
-        ttk.Label(header,text='LIVE INSPECTION  /  DEV7',foreground='#8ba4be').pack(side='left',padx=22)
+        ttk.Label(header,text='LIVE INSPECTION  /  DEV8',foreground='#8ba4be').pack(side='left',padx=22)
         self.connect_button=ttk.Button(header,text='Connect camera',command=self.connect);self.connect_button.pack(side='right')
         self.record_button=ttk.Button(header,text='Record session',command=self.toggle_record,state='disabled');self.record_button.pack(side='right',padx=8)
-        self.optical_check=ttk.Checkbutton(header,text='Optical video (~2.4 GB/min)',variable=self.record_optical)
+        self.optical_check=ttk.Checkbutton(header,text='Optical video · lossless',variable=self.record_optical)
         self.optical_check.pack(side='right',padx=8)
         connection=ttk.Frame(root,padding=(18,0,18,10));connection.pack(fill='x')
         ttk.Label(connection,text='TopView installation').pack(side='left')
@@ -68,6 +70,8 @@ class Desktop:
         self.refresh_button=ttk.Button(cameras,text='Refresh',command=self.refresh_cameras);self.refresh_button.pack(side='left')
         ttk.Button(cameras,text='Review recordings',command=self.review_recordings).pack(side='left',padx=5)
         ttk.Button(cameras,text='Open another camera window',command=self.another_camera).pack(side='left',padx=8)
+        self.connection_info=tk.StringVar(value='Checking camera connections…')
+        ttk.Label(root,textvariable=self.connection_info,padding=(18,4),foreground='#d7c991',wraplength=1350).pack(fill='x')
         ttk.Label(root,textvariable=self.status,padding=(18,9),foreground='#72d7c5').pack(fill='x')
         body=ttk.Panedwindow(root,orient='horizontal');body.pack(fill='both',expand=True,padx=12,pady=8)
         left=ttk.Frame(body);right=ttk.Frame(body,padding=12);body.add(left,weight=4);body.add(right,weight=1)
@@ -131,7 +135,9 @@ class Desktop:
     def refresh_cameras(self):
         if self.process and self.process.is_alive():return
         try:
-            devices=[d['instance_id'] for d in pnp_devices() if d.get('problem_code')==0]
+            discovered=pnp_devices()
+            self.connection_info.set(connection_guidance(discovered))
+            devices=[d['instance_id'] for d in discovered if d.get('problem_code')==0]
             self.camera_box.configure(values=devices)
             if self.camera_choice.get() not in devices:self.camera_choice.set(devices[0] if devices else '')
             if self.camera_choice.get():self.select_camera_layout()
@@ -184,6 +190,7 @@ class Desktop:
     def connect(self):
         if self.process and self.process.is_alive():
             self.send('stop');self.stop_deadline=time.monotonic()+7
+            self.invalidate_stream()
             self.status.set('Stopping camera and finalizing any recording…');return
         if self.process:self.process.join(timeout=0)
         camera_id=self.camera_choice.get()
@@ -192,6 +199,7 @@ class Desktop:
         except Exception as exc:self.status.set('Layout error: '+str(exc));return
         self.commands=self.ctx.Queue(32);self.previews=self.ctx.Queue(1);self.events=self.ctx.Queue()
         self.frame=None;self.optical=None;self.received_at=0;self.stop_deadline=None
+        self.stream_active=False
         self.exit_reported=False
         self.process=self.ctx.Process(target=worker,args=(self.path.get(),self.commands,self.previews,self.events,camera_id),daemon=True)
         self.process.start();self.send('settings',settings=self.settings)
@@ -201,11 +209,24 @@ class Desktop:
         self.root.title('Thermal Lab · '+camera_id.rsplit('\\',1)[-1])
 
     def toggle_record(self):
-        if self.recording:self.send('finish');self.record_button.configure(state='disabled');return
+        if self.record_pending:return
+        if self.recording:
+            self.record_pending=True;self.send('finish');self.record_button.configure(state='disabled');return
+        if not self.stream_active or not self.frame or time.monotonic()-self.received_at>1:
+            self.status.set('Fresh camera frames are required to start recording');return
         name=datetime.now().strftime('%Y%m%d-%H%M%S')+'-'+uuid.uuid4().hex[:6]
+        self.record_pending=True
         self.send('record',path=str((self.args.recordings/name).resolve()),optical=self.record_optical.get())
         self.optical_check.configure(state='disabled')
         self.record_button.configure(state='disabled')
+
+    def invalidate_stream(self):
+        self.record_pending=False
+        self.stream_active=False;self.frame=None;self.optical=None;self.received_at=0;self.drag=None
+        self.record_button.configure(text='Record session',state='disabled')
+        self.cursor.set('Camera disconnected · measurements unavailable')
+        self.info.set('No live frame · reconnect the selected camera to start a new session')
+        self.render();self.refresh_values()
 
     def poll(self):
         if self.process:
@@ -214,25 +235,36 @@ class Desktop:
                     event=self.events.get_nowait();kind=event['kind']
                     if kind=='connected':
                         self.start_deadline=None
+                        self.stream_active=True;self.received_at=time.monotonic()
                         previous=self.settings.get('camera_id')
                         if previous and previous!=event['camera_id']:
                             self.status.set('Layout belongs to another camera; verify alignment before use')
                         else:self.status.set('CONNECTED · TC001 Max · waiting for frames')
-                        self.settings['camera_id']=event['camera_id'];self.changed();self.record_button.configure(state='normal')
+                        self.settings['camera_id']=event['camera_id'];self.changed()
                     elif kind=='recording_started':
+                        self.record_pending=False
                         self.recording=True;self.record_path=Path(event['path'])
                         self.record_button.configure(text='Stop recording',state='normal')
                     elif kind=='recording_finished':
+                        self.record_pending=False
                         self.recording=False;self.record_button.configure(text='Record session',state='normal')
                         self.optical_check.configure(state='normal')
                         self.status.set(f"Recording {event['status']}: {event['frames']} frames · {event['path']}")
-                    elif kind=='error':self.status.set('CAMERA ERROR · '+event['message'])
+                    elif kind=='error':
+                        self.status.set('CAMERA ERROR · '+event['message']+' · Reconnect to start a new session')
+                        self.invalidate_stream()
                     elif kind=='stopped':
+                        self.invalidate_stream()
                         self.record_button.configure(state='disabled');self.connect_button.configure(text='Connect camera')
                         if self.status.get().startswith('Stopping'):self.status.set('DISCONNECTED · camera released')
             except queue.Empty:pass
             try:
-                sample=self.previews.get_nowait();self.frame=sample['frame'];self.received_at=sample['received_at']
+                sample=self.previews.get_nowait()
+                if not self.stream_active:raise queue.Empty
+                was_stale=self.frame is None or time.monotonic()-self.received_at>1
+                self.frame=sample['frame'];self.received_at=sample['received_at']
+                if was_stale:self.cursor.set('Choose Point or Rectangle, then mark the image')
+                if not self.record_pending:self.record_button.configure(state='normal')
                 if 'waiting for frames' in self.status.get():self.status.set('LIVE · TC001 Max · thermal and optical preview')
                 self.optical=optical_image(sample['raw'])
                 self.info.set(f"Frame {self.frame['arrival_sequence']} · {self.frame['elapsed_s']:.1f} s · 256 × 192 thermal / 1024 × 768 optical · apparent °C · "
@@ -242,11 +274,18 @@ class Desktop:
             except Exception as exc:self.status.set('DISPLAY ERROR · '+str(exc))
             if self.stop_deadline and time.monotonic()>self.stop_deadline and self.process.is_alive():
                 self.process.terminate();self.exit_reported=True;self.stop_deadline=None
+                self.invalidate_stream()
                 self.status.set('Camera stop timed out; worker terminated. Recording is incomplete.')
             if self.start_deadline and time.monotonic()>self.start_deadline and self.process.is_alive():
                 self.process.terminate();self.start_deadline=None;self.exit_reported=True
+                self.invalidate_stream()
                 self.status.set('Camera startup timed out; worker terminated. Reconnect to retry.')
+            if self.stream_active and time.monotonic()-self.received_at>8 and self.process.is_alive():
+                self.process.terminate();self.exit_reported=True
+                self.invalidate_stream()
+                self.status.set('Camera stream timed out; worker terminated. Recording is incomplete. Reconnect to retry.')
             if not self.process.is_alive():
+                if self.stream_active:self.invalidate_stream()
                 self.camera_box.configure(state='readonly');self.refresh_button.configure(state='normal')
                 self.process.join(timeout=0);self.connect_button.configure(text='Connect camera');self.record_button.configure(state='disabled')
                 if not self.exit_reported and self.process.exitcode:
@@ -257,6 +296,7 @@ class Desktop:
                 self.optical_check.configure(state='normal')
                 if self.closing:self.root.destroy();return
             if self.frame and time.monotonic()-self.received_at>1:
+                self.record_button.configure(state='disabled')
                 self.cursor.set('No fresh frame · measurements unavailable');self.render();self.refresh_values()
         if self.closing and not self.process:self.root.destroy();return
         self.root.after(80,self.poll)

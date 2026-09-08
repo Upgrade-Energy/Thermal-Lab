@@ -114,7 +114,7 @@ class Review:
             self.mode_box.configure(values=['Thermal','Optical','Blend'] if recording.optical else ['Thermal'])
             self.archive_info.set(('Lossless optical video paired with each thermal frame. Exposure synchronization is unqualified.' if recording.optical else 'Thermal frames only. This archive has no continuous optical video.')+'\n\nOptical alignment follows the original recording. Blend uses 55% thermal opacity. Choose Recorded or Analysis for measurements.')
             self.timeline.configure(to=max(1,len(recording.entries)-1));self.show(0)
-            self.play_button.configure(state='normal');self.root.title('Thermal Lab · Review · '+recording.path.name+' · DEV7')
+            self.play_button.configure(state='normal');self.root.title('Thermal Lab · Review · '+recording.path.name+' · DEV8')
             self.status.set(f"{recording.path.name} · {recording.manifest['camera_id']} · {recording.manifest['source']} · Loading histories…")
             self.start_histories()
         except Exception as exc:

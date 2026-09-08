@@ -1,0 +1,42 @@
+{
+  "status": "PASS",
+  "recording": "20260907-191232-5df80f",
+  "frames": 277,
+  "temperature_values_checked": 13615104,
+  "strictly_increasing_arrivals": true,
+  "first_last_raw_roundtrip_exact": true,
+  "manifest": {
+    "status": "COMPLETE",
+    "source": "HARDWARE",
+    "camera_id": "USB\\VID_3474&PID_4962\\YFDVS000000000001",
+    "dll_sha256": "f7a745d1e056e1dcda6de43ee30483fa5490eeb535bc18bbbd7ff031fcf6d3e6",
+    "timestamp_basis": "host_monotonic_arrival",
+    "temperature_basis": "apparent_raw_kelvin_64",
+    "optical_video_recorded": true,
+    "device_dropped_frames": null,
+    "frames_written": 277,
+    "started_utc": "2026-09-08T02:12:32.378658+00:00",
+    "initial_workspace": {
+      "schema": 1,
+      "alignment": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "scale": 1.0,
+        "angle": 0.0
+      },
+      "points": [],
+      "areas": [],
+      "camera_id": "USB\\VID_3474&PID_4962\\YFDVS000000000001"
+    },
+    "optical_codec": "lz4-yuyv422-v1",
+    "optical_width": 1024,
+    "optical_height": 768,
+    "optical_frames_written": 277,
+    "optical_pairing": "same_native_buffer; host_arrival; exposure_sync_unqualified",
+    "error": null,
+    "finished_utc": "2026-09-08T02:12:43.615954+00:00"
+  },
+  "optical_pairs_checked": 277,
+  "unique_optical_frames": 277,
+  "optical_first_last_raw_exact": true
+}

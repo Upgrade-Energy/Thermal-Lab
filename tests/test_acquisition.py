@@ -20,12 +20,13 @@ class AcquisitionTests(unittest.TestCase):
         commands.put(dict(action='record',path=str(path),optical=optical))
         class Camera:
             camera_id='synthetic-test-fixture'
-            def __init__(self,*_):self.origin=time.monotonic()
+            def __init__(self,*_):self.origin=time.monotonic();self.reads=0
             def __enter__(self):return self
             def __exit__(self,*_):pass
             def read(self):
-                if fail:raise OSError('Injected camera disconnect')
-                commands.put(dict(action='stop'))
+                if fail and (fail!='after-frame' or self.reads):raise OSError('Injected camera disconnect')
+                self.reads+=1
+                if not fail:commands.put(dict(action='stop'))
                 return dict(width=256,height=192,temperatures=[24.5]*49152,
                             camera_id=self.camera_id,elapsed_s=time.monotonic()-self.origin,
                             source='SIMULATION',arrival_sequence=1),bytes(1770496)
@@ -65,3 +66,16 @@ class AcquisitionTests(unittest.TestCase):
                 manifest=self.run_worker(Path(tmp)/'recording',optical=True)
             self.assertEqual(manifest['status'],'FAILED')
             self.assertIn('Injected disk failure',manifest['error'])
+
+    def test_disconnect_preserves_failed_archive_and_reconnect_starts_new_session(self):
+        from thermal_lab.playback import Recording
+        with tempfile.TemporaryDirectory() as tmp:
+            failed=Path(tmp)/'failed';recovered=Path(tmp)/'recovered'
+            with patch('thermal_lab.acquisition.traceback.print_exc'):
+                manifest=self.run_worker(failed,'after-frame',True)
+            self.assertEqual((manifest['status'],manifest['frames_written'],manifest['optical_frames_written']),('FAILED',1,1))
+            originals={p.name:p.read_bytes() for p in failed.iterdir()}
+            with self.assertRaisesRegex(ValueError,'COMPLETE'):Recording(failed)
+            result=self.run_worker(recovered,optical=True)
+            self.assertEqual(result['status'],'COMPLETE')
+            self.assertEqual(originals,{p.name:p.read_bytes() for p in failed.iterdir()})

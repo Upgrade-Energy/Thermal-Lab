@@ -4,7 +4,10 @@ Standalone thermal camera capture, numerical measurements and recording.
 **Power Lab is not required.** This repository owns thermal-camera development;
 Power Lab can integrate with it later through a separate, versioned interface.
 
-Version 0.1.0 DEV7 adds PNG snapshots and H.264 MP4 export with optional
+Version 0.1.0 DEV8 adds faster lossless optical compression, USB connection
+guidance, and immediate stale-frame clearing after camera failure. It preserves
+full resolution, every accepted frame and every numerical temperature value.
+It includes PNG snapshots and H.264 MP4 export with optional
 measurement labels and source-frame provenance. It includes editable playback points and regions with separate
 autosaved analysis layouts, recalculated histories and labeled CSV export.
 It includes continuous lossless optical recording and optical/blended
@@ -14,8 +17,13 @@ cameras, with verified Windows device selection and separate measurement layouts
 The native interface includes thermal/optical/blended/side-by-side views, optical alignment,
 named temperature points and rectangles, palettes, and numerical recording.
 USB diagnostics and TopView CSV import remain available as command-line tools.
-Optical storage uses about 2.4 GB/minute per camera at 25 fps. It is an indexed
-app-native archive; use Export MP4 in recording review to create a shareable video.
+Optical storage uses lossless LZ4 compression; savings depend on the scene.
+Budget at least the original 2.4 GB/minute per camera at 25 fps plus numerical
+data, since noisy images may not compress. Existing raw archives remain readable.
+This is an indexed app-native archive; use Export MP4 in recording review to
+create a shareable video. MP4 is a presentation export, not the numerical archive.
+See [DEV8 quality and recovery verification](docs/Quality-Preserving-Recording-Verification.md)
+for the two-camera compression measurements, exact-data checks and recovery tests.
 
 See the [TopView feature comparison and proposed UI priorities](docs/TopView-Feature-Review.md)
 for overlay alignment, precise measurement placement and recording/playback scope.
