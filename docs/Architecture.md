@@ -4,10 +4,10 @@ Thermal Lab is independently runnable and owns device discovery, camera
 acquisition, numerical conversion, measurement definitions, thermal recordings
 and its own desktop interface. Its package must not import `powerlab`.
 
-Power Lab owns electrical recipes, instruments and protection. Future
-integration is optional: pass a shared run ID and record/stop requests, exchange
+Power Lab owns electrical recipes, instruments and protection. Optional
+integration passes a shared run ID and record/stop requests, exchanges
 selected temperature measurements with timestamp and freshness metadata, and
-link resulting archives. A missing camera must be explicitly handled by the
+links resulting archives. A missing camera must be explicitly handled by the
 consumer when temperatures participate in test protection.
 
 The current native library has process-global state. Keep acquisition in a
@@ -33,6 +33,8 @@ bytes. Reads bound decompression to 1,572,864 bytes and require the exact length
 and hash. Legacy `raw-yuyv422-v1` and experimental `zlib-yuyv422-v1` remain
 readable. A bounded writer queue fails explicitly rather than dropping frames.
 
-Archive compatibility is preserved during extraction. No live IPC interface is
-implemented yet. Historical Power Lab camera copies are migration references;
+DEV9 adds an optional authenticated loopback service and shared run IDs, arrival
+timestamps, freshness-aware numerical measurements and archive links for Power
+Lab's simulated Studio runs. See [the v1 contract](Power-Lab-Integration.md).
+Archive compatibility is preserved. Historical Power Lab camera copies are migration references;
 this repository is the source of truth for subsequent camera development.

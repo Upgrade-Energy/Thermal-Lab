@@ -2,9 +2,11 @@
 
 Standalone thermal camera capture, numerical measurements and recording.
 **Power Lab is not required.** This repository owns thermal-camera development;
-Power Lab can integrate with it later through a separate, versioned interface.
+Power Lab integrates through an optional, versioned local interface.
 
-Version 0.1.0 DEV8 adds faster lossless optical compression, USB connection
+Version 0.1.0 DEV9 adds an optional [Power Lab integration service](docs/Power-Lab-Integration.md)
+with linked run IDs and fresh numerical readings. Power Lab electrical runs
+remain simulated. It includes faster lossless optical compression, USB connection
 guidance, and immediate stale-frame clearing after camera failure. It preserves
 full resolution, every accepted frame and every numerical temperature value.
 It includes PNG snapshots and H.264 MP4 export with optional

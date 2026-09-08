@@ -1,0 +1,149 @@
+{
+  "schema": 1,
+  "electrical_source": "SIMULATION",
+  "camera_source": "HARDWARE",
+  "audited_run": {
+    "status": "PASS",
+    "run_id": "db8ebf099839427593675199ac3343b8",
+    "electrical_source": "SIMULATION",
+    "electrical_samples": 248,
+    "camera_sample_comparisons": 496,
+    "cameras": [
+      {
+        "camera_id": "USB\\VID_3474&PID_4962\\YFDVS000000000001",
+        "frames": 784,
+        "temperature_values_checked": 38535168,
+        "fps": 24.992818155701155,
+        "duration_s": 31.329000000001543,
+        "optical_hashes_checked": 784,
+        "source_hashes": {
+          "camera-session.json": "8041f2bf73ee191380e0031f33c8f49238d1b4bbac507b909e97aa24bc297cc1",
+          "first.frame": "2ab3b48319c9522bd27f1ce1079705443e61fa98ef7e28f42d170b2eb60b0e0a",
+          "last.frame": "5ddd181a0e57657775970d28e9836fa7a80b5180d965807a03bf850a9b16dfd3",
+          "optical.bin": "62926b2d881030fb3b4d50cf0bd94bd642204a6794b3fc234997a402f9cda771",
+          "optical.idx": "2eb1a10acf9cd974baff992247532e2ca6f2bd9dbc1730289a319af767e8fc96",
+          "thermal.idx": "300cb66d8a364dce16e694c45f9834dcdb8d3b1016efb2bc262d1ccc60200f19",
+          "thermal.jsonl.gz": "6cd9fa672871deec2a34f9d1c08dce821570d4823c62858221863775807ac0a7"
+        }
+      },
+      {
+        "camera_id": "USB\\VID_3474&PID_4962\\6&32455EC1&0&2",
+        "frames": 784,
+        "temperature_values_checked": 38535168,
+        "fps": 25.005588733112507,
+        "duration_s": 31.31300000000192,
+        "optical_hashes_checked": 784,
+        "source_hashes": {
+          "camera-session.json": "5abf1df990605b4235ec1ae00c5de2a9de2ac2f920da9dbf58ea261ac8d463d3",
+          "first.frame": "4487973c1b80d14fc0d9b96f6e26742d8043519e208c54ba4060f08df5175e58",
+          "last.frame": "d817c3f3945daae909008707aff9177aec8eab8e350b4365fedb4303de86295f",
+          "optical.bin": "a613327e5570af01ddbc9e30661453c75a16926d6b7839c0de19c01085c68030",
+          "optical.idx": "67c3c8272628776470be57683736083e6f520bf2896202d469cc8102b7c56851",
+          "thermal.idx": "fb8f664e628afe7b3b17530075d267ce87c1e4dbcc78171e611a0d3a39220a76",
+          "thermal.jsonl.gz": "1602f56db524e5aafbfc0892e30d8c08d61fc6735e05840805389f7826671817"
+        }
+      }
+    ],
+    "source_files_unchanged": true
+  },
+  "recovery_audit": {
+    "status": "PASS",
+    "run_id": "99605a4afbca4a08ad05878645d41e96",
+    "electrical_source": "SIMULATION",
+    "electrical_samples": 41,
+    "camera_sample_comparisons": 82,
+    "cameras": [
+      {
+        "camera_id": "USB\\VID_3474&PID_4962\\YFDVS000000000001",
+        "frames": 159,
+        "temperature_values_checked": 7815168,
+        "fps": 24.968394437415704,
+        "duration_s": 6.328000000001339,
+        "optical_hashes_checked": 159,
+        "source_hashes": {
+          "camera-session.json": "f7d1eef189976e87e86a17bdceaf7ca764738fd27c5501b1203b9a2376bc8b21",
+          "first.frame": "a596565e497fdaeaeabfdad1f307a93231ab4da48d85a2d5be1c0b2576099f1f",
+          "last.frame": "8601c9edeb31de3de70e0dc523774002b816420f412268740d0bd201c09f6d46",
+          "optical.bin": "bca33008051af114eaabc5a4c5db942e15389638ea8a70d8a91fbd143ad0aa4d",
+          "optical.idx": "f60f25ae333554ec70d7de566986622052d6f88d862af1fc14674f39b8ef798c",
+          "thermal.idx": "e16f02f3bfb3417245274f8da2885790374f4ac4253d78ccfff3d8f7b5b2fb1d",
+          "thermal.jsonl.gz": "1736f5c93a9ac91e7401435f9c604864d37d1e091ee98a90b885f04f6f983b24"
+        }
+      },
+      {
+        "camera_id": "USB\\VID_3474&PID_4962\\6&32455EC1&0&2",
+        "frames": 159,
+        "temperature_values_checked": 7815168,
+        "fps": 25.03168567808113,
+        "duration_s": 6.311999999998079,
+        "optical_hashes_checked": 159,
+        "source_hashes": {
+          "camera-session.json": "45acec8129352fbfdfb4ca9045d405e2eba8067ef46f67cc3789ff32b9d94786",
+          "first.frame": "98c9a8da631fa1bbf9a19cf8821ba067c145487821298acbb692b95c7dc5b306",
+          "last.frame": "8321cca8444d2ae5654e5f038833f65122b4268456d28ecf6c83fdcfcb470e79",
+          "optical.bin": "94ecaf8341d7c4a90ed0e83598ee0f792fee8cdaf140c26d05af63cab78b7f91",
+          "optical.idx": "b1f188b49c04740c119828bd65ad2d5faed85ebcc5e8374499157c835b854a04",
+          "thermal.idx": "0b418810f68f8d342adc333afb64cf954a353153b4294a76c43c85446008fffb",
+          "thermal.jsonl.gz": "c055b96d334a07f0a85331b34933f942ce3bcde79ad17bc1225eeba8ba99c101"
+        }
+      }
+    ],
+    "source_files_unchanged": true
+  },
+  "crash_test": {
+    "status": "FAILURE_HANDLING_PASS",
+    "run_id": "244d6a4e95534d6a9f8bab3ac3dcf8c7",
+    "electrical_source": "SIMULATION",
+    "electrical_samples": 171,
+    "camera_count": 2,
+    "camera_link": {
+      "run_id": "244d6a4e95534d6a9f8bab3ac3dcf8c7",
+      "run_origin_monotonic": 29130.093,
+      "status": "FAILED",
+      "error": "<urlopen error timed out>",
+      "cameras": [
+        {
+          "camera_id": "USB\\VID_3474&PID_4962\\YFDVS000000000001",
+          "path": "C:\\Users\\MatthewBarnard\\Documents\\ChatGPT\\Thermal-Lab\\recordings\\integration-dev9\\244d6a4e95534d6a9f8bab3ac3dcf8c7\\camera0",
+          "status": "STARTING",
+          "frames": 0
+        },
+        {
+          "camera_id": "USB\\VID_3474&PID_4962\\6&32455EC1&0&2",
+          "path": "C:\\Users\\MatthewBarnard\\Documents\\ChatGPT\\Thermal-Lab\\recordings\\integration-dev9\\244d6a4e95534d6a9f8bab3ac3dcf8c7\\camera1",
+          "status": "STARTING",
+          "frames": 0
+        }
+      ],
+      "integration_schema": 1,
+      "archive_location": "Thermal Lab owns these local archives; they are linked, not embedded"
+    },
+    "run_folder": "C:\\Users\\MatthewBarnard\\Documents\\ChatGPT\\New project\\runtime\\thermal-integration-dev9-fault\\lab-runs\\244d6a4e95534d6a9f8bab3ac3dcf8c7"
+  },
+  "crash_injection": {
+    "worker_pids": [
+      1476,
+      8828
+    ],
+    "injected_utc": "2026-09-08T02:39:54.0884139Z",
+    "run_id": "244d6a4e95534d6a9f8bab3ac3dcf8c7",
+    "service_pid": 6964
+  },
+  "orphan_worker_pids_verified_exited": [
+    1476,
+    8828
+  ],
+  "tests": {
+    "thermal_lab": {
+      "passed": 64
+    },
+    "power_lab": {
+      "passed": 92,
+      "failed": 1,
+      "failure": "test_browser_loss_stops",
+      "baseline_commit": "d52d2418466b04d343776ffed695359a46e559e3",
+      "same_failure_reproduced_in_untouched_baseline": true
+    }
+  },
+  "crash_evidence_note": "Captured before final INCOMPLETE/null-count normalization; that normalization is covered by test_service_loss_retains_archive_paths_without_inventing_final_counts."
+}

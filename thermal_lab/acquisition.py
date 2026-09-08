@@ -4,6 +4,11 @@ import hashlib
 import queue
 import time
 import traceback
+import math
+import re
+import multiprocessing
+import os
+import threading
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -16,6 +21,11 @@ from .optical_recording import OpticalRecorder,CODEC
 def worker(directory, commands, previews, events, camera_id=None):
     recorder=None; optical=None; destination=None; manifest=None; last_raw=None; record_origin=0
     settings=validate_settings({}); revision=0; camera=None
+    parent=multiprocessing.parent_process();parent_watch_stop=threading.Event()
+    def watch_parent():
+        while not parent_watch_stop.wait(.25):
+            if not parent.is_alive():os._exit(2) # Release USB ownership; unfinished archives remain incomplete.
+    if parent is not None:threading.Thread(target=watch_parent,daemon=True,name='Camera owner watchdog').start()
 
     def event(kind, **data):
         events.put(dict(kind=kind,**data))
@@ -54,6 +64,8 @@ def worker(directory, commands, previews, events, camera_id=None):
                     except queue.Empty:break
                     action=command['action']
                     if action=='stop':running=False;break
+                    if action=='abort':
+                        finish(str(command.get('reason','Integration disconnected')));running=False;break
                     if action=='settings':
                         candidate=validate_settings(command['settings'])
                         if candidate['camera_id'] and candidate['camera_id'].casefold()!=camera.camera_id.casefold():
@@ -70,6 +82,13 @@ def worker(directory, commands, previews, events, camera_id=None):
                                       temperature_basis='apparent_raw_kelvin_64',optical_video_recorded=False,
                                       device_dropped_frames=None,frames_written=0,
                                       started_utc=datetime.now(timezone.utc).isoformat(),initial_workspace=settings)
+                        if command.get('run_id') is not None:
+                            run_id=command['run_id'];origin=command.get('run_origin_monotonic')
+                            if not isinstance(run_id,str) or not re.fullmatch(r'[a-f0-9]{32}',run_id):raise ValueError('Invalid integration run ID')
+                            if isinstance(origin,bool) or not isinstance(origin,(int,float)) or not math.isfinite(origin):raise ValueError('Invalid run origin')
+                            manifest.update(run_id=run_id,run_origin_monotonic=origin,
+                                            camera_origin_monotonic=camera.origin,
+                                            run_time_basis='same_host_monotonic_arrival; exposure_sync_unqualified')
                         if command.get('optical',False):
                             manifest.update(optical_video_recorded=True,optical_codec=CODEC,optical_width=1024,
                                             optical_height=768,optical_frames_written=0,
@@ -91,6 +110,8 @@ def worker(directory, commands, previews, events, camera_id=None):
                     recorded=dict(frame,camera_elapsed_s=frame['elapsed_s'],
                                   elapsed_s=frame['elapsed_s']-record_origin,workspace_revision=revision,
                                   workspace=settings,measurements=measurement_values(frame,settings))
+                    if manifest.get('run_id'):
+                        recorded.update(run_id=manifest['run_id'],run_elapsed_s=camera.origin+frame['elapsed_s']-manifest['run_origin_monotonic'])
                     if optical:recorded['optical_sha256']=optical.ingest(raw,recorded['elapsed_s'],frame['arrival_sequence'])
                     recorder.ingest([recorded])
                     if last_raw is None:(destination/'first.frame').write_bytes(raw)
@@ -98,7 +119,8 @@ def worker(directory, commands, previews, events, camera_id=None):
                 # Preview can drop superseded frames; recording keeps every accepted frame.
                 now=time.monotonic()
                 if now-last_preview>=.10:
-                    message=dict(frame=frame,raw=raw,received_at=now,
+                    message=dict(frame=frame,raw=raw,received_at=camera.origin+frame['elapsed_s'],
+                                 run_id=manifest.get('run_id') if recorder and manifest else None,
                                  recording_frames=recorder.count if recorder else None)
                     try:previews.put_nowait(message)
                     except queue.Full:pass
@@ -110,6 +132,7 @@ def worker(directory, commands, previews, events, camera_id=None):
         except Exception:traceback.print_exc()
         event('error',message=str(exc))
     finally:
+        parent_watch_stop.set()
         event('stopped')
         # A pending display frame must not keep the acquisition process alive.
         previews.cancel_join_thread()
