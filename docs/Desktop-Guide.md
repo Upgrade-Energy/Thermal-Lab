@@ -1,4 +1,4 @@
-# Thermal Lab desktop — DEV12
+# Thermal Lab desktop — DEV13
 
 Launch `thermal-lab` after `python -m pip install ".[desktop]"`, or run
 `python scripts/run_thermal_lab.py` from the repository. Requires Windows x64
@@ -47,19 +47,21 @@ for the target plane and distance; objects at different depths may not align.
 ### Auto alignment and working distance
 
 For the experimental continuous regional preview and measured stereo calibration,
-use **Smart / calibrate…** and follow the [Smart overlay guide](Smart-Overlay.md).
+use **Experimental / calibrate…** and follow the [Smart overlay guide](Smart-Overlay.md).
 
-Open **Auto-align / distance…** next to Lock alignment. The tool freezes a fresh
+Open **Align selected area…** next to Lock alignment. The tool freezes a fresh
 thermal/optical pair while live acquisition continues. Keep the target stationary
-and draw a rectangle around one object or surface on the thermal image. Click
-**Auto-align selected target**, inspect the blended outline, then **Apply reviewed
-alignment**. Nothing changes in the live workspace until Apply. Cancel search
+and draw a rectangle around one object on the left thermal image, including its
+outline and a little background. A selected measurement rectangle in the main
+window is imported automatically. Click **Preview auto-alignment**, inspect the
+blended outline, then **Apply to live**. This tool does not require a checkerboard.
+Nothing changes in the live workspace until Apply. Cancel search
 stops the background matcher. Refresh pair takes another image pair.
 
-If matching is uncertain, enable **Guide with optical target box** and draw a box
+If matching is uncertain, the tool enables **Guide with optical target box**. Draw a box
 around the same object's outline on the raw optical image at right. The tool
 estimates offset and scale from the paired boxes, retaining the current rotation.
-Auto-align can then refine locally. An uncertain refinement retains the box-based
+Preview auto-alignment can then refine locally. An uncertain refinement retains the box-based
 estimate; inspect it before applying. Manual sliders remain useful for fine tuning
 and initial rotation. The frozen preview uses a fixed 180° display orientation.
 

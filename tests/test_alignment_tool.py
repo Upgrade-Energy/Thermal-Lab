@@ -3,7 +3,7 @@ import copy
 from types import SimpleNamespace
 import unittest
 from unittest.mock import Mock
-from thermal_lab.alignment_tool import AlignmentTool
+from thermal_lab.alignment_tool import AlignmentTool,selected_region
 
 
 class Value:
@@ -13,6 +13,18 @@ class Value:
 
 
 class AlignmentToolTests(unittest.TestCase):
+    def test_selected_measurement_rectangle_is_used_as_target(self):
+        d=SimpleNamespace(selected='target',settings=dict(areas=[dict(id='target',x=.2,y=.3,x2=.6,y2=.8)]))
+        self.assertEqual(selected_region(d),[.2,.3,.6,.8])
+        d.selected='missing';self.assertIsNone(selected_region(d))
+        d.selected='target';d.settings['areas'][0]['x2']=.21
+        self.assertIsNone(selected_region(d))
+
+    def test_optical_guidance_requires_explicit_thermal_target(self):
+        t=self.tool();t.frame={};t.target_selected=False;t.guide=Value(True);t.point=Mock();t.start=None
+        t.press(None,True)
+        t.point.assert_not_called();self.assertIsNone(t.start)
+        self.assertIn('LEFT',t.message.get())
     def tool(self):
         t=AlignmentTool.__new__(AlignmentTool)
         t.camera_id='camera-a';t.base=dict(dx=0,dy=0,scale=1,angle=0)

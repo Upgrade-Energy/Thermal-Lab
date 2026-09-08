@@ -13,8 +13,8 @@ def valid_region(region):
     if not isinstance(region,(list,tuple)) or len(region)!=4:
         raise ValueError('Select a rectangular target region')
     r=[float(x) for x in region]
-    if not all(math.isfinite(x) and 0<=x<=1 for x in r) or r[2]-r[0]<.1 or r[3]-r[1]<.1:
-        raise ValueError('Select a target at least one tenth of the image width and height')
+    if not all(math.isfinite(x) and 0<=x<=1 for x in r) or r[2]-r[0]<.05 or r[3]-r[1]<.05:
+        raise ValueError('Select a target at least 5% of the image width and height')
     return r
 
 
@@ -29,6 +29,24 @@ def alignment_from_regions(thermal_region,optical_region,angle=0):
 
 
 def fit_alignment(temperatures, optical, initial, region=(0,0,1,1), *, guided=False,cancelled=lambda:False):
+    """Prefer target geometry; brightness information is a corroborated fallback."""
+    from .edge_alignment import fit_edges
+    try:edge=fit_edges(temperatures,optical,initial,region,guided=guided,cancelled=cancelled)
+    except ValueError:
+        edge=None
+    if edge is not None and edge['reliable']:return edge
+    information=_fit_information(temperatures,optical,initial,region,guided=guided,cancelled=cancelled)
+    if information['reliable'] and edge is not None:
+        from .imaging import alignment_matrix
+        points=np.array([[region[0]*256,region[1]*192,1],[region[2]*256,region[3]*192,1]])
+        a=points@np.linalg.inv(alignment_matrix(edge['alignment'])).T
+        b=points@np.linalg.inv(alignment_matrix(information['alignment'])).T
+        if np.max(np.linalg.norm(a[:,:2]-b[:,:2],axis=1))>4:information['reliable']=False
+    if information['reliable']:return information
+    return edge or information
+
+
+def _fit_information(temperatures, optical, initial, region=(0,0,1,1), *, guided=False,cancelled=lambda:False):
     """Bounded similarity search using normalized mutual information.
 
     Thermal and optical brightness need not agree. Scores are relative evidence,

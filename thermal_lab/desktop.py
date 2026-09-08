@@ -54,7 +54,7 @@ class Desktop:
         self.alignment_sliders={k:tk.DoubleVar(value=v) for k,v in self.settings['alignment'].items()}
         header=ttk.Frame(root,padding=(18,12));header.pack(fill='x')
         ttk.Label(header,text='THERMAL LAB',font=('Segoe UI',17,'bold')).pack(side='left')
-        ttk.Label(header,text='LIVE INSPECTION  /  DEV12',foreground='#8ba4be').pack(side='left',padx=22)
+        ttk.Label(header,text='LIVE INSPECTION  /  DEV13',foreground='#8ba4be').pack(side='left',padx=22)
         self.connect_button=ttk.Button(header,text='Connect camera',command=self.connect);self.connect_button.pack(side='right')
         self.record_button=ttk.Button(header,text='Record session',command=self.toggle_record,state='disabled');self.record_button.pack(side='right',padx=8)
         self.optical_check=ttk.Checkbutton(header,text='Optical video · lossless',variable=self.record_optical)
@@ -106,8 +106,8 @@ class Desktop:
                       command=lambda value,k=key:self.slide_alignment(k,value)).pack(side='left',fill='x',expand=True,padx=5)
         row=ttk.Frame(right);row.pack(fill='x',pady=6)
         ttk.Checkbutton(row,text='Lock',variable=self.locked).pack(side='left')
-        ttk.Button(row,text='Auto-align / distance…',command=self.open_alignment_tool).pack(side='left',padx=5)
-        ttk.Button(row,text='Smart / calibrate…',command=self.open_smart_alignment_tool).pack(side='left',padx=3)
+        ttk.Button(row,text='Align selected area…',command=self.open_alignment_tool).pack(side='left',padx=5)
+        ttk.Button(row,text='Experimental / calibrate…',command=self.open_smart_alignment_tool).pack(side='left',padx=3)
         ttk.Button(row,text='Reset',command=self.reset_alignment).pack(side='right')
         ttk.Separator(right).pack(fill='x',pady=10)
         row=ttk.Frame(right);row.pack(fill='x')
@@ -442,6 +442,7 @@ class Desktop:
 
     def open_alignment_tool(self):
         if getattr(self,'alignment_tool',None) and not self.alignment_tool.closed:
+            self.alignment_tool.use_current_selection()
             self.alignment_tool.window.lift();return
         try:
             from .alignment_tool import AlignmentTool

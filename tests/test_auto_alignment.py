@@ -17,6 +17,20 @@ def fixture():
 
 
 class AutoAlignmentTests(unittest.TestCase):
+    def test_target_outline_with_unrelated_heat_and_printed_label(self):
+        import cv2
+        from thermal_lab.edge_alignment import fit_edges
+        mask=np.zeros((192,256),np.uint8);cv2.rectangle(mask,(80,48),(152,132),255,-1)
+        optical=np.full((192,256),60,np.uint8);optical[mask>0]=210
+        cv2.putText(optical,'TEST',(85,100),cv2.FONT_HERSHEY_SIMPLEX,.55,20,2)
+        rgb=Image.fromarray(optical).convert('RGB').resize((1024,768))
+        truth=dict(dx=-12,dy=-6,scale=1.25,angle=0)
+        moved=np.asarray(aligned_optical(Image.fromarray(mask).convert('RGB').resize((1024,768)),truth).resize((256,192)).convert('L'))>120
+        yy,xx=np.mgrid[:192,:256];thermal=np.where(moved,27+yy*.04+8*np.exp(-((xx-110)**2+(yy-115)**2)/150),20)
+        y,x=np.where(moved);region=[(x.min()-3)/256,(y.min()-3)/192,(x.max()+4)/256,(y.max()+4)/192]
+        result=fit_edges(thermal,rgb,{},region)
+        self.assertTrue(result['reliable'],{k:v for k,v in result.items() if k!='outline_points'})
+        for key,tolerance in [('dx',3),('dy',3),('scale',.05),('angle',2)]:self.assertAlmostEqual(result['alignment'][key],truth[key],delta=tolerance)
     def test_inverted_modality_and_geometry_recovery(self):
         optical=fixture();truth=dict(dx=13,dy=-9,scale=1.12,angle=3)
         aligned=np.asarray(aligned_optical(optical,truth).convert('L').resize((256,192)),dtype=float)

@@ -12,9 +12,17 @@ from .alignment_profiles import read_profiles, save_profiles, at_distance
 from .imaging import thermal_image, aligned_optical, rotate_image
 
 
+def selected_region(desktop):
+    area=next((a for a in desktop.settings.get('areas',[]) if a['id']==getattr(desktop,'selected',None)),None)
+    if area is None:return None
+    try:return valid_region([area[k] for k in ('x','y','x2','y2')])
+    except ValueError:return None
+
+
 class AlignmentTool:
     def __init__(self,desktop):
-        self.desktop=desktop;self.camera_id=desktop.settings['camera_id'];self.region=[.1,.1,.9,.9]
+        self.desktop=desktop;self.camera_id=desktop.settings['camera_id'];selection=selected_region(desktop)
+        self.region=selection or [.1,.1,.9,.9];self.target_selected=selection is not None
         self.closed=False;self.searching=False;self.cancel=threading.Event();self.results=queue.Queue();self.photos=[]
         key=hashlib.sha256(self.camera_id.casefold().encode()).hexdigest()[:16]
         self.profile_path=desktop.args.workspace.parent/'alignment-profiles'/f'{key}.json'
@@ -27,10 +35,10 @@ class AlignmentTool:
         self.guide=tk.BooleanVar(value=False);self.optical_region=None;self.guided_seed=None
         body=ttk.Frame(self.window,padding=14);body.pack(fill='both',expand=True)
         ttk.Label(body,text='AUTO ALIGNMENT · CHOOSE THE TARGET',font=('Segoe UI',14,'bold')).pack(anchor='w')
-        ttk.Label(body,text='Draw a box on the frozen thermal image around ONE object or surface. Nearby and distant objects may need different alignments.',wraplength=980).pack(anchor='w',pady=6)
+        ttk.Label(body,text='1. Box ONE target on the left, with a little background.  2. Preview auto-alignment.  3. Apply to live. No checkerboard is needed for this tool.',wraplength=980).pack(anchor='w',pady=6)
         row=ttk.Frame(body);row.pack(fill='x')
         ttk.Button(row,text='Refresh pair',command=self.capture).pack(side='left')
-        self.auto_button=ttk.Button(row,text='Auto-align selected target',command=self.auto);self.auto_button.pack(side='left',padx=8)
+        self.auto_button=ttk.Button(row,text='Preview auto-alignment',command=self.auto);self.auto_button.pack(side='left',padx=8)
         ttk.Button(row,text='Cancel search',command=self.cancel.set).pack(side='left')
         ttk.Checkbutton(row,text='Guide with optical target box',variable=self.guide,command=self.draw).pack(side='left',padx=8)
         box=ttk.Combobox(row,textvariable=self.preview_mode,values=['Blend','Optical'],state='readonly',width=10);box.pack(side='right');box.bind('<<ComboboxSelected>>',lambda _:self.draw())
@@ -55,7 +63,7 @@ class AlignmentTool:
         self.profile_box=ttk.Combobox(row,textvariable=self.profile_choice,values=[p['name'] for p in self.profiles['profiles']],state='readonly',width=24);self.profile_box.pack(side='left')
         ttk.Button(row,text='Preview profile',command=self.load_profile).pack(side='left',padx=5)
         ttk.Button(row,text='Predict at distance',command=self.predict).pack(side='left')
-        self.apply_button=ttk.Button(row,text='Apply reviewed alignment',command=self.apply);self.apply_button.pack(side='right')
+        self.apply_button=ttk.Button(row,text='Apply to live',command=self.apply);self.apply_button.pack(side='right')
         ttk.Label(body,text='Distance is entered by you, not measured by the camera. Prediction uses your saved near/far settings within their calibrated range. This aligns one depth plane; it cannot align all depths at once or change thermal measurements.',wraplength=980,foreground='#9aafc3').pack(anchor='w',pady=7)
         self.frame=None;self.verified=False;self.start=None;self.capture();self.buttons();self.window.after(100,self.poll)
 
@@ -67,12 +75,18 @@ class AlignmentTool:
         self.frame=copy.deepcopy(d.frame);self.optical=d.optical.copy();self.base=dict(d.settings['alignment'])
         self.candidate=dict(self.base);self.verified=False;self.start=None;self.optical_region=None;self.guided_seed=None;self.guide.set(False)
         self.thermal=thermal_image(self.frame['temperatures'],'Iron')[0]
-        self.message.set(f"Frozen frame {self.frame['arrival_sequence']}. Draw a target box, then Auto-align. Refresh if the target moves.")
+        self.message.set(f"Frozen frame {self.frame['arrival_sequence']}. "+('Target selected; preview auto-alignment.' if self.target_selected else 'Draw a target box on the LEFT first.'))
         self.buttons();self.draw()
+
+    def use_current_selection(self):
+        if self.searching:return
+        selection=selected_region(self.desktop)
+        if selection is not None and (not self.target_selected or selection!=self.region):
+            self.region=selection;self.target_selected=True;self.capture()
 
     def buttons(self):
         ready=bool(self.frame is not None and not self.searching)
-        self.auto_button.configure(state='normal' if ready else 'disabled')
+        self.auto_button.configure(state='normal' if ready and self.target_selected else 'disabled')
         for b in (self.apply_button,self.save_button):b.configure(state='normal' if ready and self.verified else 'disabled')
 
     def draw(self):
@@ -86,7 +100,7 @@ class AlignmentTool:
             photo=ImageTk.PhotoImage(rotate_image(picture,180).resize((pw,ph),Image.Resampling.BILINEAR));self.photos.append(photo)
             canvas.create_image(left,top,image=photo,anchor='nw');self.bounds.append((left,top,pw,ph))
             selected=self.optical_region if index==1 and self.guide.get() else self.region
-            if selected:
+            if selected and (self.target_selected or self.start is not None):
                 x,y,x2,y2=selected;canvas.create_rectangle(left+(1-x2)*pw,top+(1-y2)*ph,left+(1-x)*pw,top+(1-y)*ph,outline='#67ffe0',width=2)
             if index==1 and self.guide.get():canvas.create_text(12,12,anchor='nw',text='RAW OPTICAL · box the SAME target',fill='#67ffe0')
 
@@ -96,6 +110,8 @@ class AlignmentTool:
 
     def press(self,e,optical=False):
         if self.searching or self.frame is None or (optical and not self.guide.get()):return
+        if optical and not self.target_selected:
+            self.message.set('Draw the target box on the LEFT thermal image first.');return
         self.start=self.point(e,optical);self.drag_optical=optical;self.old_region=copy.copy(self.optical_region if optical else self.region)
 
     def drag(self,e,optical=False):
@@ -115,8 +131,8 @@ class AlignmentTool:
                 self.guide.set(False);self.verified=True
                 self.message.set('Box-based alignment estimate. Inspect the target, or Auto-align to refine locally. No distance was inferred.')
             else:
-                self.guided_seed=None;self.optical_region=None
-                self.message.set('Target selected. Auto-align, or enable optical target guidance and box the same object on the right.')
+                self.target_selected=True;self.guided_seed=None;self.optical_region=None
+                self.message.set('Target selected. Preview auto-alignment, inspect the result, then Apply to live.')
         except ValueError as exc:
             if optical:self.optical_region=self.old_region
             else:self.region=self.old_region
@@ -124,7 +140,7 @@ class AlignmentTool:
         self.buttons();self.draw()
 
     def auto(self):
-        if self.searching or self.frame is None:return
+        if self.searching or self.frame is None or not self.target_selected:return
         self.searching=True;self.verified=False;self.cancel.clear();self.buttons();self.message.set('Matching frozen thermal and optical detail…')
         values=list(self.frame['temperatures']);optical=self.optical.copy();initial=dict(self.guided_seed or self.base);region=list(self.region);guided=self.guided_seed is not None
         def work():
@@ -137,10 +153,18 @@ class AlignmentTool:
         try:
             ok,result=self.results.get_nowait();self.searching=False
             if ok:
-                self.candidate=result['alignment'];self.verified=result['reliable'];self.draw()
-                self.message.set(result['message']+f" Match {result['score']:.3f}; validation {result['validation_score']:.3f}. These are relative scores, not accuracy percentages.")
+                self.verified=result['reliable']
+                self.candidate=result['alignment'] if self.verified else dict(self.guided_seed or self.base)
+                self.draw()
+                if self.verified:
+                    a=self.candidate
+                    self.message.set(f"Preview ready ({result.get('method','texture')}). X {a['dx']:.1f}, Y {a['dy']:.1f}, scale {a['scale']:.3f}, rotation {a['angle']:.1f}°. Check the SELECTED target, then Apply to live.")
+                else:
+                    self.guide.set(True);self.draw()
+                    self.message.set('The match is ambiguous; live alignment is unchanged. Box the SAME target in the raw optical image on the RIGHT to guide it.')
                 if not result['reliable'] and self.guided_seed:
                     self.candidate=dict(self.guided_seed);self.verified=True;self.draw()
+                    self.guide.set(False);self.draw()
                     self.message.set('Automatic refinement was uncertain; retained your paired-box estimate. Inspect before applying or saving.')
             else:self.message.set(result)
             self.buttons()
@@ -161,6 +185,7 @@ class AlignmentTool:
         if self.searching or self.frame is None:return
         p=next((p for p in self.profiles['profiles'] if p['name']==self.profile_choice.get()),None)
         if p:
+            self.target_selected=True
             self.guided_seed=None;self.optical_region=None;self.guide.set(False)
             self.candidate=dict(p['alignment']);self.region=list(p['region']);self.name.set(p['name']);self.distance.set('' if p['distance_m'] is None else str(p['distance_m']))
             self.verified=True;self.buttons();self.draw();self.message.set('Saved profile preview. Check the target and distance before applying.')
