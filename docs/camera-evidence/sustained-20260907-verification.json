@@ -1,0 +1,940 @@
+{
+  "schema": 1,
+  "status": "PASS",
+  "verified_utc": "2026-09-08T01:33:35.037607+00:00",
+  "scope": "Two-camera 30-minute capture, numerical/optical archive, recorded histories, PNG and full-length thermal MP4 verification; no power instrument commands",
+  "capture": {
+    "status": "CAPTURE_FINISHED",
+    "error": null,
+    "requested_seconds": 1800,
+    "output": "C:\\Users\\MatthewBarnard\\Documents\\ChatGPT\\Thermal-Lab\\recordings\\soak-20260907-30min"
+  },
+  "usb_after": {
+    "schema_version": 1,
+    "utc": "2026-09-08T00:38:35.735302+00:00",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "C:\\Users\\MatthewBarnard\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+    "scope": "TC001 Max only; standard USB metadata; no vendor commands",
+    "devices": [
+      {
+        "instance_id": "USB\\VID_3474&PID_4962\\6&2A549464&0&2",
+        "pdo_name": "\\Device\\USBPDO-8",
+        "name": "TC001 Max",
+        "status": "OK",
+        "problem_code": 0,
+        "problem_status": null,
+        "service": "WinUSB",
+        "driver_inf": "oem95.inf",
+        "driver_version": "6.1.7600.16385",
+        "compatible_ids": [
+          "USB\\COMPAT_VID_3474&DevClass_00&SubClass_00&Prot00",
+          "USB\\COMPAT_VID_3474&DevClass_00&SubClass_00",
+          "USB\\COMPAT_VID_3474&DevClass_00",
+          "USB\\DevClass_00&SubClass_00&Prot_00",
+          "USB\\DevClass_00&SubClass_00",
+          "USB\\DevClass_00",
+          "USB\\COMPOSITE"
+        ]
+      },
+      {
+        "instance_id": "USB\\VID_3474&PID_4962\\YFDVS000000000001",
+        "pdo_name": "\\Device\\USBPDO-7",
+        "name": "TC001 Max",
+        "status": "OK",
+        "problem_code": 0,
+        "problem_status": null,
+        "service": "WinUSB",
+        "driver_inf": "oem95.inf",
+        "driver_version": "6.1.7600.16385",
+        "compatible_ids": [
+          "USB\\COMPAT_VID_3474&DevClass_00&SubClass_00&Prot00",
+          "USB\\COMPAT_VID_3474&DevClass_00&SubClass_00",
+          "USB\\COMPAT_VID_3474&DevClass_00",
+          "USB\\DevClass_00&SubClass_00&Prot_00",
+          "USB\\DevClass_00&SubClass_00",
+          "USB\\DevClass_00",
+          "USB\\COMPOSITE"
+        ]
+      }
+    ],
+    "interfaces": [
+      {
+        "path": "\\\\?\\USB#VID_3474&PID_4962#YFDVS000000000001#{fe7a2189-e1fa-ae49-d5c9-603519b1cdbb}",
+        "opened": true,
+        "endpoints": [
+          {
+            "type": 2,
+            "id": 130,
+            "max_packet_size": 512,
+            "interval": 0
+          },
+          {
+            "type": 2,
+            "id": 5,
+            "max_packet_size": 512,
+            "interval": 0
+          }
+        ],
+        "interface": {
+          "length": 9,
+          "type": 4,
+          "number": 0,
+          "alternate": 0,
+          "endpoint_count": 2,
+          "interface_class": 255,
+          "subclass": 240,
+          "protocol": 0,
+          "string_index": 4
+        },
+        "associated_interfaces": [
+          {
+            "length": 9,
+            "type": 4,
+            "number": 1,
+            "alternate": 0,
+            "endpoint_count": 0,
+            "interface_class": 255,
+            "subclass": 240,
+            "protocol": 1,
+            "string_index": 5,
+            "endpoints": []
+          },
+          {
+            "length": 9,
+            "type": 4,
+            "number": 1,
+            "alternate": 1,
+            "endpoint_count": 2,
+            "interface_class": 255,
+            "subclass": 240,
+            "protocol": 1,
+            "string_index": 5,
+            "endpoints": [
+              {
+                "type": 2,
+                "id": 129,
+                "max_packet_size": 512,
+                "interval": 0
+              },
+              {
+                "type": 2,
+                "id": 4,
+                "max_packet_size": 512,
+                "interval": 0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "path": "\\\\?\\USB#VID_3474&PID_4962#6&2a549464&0&2#{fe7a2189-e1fa-ae49-d5c9-603519b1cdbb}",
+        "opened": true,
+        "endpoints": [
+          {
+            "type": 2,
+            "id": 130,
+            "max_packet_size": 512,
+            "interval": 0
+          },
+          {
+            "type": 2,
+            "id": 5,
+            "max_packet_size": 512,
+            "interval": 0
+          }
+        ],
+        "interface": {
+          "length": 9,
+          "type": 4,
+          "number": 0,
+          "alternate": 0,
+          "endpoint_count": 2,
+          "interface_class": 255,
+          "subclass": 240,
+          "protocol": 0,
+          "string_index": 4
+        },
+        "associated_interfaces": [
+          {
+            "length": 9,
+            "type": 4,
+            "number": 1,
+            "alternate": 0,
+            "endpoint_count": 0,
+            "interface_class": 255,
+            "subclass": 240,
+            "protocol": 1,
+            "string_index": 5,
+            "endpoints": []
+          },
+          {
+            "length": 9,
+            "type": 4,
+            "number": 1,
+            "alternate": 1,
+            "endpoint_count": 2,
+            "interface_class": 255,
+            "subclass": 240,
+            "protocol": 1,
+            "string_index": 5,
+            "endpoints": [
+              {
+                "type": 2,
+                "id": 129,
+                "max_packet_size": 512,
+                "interval": 0
+              },
+              {
+                "type": 2,
+                "id": 4,
+                "max_packet_size": 512,
+                "interval": 0
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "errors": [],
+    "capture_verified": false,
+    "temperatures_verified": false,
+    "recording_verified": false,
+    "status": "USB_ACCESS_VERIFIED"
+  },
+  "optical_repetition": [
+    {
+      "camera": "camera0",
+      "adjacent_repeat_runs": 33,
+      "repeated_frames": 460,
+      "max_identical_run_frames": 18,
+      "max_identical_span_s": 0.6870000000017171,
+      "max_time_until_changed_plane_s": 0.7190000000009604
+    },
+    {
+      "camera": "camera1",
+      "adjacent_repeat_runs": 30,
+      "repeated_frames": 461,
+      "max_identical_run_frames": 18,
+      "max_identical_span_s": 0.6870000000017171,
+      "max_time_until_changed_plane_s": 0.7340000000003783
+    }
+  ],
+  "native_repeat_details": [
+    {
+      "camera": "camera0",
+      "runs": [
+        {
+          "first_index": 1453,
+          "count": 16,
+          "elapsed_s": 58.15599999999904,
+          "span_s": 0.5940000000009604,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 2967,
+          "count": 16,
+          "elapsed_s": 118.75,
+          "span_s": 0.5940000000009604,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 4476,
+          "count": 16,
+          "elapsed_s": 179.34400000000096,
+          "span_s": 0.5929999999971187,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 5956,
+          "count": 16,
+          "elapsed_s": 239.93699999999808,
+          "span_s": 0.5940000000009604,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 7470,
+          "count": 16,
+          "elapsed_s": 300.53099999999904,
+          "span_s": 0.5940000000009604,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 8985,
+          "count": 16,
+          "elapsed_s": 361.125,
+          "span_s": 0.6090000000003783,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 10500,
+          "count": 16,
+          "elapsed_s": 421.71900000000096,
+          "span_s": 0.6090000000003783,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 12015,
+          "count": 16,
+          "elapsed_s": 482.3119999999981,
+          "span_s": 0.6100000000005821,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 13530,
+          "count": 17,
+          "elapsed_s": 542.9219999999987,
+          "span_s": 0.625,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 15046,
+          "count": 18,
+          "elapsed_s": 603.5469999999987,
+          "span_s": 0.6870000000017171,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 16562,
+          "count": 17,
+          "elapsed_s": 664.1869999999981,
+          "span_s": 0.6410000000032596,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 18078,
+          "count": 17,
+          "elapsed_s": 724.8280000000013,
+          "span_s": 0.6409999999996217,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 19594,
+          "count": 17,
+          "elapsed_s": 785.4530000000013,
+          "span_s": 0.6409999999996217,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 21111,
+          "count": 16,
+          "elapsed_s": 846.1409999999996,
+          "span_s": 0.5930000000007567,
+          "raw_identical": false,
+          "temperatures_identical": true
+        },
+        {
+          "first_index": 21820,
+          "count": 2,
+          "elapsed_s": 874.4840000000004,
+          "span_s": 0.046999999998661224,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 21866,
+          "count": 2,
+          "elapsed_s": 876.3280000000013,
+          "span_s": 0.046999999998661224,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 22626,
+          "count": 17,
+          "elapsed_s": 906.7340000000004,
+          "span_s": 0.6409999999996217,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 24142,
+          "count": 17,
+          "elapsed_s": 967.3590000000004,
+          "span_s": 0.6409999999996217,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 25659,
+          "count": 16,
+          "elapsed_s": 1028.0469999999987,
+          "span_s": 0.5940000000009604,
+          "raw_identical": false,
+          "temperatures_identical": true
+        },
+        {
+          "first_index": 27174,
+          "count": 17,
+          "elapsed_s": 1088.6409999999996,
+          "span_s": 0.6399999999994179,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 28690,
+          "count": 17,
+          "elapsed_s": 1149.2659999999996,
+          "span_s": 0.6399999999994179,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 30206,
+          "count": 18,
+          "elapsed_s": 1209.905999999999,
+          "span_s": 0.6720000000022992,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 31722,
+          "count": 17,
+          "elapsed_s": 1270.5469999999987,
+          "span_s": 0.6399999999994179,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 32620,
+          "count": 2,
+          "elapsed_s": 1306.4530000000013,
+          "span_s": 0.046999999998661224,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 33238,
+          "count": 17,
+          "elapsed_s": 1331.1719999999987,
+          "span_s": 0.6399999999994179,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 34754,
+          "count": 17,
+          "elapsed_s": 1391.811999999998,
+          "span_s": 0.6410000000032596,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 36270,
+          "count": 17,
+          "elapsed_s": 1452.4530000000013,
+          "span_s": 0.6409999999996217,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 37786,
+          "count": 17,
+          "elapsed_s": 1513.0780000000013,
+          "span_s": 0.6409999999996217,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 39302,
+          "count": 17,
+          "elapsed_s": 1573.719000000001,
+          "span_s": 0.6399999999994179,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 40276,
+          "count": 2,
+          "elapsed_s": 1612.6719999999987,
+          "span_s": 0.0470000000022992,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 40818,
+          "count": 17,
+          "elapsed_s": 1634.3590000000004,
+          "span_s": 0.6409999999996217,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 42334,
+          "count": 17,
+          "elapsed_s": 1694.9840000000004,
+          "span_s": 0.6409999999996217,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 43850,
+          "count": 17,
+          "elapsed_s": 1755.625,
+          "span_s": 0.6409999999996217,
+          "raw_identical": false,
+          "temperatures_identical": false
+        }
+      ]
+    },
+    {
+      "camera": "camera1",
+      "runs": [
+        {
+          "first_index": 1493,
+          "count": 16,
+          "elapsed_s": 59.79699999999866,
+          "span_s": 0.5940000000009604,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 3006,
+          "count": 16,
+          "elapsed_s": 120.39099999999962,
+          "span_s": 0.5930000000007567,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 4518,
+          "count": 16,
+          "elapsed_s": 181.0,
+          "span_s": 0.5780000000013388,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 5999,
+          "count": 16,
+          "elapsed_s": 241.57800000000134,
+          "span_s": 0.5939999999973224,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 7513,
+          "count": 17,
+          "elapsed_s": 302.17199999999866,
+          "span_s": 0.6399999999994179,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 9029,
+          "count": 17,
+          "elapsed_s": 362.8119999999981,
+          "span_s": 0.6410000000032596,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 10545,
+          "count": 17,
+          "elapsed_s": 423.4369999999981,
+          "span_s": 0.6410000000032596,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 12061,
+          "count": 17,
+          "elapsed_s": 484.07800000000134,
+          "span_s": 0.6409999999996217,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 13577,
+          "count": 17,
+          "elapsed_s": 544.719000000001,
+          "span_s": 0.6399999999994179,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 15093,
+          "count": 17,
+          "elapsed_s": 605.344000000001,
+          "span_s": 0.6399999999994179,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 16610,
+          "count": 16,
+          "elapsed_s": 666.030999999999,
+          "span_s": 0.5940000000009604,
+          "raw_identical": false,
+          "temperatures_identical": true
+        },
+        {
+          "first_index": 18126,
+          "count": 17,
+          "elapsed_s": 726.655999999999,
+          "span_s": 0.6409999999996217,
+          "raw_identical": false,
+          "temperatures_identical": true
+        },
+        {
+          "first_index": 19641,
+          "count": 17,
+          "elapsed_s": 787.25,
+          "span_s": 0.6409999999996217,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 21157,
+          "count": 17,
+          "elapsed_s": 847.8909999999996,
+          "span_s": 0.6399999999994179,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 22673,
+          "count": 17,
+          "elapsed_s": 908.530999999999,
+          "span_s": 0.6409999999996217,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 24189,
+          "count": 17,
+          "elapsed_s": 969.155999999999,
+          "span_s": 0.6409999999996217,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 25706,
+          "count": 17,
+          "elapsed_s": 1029.844000000001,
+          "span_s": 0.6399999999994179,
+          "raw_identical": false,
+          "temperatures_identical": true
+        },
+        {
+          "first_index": 27221,
+          "count": 17,
+          "elapsed_s": 1090.436999999998,
+          "span_s": 0.6410000000032596,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 28737,
+          "count": 17,
+          "elapsed_s": 1151.061999999998,
+          "span_s": 0.6570000000028813,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 30065,
+          "count": 2,
+          "elapsed_s": 1204.186999999998,
+          "span_s": 0.03200000000288128,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 30253,
+          "count": 17,
+          "elapsed_s": 1211.7030000000013,
+          "span_s": 0.6409999999996217,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 31769,
+          "count": 17,
+          "elapsed_s": 1272.344000000001,
+          "span_s": 0.6399999999994179,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 33285,
+          "count": 18,
+          "elapsed_s": 1332.969000000001,
+          "span_s": 0.6869999999980791,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 34801,
+          "count": 17,
+          "elapsed_s": 1393.6090000000004,
+          "span_s": 0.6409999999996217,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 36317,
+          "count": 17,
+          "elapsed_s": 1454.25,
+          "span_s": 0.6409999999996217,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 37833,
+          "count": 17,
+          "elapsed_s": 1514.875,
+          "span_s": 0.6559999999990396,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 39349,
+          "count": 17,
+          "elapsed_s": 1575.5159999999996,
+          "span_s": 0.6399999999994179,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 40865,
+          "count": 17,
+          "elapsed_s": 1636.155999999999,
+          "span_s": 0.6409999999996217,
+          "raw_identical": false,
+          "temperatures_identical": false
+        },
+        {
+          "first_index": 42382,
+          "count": 16,
+          "elapsed_s": 1696.8280000000013,
+          "span_s": 0.5939999999973224,
+          "raw_identical": false,
+          "temperatures_identical": true
+        },
+        {
+          "first_index": 43897,
+          "count": 18,
+          "elapsed_s": 1757.4219999999987,
+          "span_s": 0.6870000000017171,
+          "raw_identical": false,
+          "temperatures_identical": false
+        }
+      ]
+    }
+  ],
+  "cameras": [
+    {
+      "name": "camera0",
+      "events": {
+        "events": [
+          {
+            "kind": "connected",
+            "camera_id": "USB\\VID_3474&PID_4962\\6&2A549464&0&2",
+            "startup_retries": 0
+          },
+          {
+            "kind": "recording_started",
+            "path": "recordings\\soak-20260907-30min\\camera0"
+          },
+          {
+            "kind": "recording_finished",
+            "path": "recordings\\soak-20260907-30min\\camera0",
+            "status": "COMPLETE",
+            "frames": 45008,
+            "error": null
+          },
+          {
+            "kind": "stopped"
+          }
+        ],
+        "exitcode": 0
+      },
+      "verification": {
+        "status": "PASS",
+        "camera_id": "USB\\VID_3474&PID_4962\\6&2A549464&0&2",
+        "frames": 45008,
+        "duration_s": 1801.875,
+        "fps": 24.977870274020116,
+        "max_arrival_gap_s": 0.0930000000007567,
+        "median_arrival_gap_s": 0.0459999999984575,
+        "p99_arrival_gap_s": 0.0470000000022992,
+        "accepted_sequence_gaps": 0,
+        "optical_pairs_checked": 45008,
+        "unique_optical_frames": 44548,
+        "temperature_values_checked": 2212233216,
+        "temperature_range_c": [
+          20.0375,
+          25.725
+        ],
+        "history_values_checked": 225040,
+        "first_last_raw_exact": true,
+        "source_files_unchanged": 7,
+        "source_hashes": {
+          "camera-session.json": "f6ef3a200a34512827486d02b09a4eea8806b3cfd3cd35e7bc905f810aea9617",
+          "first.frame": "c95f02780f6b50a3da707bde4b544c173265ec5df1562e07b32c0de83922a6d3",
+          "last.frame": "a3a66d1d1539b289204e0a3526c6029c55603299b98380b08c0995093d2403d1",
+          "optical.bin": "e8dd57c9ebf11e76f23df8c7dbf2a38bd586f312e2a3b3b659cc0f5720f241bd",
+          "optical.idx": "1deaff5cf158c08c950865435bfb4581804d453f8a01bc8337e41d3cbd7ccae7",
+          "thermal.idx": "84422e7db047966f9063f593725ac875a4733f0176b7a890273cb5028d70357f",
+          "thermal.jsonl.gz": "a2de4c78e3111fca48a8057ddead89a7df25628c5ded9d85c0ccd905aaacc02c"
+        },
+        "mp4_frames_decoded": 45048,
+        "mp4_duration_s": 1801.92,
+        "mp4_bytes": 880670222
+      },
+      "artifacts": {
+        "decoded-1.png": {
+          "bytes": 355549,
+          "sha256": "5d6908b1c6c2c5b54472e6e1c98b9745cbd556758eac01a2e38ddcf70c73a982"
+        },
+        "decoded-22524.png": {
+          "bytes": 546916,
+          "sha256": "fbf9ec565c47770990c5ff3759c34e5c0a9b5b474276caad1cd198941f494461"
+        },
+        "decoded-45048.png": {
+          "bytes": 558484,
+          "sha256": "bcd0d41cdecac4d4b7d2f58fba43cde1197c216bf00cef34066c3bf3b7d3b3cd"
+        },
+        "first-blend.png": {
+          "bytes": 514005,
+          "sha256": "f18fef520c812523c6097e0dcdc55433339e06e6e3fa405f594bb9add8ec2b6e"
+        },
+        "full-thermal.mp4": {
+          "bytes": 880670222,
+          "sha256": "cd4e359df751a8315dbb64580bcd0f03479b884c3d7fefb1c5876aa5bff33e0d"
+        },
+        "full-thermal.mp4.json": {
+          "bytes": 1563288,
+          "sha256": "4d5e00640a1c37e19e13b948a11b6b1b3416555dc98402e4719ba31ba1ed0c34"
+        },
+        "history.csv": {
+          "bytes": 37244994,
+          "sha256": "b396485625163d5bbae2c209f6929060fb2ea4b48c67ea96ea29d6c16886686a"
+        },
+        "last-blend.png": {
+          "bytes": 533363,
+          "sha256": "a78ad8cdff7c001bdb364c576c9a8df2284c4fcb590261f118c7f740ab607099"
+        },
+        "middle-blend.png": {
+          "bytes": 498603,
+          "sha256": "44fa5ca35092038cce9758eaeb336a70ed9354957cba0018a09869305cc3b61f"
+        }
+      },
+      "mp4_first_source_frame": 0,
+      "mp4_last_source_frame": 45007
+    },
+    {
+      "name": "camera1",
+      "events": {
+        "events": [
+          {
+            "kind": "connected",
+            "camera_id": "USB\\VID_3474&PID_4962\\YFDVS000000000001",
+            "startup_retries": 0
+          },
+          {
+            "kind": "recording_started",
+            "path": "recordings\\soak-20260907-30min\\camera1"
+          },
+          {
+            "kind": "recording_finished",
+            "path": "recordings\\soak-20260907-30min\\camera1",
+            "status": "COMPLETE",
+            "frames": 45010,
+            "error": null
+          },
+          {
+            "kind": "stopped"
+          }
+        ],
+        "exitcode": 0
+      },
+      "verification": {
+        "status": "PASS",
+        "camera_id": "USB\\VID_3474&PID_4962\\YFDVS000000000001",
+        "frames": 45010,
+        "duration_s": 1801.875,
+        "fps": 24.9789802289282,
+        "max_arrival_gap_s": 0.09400000000096043,
+        "median_arrival_gap_s": 0.0459999999984575,
+        "p99_arrival_gap_s": 0.0470000000022992,
+        "accepted_sequence_gaps": 0,
+        "optical_pairs_checked": 45010,
+        "unique_optical_frames": 44549,
+        "temperature_values_checked": 2212331520,
+        "temperature_range_c": [
+          20.35,
+          35.2875
+        ],
+        "history_values_checked": 225050,
+        "first_last_raw_exact": true,
+        "source_files_unchanged": 7,
+        "source_hashes": {
+          "camera-session.json": "b1f3c1a09235e91c56cb3b15d1eb825318c12b5f18fe0bce6278ac525cf1d08a",
+          "first.frame": "b83383b782115d508d03a42bc057e3cf8ab9c4a235ed846f81ae5fefcc1ffffa",
+          "last.frame": "836681335965fa551b8e31c0395b7ec5c9ee16586aa2471904200b86d342fa89",
+          "optical.bin": "aa791abb1ef9ec405495438b79bf063765758df2a75b3f08915d4640f3d70e53",
+          "optical.idx": "f0892bb94a9a43059e130deb422d0638db5a0b5f1029182e4bc454ca4a1c81f3",
+          "thermal.idx": "5076270b99db18e1a15f0bfa992c73b83f2d44ce5a07c12e3a24a251377dc432",
+          "thermal.jsonl.gz": "e86cc2356a8faeafc7440e6886c8f4fc45ce16c635057281e215c9c439d447be"
+        },
+        "mp4_frames_decoded": 45048,
+        "mp4_duration_s": 1801.92,
+        "mp4_bytes": 700851262
+      },
+      "artifacts": {
+        "decoded-1.png": {
+          "bytes": 200101,
+          "sha256": "3dc739a0489f3276b93f457c3dee195b542003aa5ab8ce552f662838719fbda6"
+        },
+        "decoded-22524.png": {
+          "bytes": 491608,
+          "sha256": "03d5ceffb1518b7675f394eb376a88cdc0167547c949d535f9a9a5fcd6673cef"
+        },
+        "decoded-45048.png": {
+          "bytes": 496001,
+          "sha256": "797d6663cd5e1190eda9f0d2ea162190ba6b616bbbb7c7cf0c4b905bc33a67b8"
+        },
+        "first-blend.png": {
+          "bytes": 715386,
+          "sha256": "859df141fac7dfe02f3daf24bb074d3ddfaeced91cdbc0b2889814a031e3664c"
+        },
+        "full-thermal.mp4": {
+          "bytes": 700851262,
+          "sha256": "1bd6a513dc07d9eab4522fffbaa32b723ff982fdf9ec26325f6c3aa7f62a9b5f"
+        },
+        "full-thermal.mp4.json": {
+          "bytes": 1562764,
+          "sha256": "789e79767f8abed1d8d71dc60b873b6a0fa73bfacddf92cc6065c0ea209c55a2"
+        },
+        "history.csv": {
+          "bytes": 37904479,
+          "sha256": "434102843a7f2ad4085f3801694602233d0603cd38608cfbbe2b27fbe758a9d0"
+        },
+        "last-blend.png": {
+          "bytes": 683133,
+          "sha256": "4fb933f510d29887ef158b8fbe5d9b54b8c85c8cfd88ad4f318a3939dfb84d68"
+        },
+        "middle-blend.png": {
+          "bytes": 653286,
+          "sha256": "daa306055b96554adcc653bc70c3ee04d81ffeaf9b72215543593f5a7da11c31"
+        }
+      },
+      "mp4_first_source_frame": 0,
+      "mp4_last_source_frame": 45009
+    }
+  ]
+}

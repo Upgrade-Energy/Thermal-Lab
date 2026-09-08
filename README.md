@@ -38,6 +38,10 @@ controller paths; the tested shared hub could not sustain both streams.
 TopView itself must be closed. See the [desktop guide](docs/Desktop-Guide.md).
 See [DEV5 optical verification](docs/Optical-Recording-Verification.md) for the
 two-camera recording checks and remaining limits.
+The [30-minute two-camera test](docs/Sustained-Camera-Verification.md) verified
+90,018 thermal/optical frame pairs, all recorded temperature histories and
+full-length video exports. It also documents brief source optical-image holds
+and the 146 GB combined archive size.
 
 ## Review a recording
 
@@ -105,7 +109,7 @@ The `thermal_lab` package is also installable with `python -m pip install .`.
 CI tests parsers, numerical decoding and recording without opening hardware.
 Hardware tests are run explicitly using the commands above.
 
-Next: longer capture and disconnect/recovery tests, advanced measurement tools,
+Next: disconnect/recovery tests, advanced measurement tools,
 and environmental correction.
 A later Power Lab integration should exchange
 run IDs, recording commands and selected measurements with freshness metadata.
