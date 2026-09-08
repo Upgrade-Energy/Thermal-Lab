@@ -25,6 +25,16 @@ class AlignmentToolTests(unittest.TestCase):
         t.press(None,True)
         t.point.assert_not_called();self.assertIsNone(t.start)
         self.assertIn('LEFT',t.message.get())
+
+    def test_zoomed_display_click_maps_to_original_sensor_coordinates(self):
+        t=self.tool();t.bounds=[(10,20,400,300)]*2;t.view_regions=[[.2,.3,.6,.8]]*2
+        self.assertEqual(t.point(SimpleNamespace(x=210,y=170)),(.4,.55))
+
+    def test_new_points_disable_apply_until_fit_review(self):
+        t=self.tool();t.frame={};t.target_selected=True;t.start=None;t.point_pairs=[[],[]]
+        t.guide=Value(False);t.zoom_target=Value(False);t.buttons=Mock();t.draw=Mock()
+        t.start_points();self.assertFalse(t.verified);self.assertTrue(t.point_mode);self.assertTrue(t.zoom_target.get())
+        t.apply();t.desktop.changed.assert_not_called()
     def tool(self):
         t=AlignmentTool.__new__(AlignmentTool)
         t.camera_id='camera-a';t.base=dict(dx=0,dy=0,scale=1,angle=0)

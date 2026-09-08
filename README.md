@@ -4,7 +4,10 @@ Standalone thermal camera capture, numerical measurements and recording.
 **Power Lab is not required.** This repository owns thermal-camera development;
 Power Lab integrates through an optional, versioned local interface.
 
-Version 0.1.0 DEV13 fixes [selected-area alignment](docs/Selected-Area-Alignment-Fix.md)
+Version 0.1.0 DEV14 improves [selected-subject fitting](docs/Subject-Alignment-DEV14.md)
+and adds zoomed shared-point guidance for targets such as faces. Automatic matching
+can still be ambiguous; perfect registration of every subject is not guaranteed.
+It includes the DEV13 [selected-area alignment fixes](docs/Selected-Area-Alignment-Fix.md)
 with outline matching, imported measurement rectangles and explicit preview/apply controls.
 Selected-area alignment does not require a checkerboard; ambiguous scenes offer paired-box guidance.
 It also includes an experimental [continuous regional overlay and measured camera calibration workflow](docs/Smart-Overlay.md).

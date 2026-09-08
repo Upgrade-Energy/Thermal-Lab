@@ -9,6 +9,31 @@ from .workspace import validate_settings
 class AlignmentCancelled(Exception): pass
 
 
+def alignment_from_points(thermal_points,optical_points):
+    """Fit corresponding normalized sensor points, independent of prior distance."""
+    fixed=np.asarray(thermal_points,dtype=float);moving=np.asarray(optical_points,dtype=float)
+    if fixed.shape!=moving.shape or fixed.ndim!=2 or fixed.shape[1]!=2 or not 3<=len(fixed)<=8:
+        raise ValueError('Match at least three shared points on this target (up to eight).')
+    if not np.isfinite(fixed).all() or not np.isfinite(moving).all() or np.any((fixed<0)|(fixed>1)) or np.any((moving<0)|(moving>1)):
+        raise ValueError('Shared points must be inside both images.')
+    fixed=fixed*[256,192];moving=moving*[256,192]
+    f=fixed-fixed.mean(axis=0);m=moving-moving.mean(axis=0)
+    if min(np.linalg.svd(f,compute_uv=False)[-1],np.linalg.svd(m,compute_uv=False)[-1])<1:
+        raise ValueError('Spread points across the target, not along one line.')
+    # x'=a*x-b*y+tx; y'=b*x+a*y+ty. No reflection or thermal resampling.
+    rows=[];values=[]
+    for (x,y),(u,v) in zip(moving,fixed):
+        rows.extend([[x,-y,1,0],[y,x,0,1]]);values.extend([u,v])
+    a,b,tx,ty=np.linalg.lstsq(rows,values,rcond=None)[0]
+    alignment=validate_settings(dict(alignment=dict(scale=math.hypot(a,b),angle=math.degrees(math.atan2(b,a)),
+        dx=tx-128+a*128-b*96,dy=ty-96+b*128+a*96)))['alignment']
+    predicted=moving@np.array([[a,b],[-b,a]])+[tx,ty]
+    errors=np.linalg.norm(predicted-fixed,axis=1)
+    if errors.max()>3:
+        raise ValueError('Shared points disagree by more than 3 thermal pixels. Undo and check matching features.')
+    return dict(alignment=alignment,rms_pixels=float(np.sqrt(np.mean(errors**2))),max_pixels=float(errors.max()))
+
+
 def valid_region(region):
     if not isinstance(region,(list,tuple)) or len(region)!=4:
         raise ValueError('Select a rectangular target region')

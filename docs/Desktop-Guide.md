@@ -1,4 +1,4 @@
-# Thermal Lab desktop — DEV13
+# Thermal Lab desktop — DEV14
 
 Launch `thermal-lab` after `python -m pip install ".[desktop]"`, or run
 `python scripts/run_thermal_lab.py` from the repository. Requires Windows x64
@@ -57,6 +57,28 @@ window is imported automatically. Click **Preview auto-alignment**, inspect the
 blended outline, then **Apply to live**. This tool does not require a checkerboard.
 Nothing changes in the live workspace until Apply. Cancel search
 stops the background matcher. Refresh pair takes another image pair.
+
+DEV14 searches scale and rotation around the selected subject and uses measured
+edges rather than artificial edges from the selection rectangle. A new subject
+is fitted independently; entering its distance is not required. Tight selections
+with weak or incompatible features can still be ambiguous.
+
+For a face or other target that remains misaligned, use **Match shared points**.
+The tool zooms into the target. Click a recognizable feature on the LEFT, then
+the same feature on the raw optical image on the RIGHT. Repeat for at least three
+points spread across the selected subject, such as both eyes and the nose if
+visible in both sensors. Click **Preview point fit**, inspect, then **Apply to live**.
+Use **Undo point** to correct a click; turn off **Zoom selected target** if the
+optical subject is outside the enlarged view. No distance or numerical offset is
+needed. The fit solves offset, uniform scale and rotation from the shared points.
+It rejects nearly collinear or inconsistent pairs. Its displayed residual measures
+agreement at your clicks, not independently measured registration accuracy.
+Preview auto-alignment preserves an existing three-point fit instead of drifting
+away from those constraints. Refreshing or selecting a new thermal area clears them.
+
+This changes overlay registration, not optical focus. A three-dimensional face
+can retain local differences between the two viewpoints; no similarity transform
+can guarantee every pixel corresponds perfectly. See [DEV14 verification](Subject-Alignment-DEV14.md).
 
 If matching is uncertain, the tool enables **Guide with optical target box**. Draw a box
 around the same object's outline on the raw optical image at right. The tool

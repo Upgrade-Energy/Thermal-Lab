@@ -25,7 +25,8 @@ def fit_edges(temperatures,optical,initial,region,*,guided=False,cancelled=lambd
     # Recover a silhouette when the rectangle encloses a thermally distinct object.
     candidates=[];crop=cv2.GaussianBlur(thermal[top:bottom,left:right],(5,5),1)
     h,w=crop.shape
-    for threshold in np.percentile(crop,np.arange(15,90,5)):
+    otsu=cv2.threshold(crop,0,255,cv2.THRESH_BINARY|cv2.THRESH_OTSU)[0]
+    for threshold in np.unique(np.r_[np.percentile(crop,np.arange(15,90,5)),otsu]):
         for polarity in (False,True):
             mask=np.uint8(crop>threshold if polarity else crop<threshold)
             count,labels,stats,centers=cv2.connectedComponentsWithStats(mask)
@@ -40,14 +41,25 @@ def fit_edges(temperatures,optical,initial,region,*,guided=False,cancelled=lambd
                 if bottom<191:border.extend(foreground[-1])
                 touching=np.mean(border) if border else 0
                 quality=(bw/w+bh/h)/2-2*touching-.2*np.linalg.norm((centers[label]-[w/2,h/2])/[w,h])
-                candidates.append((quality,foreground))
+                contour=cv2.morphologyEx(np.uint8(foreground),cv2.MORPH_GRADIENT,np.ones((3,3),np.uint8))>0
+                strength=float(np.mean(tm[top:bottom,left:right][contour]))/max(1,float(tm[top:bottom,left:right].max()))
+                candidates.append((quality+.2*strength,foreground,quality))
     silhouette=False;quality=0
     if candidates:
-        quality,mask=max(candidates,key=lambda item:item[0])
+        _,mask,quality=max(candidates,key=lambda item:item[0])
         if quality>.55:
             binary=np.zeros_like(thermal);binary[top:bottom,left:right]=np.uint8(mask)*255
-            te,ta,tm=edges(binary);silhouette=True
+            boundary=edges(binary)[0]
+            distance=cv2.distanceTransform(np.uint8(boundary==0),cv2.DIST_L2,3)
+            # The mask identifies the subject, but the measured gradients locate
+            # its actual edge. A thresholded mask alone can enlarge a soft edge.
+            te=np.where(distance<3,te,0).astype(np.uint8);silhouette=True
     selected=np.zeros_like(te,bool);selected[top:bottom,left:right]=True
+    if silhouette:
+        # Cropping a connected object must not invent edges along the selection
+        # box. Such edges previously pulled partially selected faces to the box.
+        selected[top:top+2,left:right]=False;selected[max(top,bottom-2):bottom,left:right]=False
+        selected[top:bottom,left:left+2]=False;selected[top:bottom,max(left,right-2):right]=False
     selected[:2]=False;selected[-2:]=False;selected[:,:2]=False;selected[:,-2:]=False
     y,x=np.where((te>0)&selected)
     # The selected rectangle describes the object's extent. Interior hotspots and
@@ -55,7 +67,8 @@ def fit_edges(temperatures,optical,initial,region,*,guided=False,cancelled=lambd
     boundary=np.minimum.reduce([(x-left)/max(1,right-left),(right-1-x)/max(1,right-left),
                                 (y-top)/max(1,bottom-top),(bottom-1-y)/max(1,bottom-top)])
     outer=boundary<.20
-    if not silhouette and np.count_nonzero(outer)>=25:x,y=x[outer],y[outer]
+    # A selection may be a patch inside a larger subject, not its bounding box.
+    # Keep interior evidence (eyes, nose, fingers) when no silhouette is available.
     if len(x)<25 or np.count_nonzero(oe)<25:raise ValueError('Too few shared outlines. Include the full target and a little background.')
     # Strong isolated thermal noise is not a useful object outline.
     if len(x)/max(1,roi.size)>.22:raise ValueError('Thermal target is too noisy for outline matching')
@@ -76,7 +89,7 @@ def fit_edges(temperatures,optical,initial,region,*,guided=False,cancelled=lambd
     thermal_fields=np.stack(thermal_fields)
     all_distances=cv2.distanceTransform(np.uint8(thermal_edges==0),cv2.DIST_L2,3)
     vy,vx=np.where(oe>0);va=oa[vy,vx]
-    started=time.monotonic();evaluations=0
+    started=time.monotonic();evaluations=0;radius=4
     def evaluate(p,details=False):
         nonlocal evaluations
         evaluations+=1
@@ -93,19 +106,19 @@ def fit_edges(temperatures,optical,initial,region,*,guided=False,cancelled=lambd
         bx=np.clip(ox,0,254.999);by=np.clip(oy,0,190.999);ix=bx.astype(int);iy=by.astype(int);fx=bx-ix;fy=by-iy
         b=np.int32(np.mod(angles-a,np.pi)/np.pi*bins)%bins
         distance=(fields[b,iy,ix]*(1-fx)*(1-fy)+fields[b,iy,ix+1]*fx*(1-fy)+fields[b,iy+1,ix]*(1-fx)*fy+fields[b,iy+1,ix+1]*fx*fy)*scale
-        closeness=np.exp(-.5*(distance/2)**2);closeness[~good]=0
+        closeness=np.exp(-.5*(distance/radius)**2);closeness[~good]=0
         value=float(np.average(closeness,weights=weights))
         fc,fs=math.cos(a)*scale,math.sin(a)*scale
         px=fc*(vx-128)-fs*(vy-96)+128+dx;py=fs*(vx-128)+fc*(vy-96)+96+dy
         selected=(px>=left)&(px<right)&(py>=top)&(py<bottom)
         boundary=np.minimum.reduce([(px-left)/max(1,right-left),(right-px)/max(1,right-left),(py-top)/max(1,bottom-top),(bottom-py)/max(1,bottom-top)])
-        selected&=boundary<.20
+        if silhouette:selected&=boundary<.20
         if np.count_nonzero(selected)<15:return (-1,0) if details else -1
         tx=np.clip(px[selected],0,255).astype(int);ty=np.clip(py[selected],0,191).astype(int)
         vb=np.int32(np.mod(va[selected]+a,np.pi)/np.pi*bins)%bins
         reverse_distance=np.minimum(thermal_fields[vb,ty,tx],100)
         nearby=all_distances[ty,tx]<5
-        precision=float(np.mean(np.exp(-.5*(reverse_distance[nearby]/2)**2))) if nearby.any() else 0
+        precision=float(np.mean(np.exp(-.5*(reverse_distance[nearby]/radius)**2))) if nearby.any() else 0
         value=.7*value+.3*precision
         # A weak prior breaks ties without rewarding a visually unrelated rotation.
         value-=.002*abs(angle-base[3])+.0001*(abs(dx-base[0])+abs(dy-base[1]))
@@ -125,17 +138,28 @@ def fit_edges(temperatures,optical,initial,region,*,guided=False,cancelled=lambd
         p=base.copy();p[2]*=scale;seeds.append((evaluate(p),p))
     fitted=[]
     for score,p in seeds:
-        for step in ([3,3,.025,1],[1,1,.01,.3],[.25,.25,.002,.1]):
+        for radius,step in ((4,[3,3,.025,1]),(2,[1,1,.01,.3]),(2,[.25,.25,.002,.1])):
+            score=evaluate(p)
             for _ in range(20):
                 choices=[(score,p)]
                 for axis in range(4):
                     for sign in (-1,1):
                         q=p.copy();q[axis]+=step[axis]*sign;choices.append((evaluate(q),q))
+                        if axis>=2:
+                            # Change scale/rotation around the selected subject,
+                            # not the sensor center (which couples distance with
+                            # an unintended translation for off-center faces).
+                            center=np.array([(left+right)/2-128,(top+bottom)/2-96])
+                            angle=math.radians(p[3]);c,s=math.cos(angle),math.sin(angle)
+                            anchor=np.array([[c,s],[-s,c]])@(center-p[:2])/p[2]
+                            angle=math.radians(q[3]);c,s=math.cos(angle),math.sin(angle)
+                            q=q.copy();q[:2]=center-q[2]*(np.array([[c,-s],[s,c]])@anchor)
+                            choices.append((evaluate(q),q))
                 value,q=max(choices,key=lambda item:item[0])
                 if value<=score+1e-5:break
                 score,p=value,q
         fitted.append((score,p))
-    score,p=max(fitted,key=lambda item:item[0]);score,support=evaluate(p,True)
+    score,p=max(fitted,key=lambda item:item[0]);score,support=evaluate(p,True);baseline=evaluate(base)
     alternatives=[v for v,q in fitted if np.linalg.norm((p-q)/[6,6,.08,3])>1]
     margin=score-max(alternatives) if alternatives else score
     orientation_bins=len(np.unique(np.int32(angles/(np.pi/4))))
