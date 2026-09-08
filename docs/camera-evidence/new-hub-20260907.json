@@ -1,0 +1,569 @@
+{
+  "status": "FAILED_SIMULTANEOUS_CAPTURE",
+  "usb_before": {
+    "schema_version": 1,
+    "utc": "2026-09-08T01:46:16.764660+00:00",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "C:\\Users\\MatthewBarnard\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+    "scope": "TC001 Max only; standard USB metadata; no vendor commands",
+    "devices": [
+      {
+        "instance_id": "USB\\VID_3474&PID_4962\\8&264A60BF&0&1",
+        "pdo_name": "\\Device\\USBPDO-13",
+        "parent": "USB\\VID_05E3&PID_0610\\7&336735f7&0&4",
+        "location_paths": [
+          "PCIROOT(0)#PCI(0801)#PCI(0003)#USBROOT(0)#USB(2)#USB(4)#USB(1)",
+          "ACPI(_SB_)#ACPI(PCI0)#ACPI(GP17)#ACPI(XHC0)#ACPI(RHUB)#ACPI(PRT2)#USB(4)#USB(1)"
+        ],
+        "name": "TC001 Max",
+        "status": "OK",
+        "problem_code": 0,
+        "problem_status": null,
+        "service": "WinUSB",
+        "driver_inf": "oem95.inf",
+        "driver_version": "6.1.7600.16385",
+        "compatible_ids": [
+          "USB\\COMPAT_VID_3474&DevClass_00&SubClass_00&Prot00",
+          "USB\\COMPAT_VID_3474&DevClass_00&SubClass_00",
+          "USB\\COMPAT_VID_3474&DevClass_00",
+          "USB\\DevClass_00&SubClass_00&Prot_00",
+          "USB\\DevClass_00&SubClass_00",
+          "USB\\DevClass_00",
+          "USB\\COMPOSITE"
+        ]
+      },
+      {
+        "instance_id": "USB\\VID_3474&PID_4962\\YFDVS000000000001",
+        "pdo_name": "\\Device\\USBPDO-9",
+        "parent": "USB\\VID_2109&PID_2822\\6&32455ec1&0&2",
+        "location_paths": [
+          "PCIROOT(0)#PCI(0801)#PCI(0003)#USBROOT(0)#USB(2)#USB(1)",
+          "ACPI(_SB_)#ACPI(PCI0)#ACPI(GP17)#ACPI(XHC0)#ACPI(RHUB)#ACPI(PRT2)#USB(1)"
+        ],
+        "name": "TC001 Max",
+        "status": "OK",
+        "problem_code": 0,
+        "problem_status": null,
+        "service": "WinUSB",
+        "driver_inf": "oem95.inf",
+        "driver_version": "6.1.7600.16385",
+        "compatible_ids": [
+          "USB\\COMPAT_VID_3474&DevClass_00&SubClass_00&Prot00",
+          "USB\\COMPAT_VID_3474&DevClass_00&SubClass_00",
+          "USB\\COMPAT_VID_3474&DevClass_00",
+          "USB\\DevClass_00&SubClass_00&Prot_00",
+          "USB\\DevClass_00&SubClass_00",
+          "USB\\DevClass_00",
+          "USB\\COMPOSITE"
+        ]
+      }
+    ],
+    "interfaces": [
+      {
+        "path": "\\\\?\\USB#VID_3474&PID_4962#YFDVS000000000001#{fe7a2189-e1fa-ae49-d5c9-603519b1cdbb}",
+        "opened": true,
+        "endpoints": [
+          {
+            "type": 2,
+            "id": 130,
+            "max_packet_size": 512,
+            "interval": 0
+          },
+          {
+            "type": 2,
+            "id": 5,
+            "max_packet_size": 512,
+            "interval": 0
+          }
+        ],
+        "winusb_speed_code": 3,
+        "usb_version_bcd": "0200",
+        "device_descriptor_hex": "12010002ef02014074346249000201020301",
+        "interface": {
+          "length": 9,
+          "type": 4,
+          "number": 0,
+          "alternate": 0,
+          "endpoint_count": 2,
+          "interface_class": 255,
+          "subclass": 240,
+          "protocol": 0,
+          "string_index": 4
+        },
+        "associated_interfaces": [
+          {
+            "length": 9,
+            "type": 4,
+            "number": 1,
+            "alternate": 0,
+            "endpoint_count": 0,
+            "interface_class": 255,
+            "subclass": 240,
+            "protocol": 1,
+            "string_index": 5,
+            "endpoints": []
+          },
+          {
+            "length": 9,
+            "type": 4,
+            "number": 1,
+            "alternate": 1,
+            "endpoint_count": 2,
+            "interface_class": 255,
+            "subclass": 240,
+            "protocol": 1,
+            "string_index": 5,
+            "endpoints": [
+              {
+                "type": 2,
+                "id": 129,
+                "max_packet_size": 512,
+                "interval": 0
+              },
+              {
+                "type": 2,
+                "id": 4,
+                "max_packet_size": 512,
+                "interval": 0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "path": "\\\\?\\USB#VID_3474&PID_4962#8&264a60bf&0&1#{fe7a2189-e1fa-ae49-d5c9-603519b1cdbb}",
+        "opened": true,
+        "endpoints": [
+          {
+            "type": 2,
+            "id": 130,
+            "max_packet_size": 512,
+            "interval": 0
+          },
+          {
+            "type": 2,
+            "id": 5,
+            "max_packet_size": 512,
+            "interval": 0
+          }
+        ],
+        "winusb_speed_code": 3,
+        "usb_version_bcd": "0200",
+        "device_descriptor_hex": "12010002ef02014074346249000201020301",
+        "interface": {
+          "length": 9,
+          "type": 4,
+          "number": 0,
+          "alternate": 0,
+          "endpoint_count": 2,
+          "interface_class": 255,
+          "subclass": 240,
+          "protocol": 0,
+          "string_index": 4
+        },
+        "associated_interfaces": [
+          {
+            "length": 9,
+            "type": 4,
+            "number": 1,
+            "alternate": 0,
+            "endpoint_count": 0,
+            "interface_class": 255,
+            "subclass": 240,
+            "protocol": 1,
+            "string_index": 5,
+            "endpoints": []
+          },
+          {
+            "length": 9,
+            "type": 4,
+            "number": 1,
+            "alternate": 1,
+            "endpoint_count": 2,
+            "interface_class": 255,
+            "subclass": 240,
+            "protocol": 1,
+            "string_index": 5,
+            "endpoints": [
+              {
+                "type": 2,
+                "id": 129,
+                "max_packet_size": 512,
+                "interval": 0
+              },
+              {
+                "type": 2,
+                "id": 4,
+                "max_packet_size": 512,
+                "interval": 0
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "errors": [],
+    "capture_verified": false,
+    "temperatures_verified": false,
+    "recording_verified": false,
+    "status": "USB_ACCESS_VERIFIED"
+  },
+  "usb_after": {
+    "schema_version": 1,
+    "utc": "2026-09-08T01:48:11.229933+00:00",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "C:\\Users\\MatthewBarnard\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+    "scope": "TC001 Max only; standard USB metadata; no vendor commands",
+    "devices": [
+      {
+        "instance_id": "USB\\VID_3474&PID_4962\\8&264A60BF&0&1",
+        "pdo_name": "\\Device\\USBPDO-13",
+        "parent": "USB\\VID_05E3&PID_0610\\7&336735f7&0&4",
+        "location_paths": [
+          "PCIROOT(0)#PCI(0801)#PCI(0003)#USBROOT(0)#USB(2)#USB(4)#USB(1)",
+          "ACPI(_SB_)#ACPI(PCI0)#ACPI(GP17)#ACPI(XHC0)#ACPI(RHUB)#ACPI(PRT2)#USB(4)#USB(1)"
+        ],
+        "name": "TC001 Max",
+        "status": "OK",
+        "problem_code": 0,
+        "problem_status": null,
+        "service": "WinUSB",
+        "driver_inf": "oem95.inf",
+        "driver_version": "6.1.7600.16385",
+        "compatible_ids": [
+          "USB\\COMPAT_VID_3474&DevClass_00&SubClass_00&Prot00",
+          "USB\\COMPAT_VID_3474&DevClass_00&SubClass_00",
+          "USB\\COMPAT_VID_3474&DevClass_00",
+          "USB\\DevClass_00&SubClass_00&Prot_00",
+          "USB\\DevClass_00&SubClass_00",
+          "USB\\DevClass_00",
+          "USB\\COMPOSITE"
+        ]
+      },
+      {
+        "instance_id": "USB\\VID_3474&PID_4962\\YFDVS000000000001",
+        "pdo_name": "\\Device\\USBPDO-9",
+        "parent": "USB\\VID_2109&PID_2822\\6&32455ec1&0&2",
+        "location_paths": [
+          "PCIROOT(0)#PCI(0801)#PCI(0003)#USBROOT(0)#USB(2)#USB(1)",
+          "ACPI(_SB_)#ACPI(PCI0)#ACPI(GP17)#ACPI(XHC0)#ACPI(RHUB)#ACPI(PRT2)#USB(1)"
+        ],
+        "name": "TC001 Max",
+        "status": "OK",
+        "problem_code": 0,
+        "problem_status": null,
+        "service": "WinUSB",
+        "driver_inf": "oem95.inf",
+        "driver_version": "6.1.7600.16385",
+        "compatible_ids": [
+          "USB\\COMPAT_VID_3474&DevClass_00&SubClass_00&Prot00",
+          "USB\\COMPAT_VID_3474&DevClass_00&SubClass_00",
+          "USB\\COMPAT_VID_3474&DevClass_00",
+          "USB\\DevClass_00&SubClass_00&Prot_00",
+          "USB\\DevClass_00&SubClass_00",
+          "USB\\DevClass_00",
+          "USB\\COMPOSITE"
+        ]
+      }
+    ],
+    "interfaces": [
+      {
+        "path": "\\\\?\\USB#VID_3474&PID_4962#YFDVS000000000001#{fe7a2189-e1fa-ae49-d5c9-603519b1cdbb}",
+        "opened": true,
+        "endpoints": [
+          {
+            "type": 2,
+            "id": 130,
+            "max_packet_size": 512,
+            "interval": 0
+          },
+          {
+            "type": 2,
+            "id": 5,
+            "max_packet_size": 512,
+            "interval": 0
+          }
+        ],
+        "winusb_speed_code": 3,
+        "usb_version_bcd": "0200",
+        "device_descriptor_hex": "12010002ef02014074346249000201020301",
+        "interface": {
+          "length": 9,
+          "type": 4,
+          "number": 0,
+          "alternate": 0,
+          "endpoint_count": 2,
+          "interface_class": 255,
+          "subclass": 240,
+          "protocol": 0,
+          "string_index": 4
+        },
+        "associated_interfaces": [
+          {
+            "length": 9,
+            "type": 4,
+            "number": 1,
+            "alternate": 0,
+            "endpoint_count": 0,
+            "interface_class": 255,
+            "subclass": 240,
+            "protocol": 1,
+            "string_index": 5,
+            "endpoints": []
+          },
+          {
+            "length": 9,
+            "type": 4,
+            "number": 1,
+            "alternate": 1,
+            "endpoint_count": 2,
+            "interface_class": 255,
+            "subclass": 240,
+            "protocol": 1,
+            "string_index": 5,
+            "endpoints": [
+              {
+                "type": 2,
+                "id": 129,
+                "max_packet_size": 512,
+                "interval": 0
+              },
+              {
+                "type": 2,
+                "id": 4,
+                "max_packet_size": 512,
+                "interval": 0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "path": "\\\\?\\USB#VID_3474&PID_4962#8&264a60bf&0&1#{fe7a2189-e1fa-ae49-d5c9-603519b1cdbb}",
+        "opened": true,
+        "endpoints": [
+          {
+            "type": 2,
+            "id": 130,
+            "max_packet_size": 512,
+            "interval": 0
+          },
+          {
+            "type": 2,
+            "id": 5,
+            "max_packet_size": 512,
+            "interval": 0
+          }
+        ],
+        "winusb_speed_code": 3,
+        "usb_version_bcd": "0200",
+        "device_descriptor_hex": "12010002ef02014074346249000201020301",
+        "interface": {
+          "length": 9,
+          "type": 4,
+          "number": 0,
+          "alternate": 0,
+          "endpoint_count": 2,
+          "interface_class": 255,
+          "subclass": 240,
+          "protocol": 0,
+          "string_index": 4
+        },
+        "associated_interfaces": [
+          {
+            "length": 9,
+            "type": 4,
+            "number": 1,
+            "alternate": 0,
+            "endpoint_count": 0,
+            "interface_class": 255,
+            "subclass": 240,
+            "protocol": 1,
+            "string_index": 5,
+            "endpoints": []
+          },
+          {
+            "length": 9,
+            "type": 4,
+            "number": 1,
+            "alternate": 1,
+            "endpoint_count": 2,
+            "interface_class": 255,
+            "subclass": 240,
+            "protocol": 1,
+            "string_index": 5,
+            "endpoints": [
+              {
+                "type": 2,
+                "id": 129,
+                "max_packet_size": 512,
+                "interval": 0
+              },
+              {
+                "type": 2,
+                "id": 4,
+                "max_packet_size": 512,
+                "interval": 0
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "errors": [],
+    "capture_verified": false,
+    "temperatures_verified": false,
+    "recording_verified": false,
+    "status": "USB_ACCESS_VERIFIED"
+  },
+  "downstream_hub_parent": "USB\\VID_2109&PID_2822\\6&32455ec1&0&2",
+  "production_capture": {
+    "status": "FAILED",
+    "error": "TC001 Max frame_get failed (-625); close TopView if it owns the camera",
+    "requested_seconds": 60,
+    "output": "C:\\Users\\MatthewBarnard\\Documents\\ChatGPT\\Thermal-Lab\\recordings\\new-hub-20260907-test1"
+  },
+  "events": {
+    "camera0-events.json": {
+      "events": [
+        {
+          "kind": "connected",
+          "camera_id": "USB\\VID_3474&PID_4962\\8&264A60BF&0&1",
+          "startup_retries": 1
+        },
+        {
+          "kind": "error",
+          "message": "TC001 Max frame_get failed (-625); close TopView if it owns the camera"
+        },
+        {
+          "kind": "stopped"
+        }
+      ],
+      "exitcode": 0
+    },
+    "camera1-events.json": {
+      "events": [
+        {
+          "kind": "connected",
+          "camera_id": "USB\\VID_3474&PID_4962\\YFDVS000000000001",
+          "startup_retries": 1
+        },
+        {
+          "kind": "recording_started",
+          "path": "recordings\\new-hub-20260907-test1\\camera1"
+        },
+        {
+          "kind": "recording_finished",
+          "path": "recordings\\new-hub-20260907-test1\\camera1",
+          "status": "COMPLETE",
+          "frames": 15,
+          "error": null
+        },
+        {
+          "kind": "stopped"
+        }
+      ],
+      "exitcode": 0
+    }
+  },
+  "experiments": {
+    "runtime\\new-hub-rate-probes\\pair-25\\0\\result.json": {
+      "camera_id": "USB\\VID_3474&PID_4962\\8&264A60BF&0&1",
+      "requested_fps": 25,
+      "status": "FAILED",
+      "frames": 20,
+      "error": "Traceback (most recent call last):\n  File \"C:\\Users\\MatthewBarnard\\Documents\\ChatGPT\\Thermal-Lab\\runtime\\probe_new_hub.py\", line 17, in child\n    frame,raw=camera.read()\n              ^^^^^^^^^^^^^\n  File \"C:\\Users\\MatthewBarnard\\Documents\\ChatGPT\\Thermal-Lab\\thermal_lab\\tc001_max.py\", line 183, in read\n    result = self._read()\n             ^^^^^^^^^^^^\n  File \"C:\\Users\\MatthewBarnard\\Documents\\ChatGPT\\Thermal-Lab\\thermal_lab\\tc001_max.py\", line 200, in _read\n    self._check('frame_get', self.dll.irdvs_camera_frame_get(self.handle, 0, self.buffer, FRAME_BYTES))\n  File \"C:\\Users\\MatthewBarnard\\Documents\\ChatGPT\\Thermal-Lab\\thermal_lab\\tc001_max.py\", line 178, in _check\n    raise OSError(f'TC001 Max {operation} failed ({result}); close TopView if it owns the camera')\nOSError: TC001 Max frame_get failed (-625); close TopView if it owns the camera\n",
+      "exitcode": 0
+    },
+    "runtime\\new-hub-rate-probes\\pair-25\\1\\result.json": {
+      "camera_id": "USB\\VID_3474&PID_4962\\YFDVS000000000001",
+      "requested_fps": 25,
+      "status": "CAPTURED",
+      "frames": 337,
+      "span_s": 13.43800000000192,
+      "fps": 25.003720791780918,
+      "rejected": 8,
+      "startup_retries": 0,
+      "first_range": [
+        21.4125,
+        32.225
+      ],
+      "last_range": [
+        20.6625,
+        31.725
+      ],
+      "exitcode": 0
+    },
+    "runtime\\new-hub-rate-probes\\single0-25\\0\\result.json": {
+      "camera_id": "USB\\VID_3474&PID_4962\\8&264A60BF&0&1",
+      "requested_fps": 25,
+      "status": "CAPTURED",
+      "frames": 194,
+      "span_s": 7.718000000000757,
+      "fps": 25.006478362267565,
+      "rejected": 2,
+      "startup_retries": 0,
+      "first_range": [
+        21.725,
+        27.5375
+      ],
+      "last_range": [
+        21.35,
+        27.225
+      ],
+      "exitcode": 0
+    },
+    "runtime\\new-hub-rate-probes\\single1-25\\1\\result.json": {
+      "camera_id": "USB\\VID_3474&PID_4962\\YFDVS000000000001",
+      "requested_fps": 25,
+      "status": "CAPTURED",
+      "frames": 196,
+      "span_s": 7.797000000002299,
+      "fps": 25.009619084255803,
+      "rejected": 2,
+      "startup_retries": 0,
+      "first_range": [
+        21.35,
+        32.1625
+      ],
+      "last_range": [
+        21.1,
+        31.9125
+      ],
+      "exitcode": 0
+    }
+  },
+  "short_archive_verification": {
+    "status": "PASS",
+    "camera_id": "USB\\VID_3474&PID_4962\\YFDVS000000000001",
+    "frames": 15,
+    "duration_s": 0.5630000000019209,
+    "fps": 24.86678507984411,
+    "max_arrival_gap_s": 0.0470000000022992,
+    "median_arrival_gap_s": 0.0459999999984575,
+    "p99_arrival_gap_s": 0.0470000000022992,
+    "accepted_sequence_gaps": 0,
+    "optical_pairs_checked": 15,
+    "unique_optical_frames": 15,
+    "temperature_values_checked": 737280,
+    "temperature_range_c": [
+      19.0375,
+      29.9125
+    ],
+    "history_values_checked": 75,
+    "first_last_raw_exact": true,
+    "source_files_unchanged": 7,
+    "source_hashes": {
+      "camera-session.json": "8624517a84d53d9a100192549ea9cd47fa6d4ceac1a6db6ed51226b5472cfb6c",
+      "first.frame": "cab4245b5898a2a6faae4e69da034eea6c4f5494716a8b171881e57bfb0b713c",
+      "last.frame": "b47cbee408378f40a784289a8741863cfa6f7aa831f154f7cbae422d0663d807",
+      "optical.bin": "413627ed9e31e61774889660bfc65ac64e17a35703489b6221479cfd86506da0",
+      "optical.idx": "9930361482a30ce0cef63b49a7fe441c37d86beda83596ffc63daac0f5b5f9db",
+      "thermal.idx": "ee47113d02320c16e899ae08afaafd206e4309bb9038e7502f32123e0d9268a4",
+      "thermal.jsonl.gz": "992d324806a457eb101d2b7f363ea68b8dec1faeee64a4b7b57d8b6e84ddf5e4"
+    },
+    "mp4_frames_decoded": 16,
+    "mp4_duration_s": 0.64,
+    "mp4_bytes": 137168
+  }
+}

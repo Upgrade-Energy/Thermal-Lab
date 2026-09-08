@@ -75,3 +75,34 @@ device descriptor so future connection changes can be assessed directly.
 
 References: [Microsoft USB FAQ](https://learn.microsoft.com/en-us/windows-hardware/drivers/usbcon/usb-faq--introductory-level),
 [WinUsb_QueryDeviceInformation](https://learn.microsoft.com/en-us/windows/win32/api/winusb/nf-winusb-winusb_querydeviceinformation).
+
+## Replacement hub retest, 18:46 PDT
+
+The replacement layout introduces upstream hub `VID_2109&PID_2822` at
+`USBROOT(0)#USB(2)` on XHC0. The serial-based camera connects to its port 1.
+The other camera connects through downstream hub `VID_05E3&PID_0610` on its
+port 4, then port 1. Windows explicitly reports the downstream hub's parent
+as the VIA hub. These can be internal hub layers; enumeration alone does not
+identify how many physical enclosures the user has. Both cameras still report
+USB descriptor 0200 and share the upstream USB 2 connection.
+
+The production 60-second recording attempt failed early with native
+`frame_get -625`. Both workers needed one startup retry; one camera saved only
+15 paired frames before normal safety shutdown of the pair. Each camera then
+passed an individual capture on the unchanged layout: 194 frames / 7.718 seconds
+and 196 frames / 7.797 seconds, both about 25 fps. A second concurrent test again
+failed: the downstream camera returned `-625` after 20 frames, while the other
+captured 337 frames over 13.438 seconds, rejecting eight unusable buffers.
+
+Inspected both production preview images: ceiling light and nearby computer/mat
+are visible in their corresponding optical and thermal views. The short saved
+archive passed all 737,280 temperature-value checks, 15 optical hashes/pairs,
+75 history values, PNG exports, 16-frame MP4 decoding and unchanged-source
+hashes. Its duration is only 0.563 seconds; this is **not** a successful sustained
+or simultaneous two-camera test. Both workers were stopped after testing.
+
+[Replacement-hub evidence](camera-evidence/new-hub-20260907.json) records the
+new topology, both failed concurrent attempts, individual controls and short
+archive verification. Local artifacts are in `recordings/new-hub-20260907-test1`,
+`runtime/new-hub-rate-probes` and `runtime/new-hub-short-recording-verification`.
+No production behavior was changed for this retest.
