@@ -1,4 +1,4 @@
-# Thermal Lab desktop — DEV7
+# Thermal Lab desktop — DEV11
 
 Launch `thermal-lab` after `python -m pip install ".[desktop]"`, or run
 `python scripts/run_thermal_lab.py` from the repository. Requires Windows x64
@@ -43,6 +43,40 @@ apply with Enter or when leaving the field and keep the sliders synchronized. Lo
 alignment prevents changes; Reset restores the default optical transform.
 This initial transform is not a factory registration calibration. Adjust it
 for the target plane and distance; objects at different depths may not align.
+
+### Auto alignment and working distance
+
+Open **Auto-align / distance…** next to Lock alignment. The tool freezes a fresh
+thermal/optical pair while live acquisition continues. Keep the target stationary
+and draw a rectangle around one object or surface on the thermal image. Click
+**Auto-align selected target**, inspect the blended outline, then **Apply reviewed
+alignment**. Nothing changes in the live workspace until Apply. Cancel search
+stops the background matcher. Refresh pair takes another image pair.
+
+If matching is uncertain, enable **Guide with optical target box** and draw a box
+around the same object's outline on the raw optical image at right. The tool
+estimates offset and scale from the paired boxes, retaining the current rotation.
+Auto-align can then refine locally. An uncertain refinement retains the box-based
+estimate; inspect it before applying. Manual sliders remain useful for fine tuning
+and initial rotation. The frozen preview uses a fixed 180° display orientation.
+
+Save a reviewed result with a target name such as Near bench or Far wall. Optionally
+enter its measured working distance in metres. Profiles are specific to the camera
+identity and stored in `alignment-profiles/` beside the workspace file. Preview
+profile recalls one. To estimate another working distance, save at least two
+profiles at different known distances, enter a distance between them and click
+**Predict at distance**. Check the preview and Apply. Prediction interpolates in
+inverse distance and refuses extrapolation. Update profiles after changing the
+camera mounting or optical geometry.
+
+This is target-plane alignment, not automatic depth measurement or a factory
+calibration. The camera does not supply target distance. One global overlay cannot
+simultaneously remove parallax for objects at different depths. Profile prediction
+is an estimate requiring visual review; perspective and occlusion remain possible.
+Automatic matching is experimental and may require paired-box guidance when hot
+features do not correspond to visible outlines. Match scores are not accuracy
+percentages. Alignment never resamples the recorded temperature grid, changes
+measurement coordinates, or reduces raw optical recording quality.
 
 Choose Iron, Rainbow, White hot or Black hot. Automatic range follows the
 current thermal minimum/maximum; disable it and enter low/high Celsius values

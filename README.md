@@ -4,7 +4,11 @@ Standalone thermal camera capture, numerical measurements and recording.
 **Power Lab is not required.** This repository owns thermal-camera development;
 Power Lab integrates through an optional, versioned local interface.
 
-Version 0.1.0 DEV10 adds an optional [Power Lab integration service](docs/Power-Lab-Integration.md)
+Version 0.1.0 DEV11 adds a [target auto-alignment tool and near/far profiles](docs/Desktop-Guide.md#auto-alignment-and-working-distance),
+with frozen previews, paired-box guidance and working-distance interpolation.
+Automatic matching is experimental; every result requires visual review.
+See [alignment verification and limits](docs/Auto-Alignment-Verification.md).
+It includes an optional [Power Lab integration service](docs/Power-Lab-Integration.md)
 with Power Lab browser camera selection, full numerical live views, and linked thermal/optical playback. Power Lab electrical runs
 remain simulated. It includes faster lossless optical compression, USB connection
 guidance, and immediate stale-frame clearing after camera failure. It preserves

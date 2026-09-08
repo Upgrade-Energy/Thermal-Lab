@@ -54,7 +54,7 @@ class Desktop:
         self.alignment_sliders={k:tk.DoubleVar(value=v) for k,v in self.settings['alignment'].items()}
         header=ttk.Frame(root,padding=(18,12));header.pack(fill='x')
         ttk.Label(header,text='THERMAL LAB',font=('Segoe UI',17,'bold')).pack(side='left')
-        ttk.Label(header,text='LIVE INSPECTION  /  DEV10',foreground='#8ba4be').pack(side='left',padx=22)
+        ttk.Label(header,text='LIVE INSPECTION  /  DEV11',foreground='#8ba4be').pack(side='left',padx=22)
         self.connect_button=ttk.Button(header,text='Connect camera',command=self.connect);self.connect_button.pack(side='right')
         self.record_button=ttk.Button(header,text='Record session',command=self.toggle_record,state='disabled');self.record_button.pack(side='right',padx=8)
         self.optical_check=ttk.Checkbutton(header,text='Optical video · lossless',variable=self.record_optical)
@@ -106,6 +106,7 @@ class Desktop:
                       command=lambda value,k=key:self.slide_alignment(k,value)).pack(side='left',fill='x',expand=True,padx=5)
         row=ttk.Frame(right);row.pack(fill='x',pady=6)
         ttk.Checkbutton(row,text='Lock alignment',variable=self.locked).pack(side='left')
+        ttk.Button(row,text='Auto-align / distance…',command=self.open_alignment_tool).pack(side='left',padx=5)
         ttk.Button(row,text='Reset',command=self.reset_alignment).pack(side='right')
         ttk.Separator(right).pack(fill='x',pady=10)
         row=ttk.Frame(right);row.pack(fill='x')
@@ -438,6 +439,14 @@ class Desktop:
             var.set(f"{self.settings['alignment'][key]:.3f}")
             self.alignment_sliders[key].set(self.settings['alignment'][key])
 
+    def open_alignment_tool(self):
+        if getattr(self,'alignment_tool',None) and not self.alignment_tool.closed:
+            self.alignment_tool.window.lift();return
+        try:
+            from .alignment_tool import AlignmentTool
+            self.alignment_tool=AlignmentTool(self)
+        except Exception as exc:self.status.set('Alignment tool: '+str(exc))
+
     def slide_alignment(self,key,value):
         if self.locked.get():self.sync_alignment();return
         self.settings['alignment'][key]=float(value)
@@ -512,6 +521,7 @@ class Desktop:
             except Exception as exc:messagebox.showerror('Load failed',str(exc))
 
     def close(self):
+        if getattr(self,'alignment_tool',None) and not self.alignment_tool.closed:self.alignment_tool.close()
         self.closing=True
         if self.process and self.process.is_alive():
             self.send('stop');self.stop_deadline=time.monotonic()+7;self.status.set('Closing camera and finalizing recording…')
