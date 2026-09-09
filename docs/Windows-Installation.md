@@ -1,6 +1,6 @@
 # Thermal Lab: installation and updates
 
-Run `Thermal-Lab-Setup-0.1.0-dev15.exe` on Windows 10/11 x64. No separate Python installation is needed. The installer works for the current Windows user and creates Desktop and Start menu shortcuts. Choose Finish, then open Thermal Lab.
+Run `Thermal-Lab-Setup-0.1.0-dev16.exe` on Windows 10/11 x64. No separate Python installation is needed. The installer works for the current Windows user and creates Desktop and Start menu shortcuts. Choose Finish, then open Thermal Lab.
 
 Thermal Lab also has Start menu shortcuts for **Power Lab service** and **Review recordings**. Install TOPDON TopView and its drivers separately; our installer does not redistribute proprietary camera DLLs. In Thermal Lab, select its TopView folder. To let Power Lab use the cameras, disconnect them from Thermal Lab live inspection, open **Power Lab service**, and choose **Start service**. Power Lab's Thermal Lab link uses this local service for selected-camera measurements and grouped recording start/stop. Closing the service window leaves it running; use **Stop service** after disconnecting Power Lab's camera group to stop it.
 

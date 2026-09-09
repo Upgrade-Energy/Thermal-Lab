@@ -100,7 +100,7 @@ Section "Install"
   FileOpen $0 "$INSTDIR\Launch.vbs.tmp" w
   FileWrite $0 'Option Explicit$\r$\nDim fs, base, stream, version, expression, app, mode, shell$\r$\n'
   FileWrite $0 'Set fs = CreateObject("Scripting.FileSystemObject")$\r$\nbase = fs.GetParentFolderName(WScript.ScriptFullName)$\r$\n'
-  FileWrite $0 'Set stream = fs.OpenTextFile(fs.BuildPath(base, "current.txt"), 1)$\r$\nversion = Trim(stream.ReadAll)$\r$\nstream.Close$\r$\n'
+  FileWrite $0 'Set stream = fs.OpenTextFile(fs.BuildPath(base, "current.txt"), 1)$\r$\nversion = Trim(stream.ReadLine)$\r$\nstream.Close$\r$\n'
   FileWrite $0 'Set expression = New RegExp$\r$\nexpression.Pattern = "^[0-9A-Za-z.-]+$$"$\r$\nIf Not expression.Test(version) Then WScript.Quit 1$\r$\n'
   FileWrite $0 'app = fs.BuildPath(fs.BuildPath(base, "versions"), version)$\r$\nmode = "app"$\r$\nIf WScript.Arguments.Count > 0 Then mode = WScript.Arguments(0)$\r$\n'
   FileWrite $0 'If mode <> "app" And mode <> "updates" And mode <> "service" And mode <> "review" Then WScript.Quit 1$\r$\n'

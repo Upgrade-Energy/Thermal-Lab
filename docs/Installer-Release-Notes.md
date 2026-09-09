@@ -1,4 +1,7 @@
-# Thermal Lab 0.1.0-dev15
+# Thermal Lab 0.1.0-dev16
+
+Fixes Windows shortcut startup by reading the single-line version pointer correctly. Both application and update shortcuts are exercised on Windows before this release is published. Reinstall uses a fresh directory so an open updater cannot lock the replacement runtime.
+
 
 - Standalone Windows 10/11 x64 installer with bundled Python, Tcl/Tk and required desktop dependencies.
 - Desktop and Start menu shortcuts, plus Check for updates.

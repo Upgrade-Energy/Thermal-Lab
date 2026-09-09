@@ -45,7 +45,15 @@ def open_shortcut(shortcut, launcher, mode):
                 matched.append(process)
                 return True
         return False
-    wait_for(find_process)
+    try:
+        wait_for(find_process)
+    except AssertionError:
+        from PIL import ImageGrab
+        ImageGrab.grab().save(ROOT/'windows-evidence/shortcut-failure.png')
+        installed = launcher.parent.parent.parent
+        result = subprocess.run(['cscript.exe','//nologo',str(installed/'Launch.vbs'),mode],capture_output=True,text=True,timeout=15)
+        print('Shortcut diagnostics:',result.returncode,result.stdout,result.stderr)
+        raise
     return matched[0]
 
 

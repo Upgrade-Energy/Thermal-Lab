@@ -1,4 +1,4 @@
-# Thermal-Lab 0.1.0-dev15: installer verification
+# Thermal-Lab 0.1.0-dev16: installer verification
 
 Implemented a native NSIS Windows x64 Setup EXE, per-user shortcuts and uninstall entry, an isolated pinned Python 3.14.7 + Tcl/Tk 9 runtime, and Check for updates. Thermal Lab also bundles pinned NumPy, Pillow, OpenCV, LZ4 and FFmpeg wheels and provides a visible integration-service manager.
 
@@ -11,10 +11,8 @@ Implemented a native NSIS Windows x64 Setup EXE, per-user shortcuts and uninstal
 - Native Tk update dialogs: available-release, no-release, offline/access-failure states; Thermal Lab service launcher. These are Linux-rendered windows with fixtures, not Windows or live GitHub release evidence.
 - NSIS compilation and complete staged package checksums, required runtime modules/files and dependency hashes.
 
-## Not yet verified
+## Windows qualification
 
-Windows execution of the Setup EXE, bundled application and updater; Windows DPAPI storage and named-mutex behavior; real GitHub asset download and installation. A prepared Windows workflow covers initial install, application launch, blocking install while active, independent updater launch, reinstall, shortcuts and user-data preservation.
+Initial Windows testing passed installation, direct application/updater launch, busy-install refusal, DPAPI credential encryption, reinstall while the updater was open, data preservation, and a real GitHub installer download. The subsequent test opening the actual Start menu shortcut exposed a launcher defect: VBScript Trim does not remove the newline from the version pointer. The initial DEV5/DEV15 installers have been withdrawn from the update feed.
 
-GitHub source publication was rejected by automatic approval review because it requires explicit upload authorization. No remote source, branch, workflow or release was created in this turn. Accordingly the release workflow has not run and there is no new hosted release yet. Do not describe this local package as Windows-qualified or live-update-qualified.
-
-The source changes and workflow are ready locally for publication after that authorization. Physical camera and electrical bench verification remain separate from installer qualification. No camera capture, output enable, driver installation or physical power test occurred here.
+The corrected DEV6/DEV16 launchers read the pointer with ReadLine. The release workflow now opens both the application and updater through their generated Windows shortcuts before publishing. See the workflow associated with the current release tag for final Windows and GitHub download evidence. Physical lab-computer, instrument and camera tests remain separate from installer qualification.

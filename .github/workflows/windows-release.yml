@@ -10,6 +10,26 @@ concurrency:
   group: windows-release-${{ github.ref }}
   cancel-in-progress: false
 jobs:
+  withdraw_known_broken_installers:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Hide superseded installers with the confirmed shortcut defect
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          python - <<'PYCODE'
+          import json, subprocess
+          for version in json.load(open('release.json')).get('withdrawn_versions', []):
+              tag = 'v' + version
+              result = subprocess.run(['gh', 'release', 'view', tag, '--json', 'isDraft'], capture_output=True, text=True)
+              if result.returncode == 0 and not json.loads(result.stdout)['isDraft']:
+                  subprocess.run(['gh', 'release', 'edit', tag, '--draft=true'], check=True)
+          PYCODE
   build:
     runs-on: ubuntu-latest
     steps:

@@ -2,6 +2,9 @@
   "app_id": "ThermalLab",
   "name": "Thermal Lab",
   "repository": "Upgrade-Energy/Thermal-Lab",
-  "version": "0.1.0-dev15",
-  "asset_prefix": "Thermal-Lab-Setup-"
+  "version": "0.1.0-dev16",
+  "asset_prefix": "Thermal-Lab-Setup-",
+  "withdrawn_versions": [
+    "0.1.0-dev15"
+  ]
 }
