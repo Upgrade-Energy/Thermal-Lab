@@ -48,6 +48,9 @@ def main():
     assert (Path(os.environ['APPDATA'])/'Microsoft/Windows/Start Menu/Programs/Upgrade Energy'/f"{settings['name']}.lnk").exists()
     evidence=ROOT/'windows-evidence';evidence.mkdir(exist_ok=True)
     child=subprocess.Popen([str(runtime),str(launcher),'app'])
+    # Exercise current-user Windows credential encryption without real credentials.
+    subprocess.run([str(version/'runtime/python.exe'),'-c',
+        "from lab_update import _protect; value=b'ci-synthetic-read-access'; encrypted=_protect(value); assert encrypted != value; assert _protect(encrypted, True) == value"],cwd=version,check=True,timeout=30)
     updater=None
     try:
         wait_for(lambda:app_running(app));assert child.poll() is None
@@ -75,6 +78,8 @@ def main():
         # The separate updater remains open while the installer replaces the selected version.
         result=subprocess.run([str(installer),'/S'],timeout=240);assert result.returncode==0,result.returncode
         assert updater.poll() is None
+        assert (installed/'current.txt').read_text().strip()!=pointer, 'Reinstall must use a fresh directory'
+        assert version.is_dir(), 'Previous runtime must remain available to the updater'
         assert sentinel.read_text()=='User settings and recordings must survive.'
         assert thermal_saved.read_text()=='Original camera layout marker'
         close_windows(updater.pid);updater.wait(timeout=15)
@@ -82,7 +87,7 @@ def main():
         wait_for(lambda:not (installed/'current.txt').exists())
         assert sentinel.read_text()=='User settings and recordings must survive.'
         assert thermal_saved.read_text()=='Original camera layout marker'
-        (evidence/'verification.json').write_text(json.dumps(dict(app=app,version=settings['version'],install=True,app_launch=True,busy_install_blocked=True,update_dialog=True,reinstall=True,settings_preserved=True,uninstall_preserves_data=True,hardware_tested=False),indent=2))
+        (evidence/'verification.json').write_text(json.dumps(dict(app=app,version=settings['version'],install=True,app_launch=True,busy_install_blocked=True,update_dialog=True,credential_encryption=True,reinstall=True,settings_preserved=True,uninstall_preserves_data=True,hardware_tested=False),indent=2))
         print('PASS: Windows install, app and updater launch, busy-install lock, reinstall and data preservation')
     finally:
         for process in [child,updater]:

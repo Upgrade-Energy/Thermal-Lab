@@ -11,6 +11,7 @@ SetCompressor /SOLID lzma
 ShowInstDetails show
 BrandingText "Upgrade Energy · @APP_NAME@ @VERSION@"
 Var Gate
+Var VersionDir
 !define MUI_ABORTWARNING
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_INSTFILES
@@ -69,7 +70,17 @@ FunctionEnd
 !insertmacro AcquireGate "un"
 
 Section "Install"
-  SetOutPath "$INSTDIR\versions\@BUILD_ID@"
+  CreateDirectory "$INSTDIR\versions"
+  ; Reserve a fresh directory even when reinstalling the same build. An open
+  ; updater may still use the previous runtime; never overwrite its files.
+  ClearErrors
+  GetTempFileName $VersionDir "$INSTDIR\versions"
+  ${If} ${Errors}
+    SetErrorLevel 4
+    Abort "Could not reserve an installation directory."
+  ${EndIf}
+  Delete $VersionDir
+  SetOutPath $VersionDir
   ClearErrors
   File /r "@PAYLOAD@/*"
   ${If} ${Errors}
@@ -78,7 +89,7 @@ Section "Install"
     Abort
   ${EndIf}
   DetailPrint "Verifying the bundled runtime and application before activation..."
-  nsExec::ExecToLog '"$INSTDIR\versions\@BUILD_ID@\runtime\python.exe" "$INSTDIR\versions\@BUILD_ID@\scripts\installer_smoke.py" --activate "$INSTDIR"'
+  nsExec::ExecToLog '"$VersionDir\runtime\python.exe" "$VersionDir\scripts\installer_smoke.py" --activate "$INSTDIR"'
   Pop $0
   ${If} $0 != 0
     MessageBox MB_ICONSTOP "Installation validation failed. The previous version and all recordings are retained. Open installation details for the error." /SD IDOK
