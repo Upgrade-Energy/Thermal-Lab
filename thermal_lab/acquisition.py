@@ -19,6 +19,8 @@ from .optical_recording import OpticalRecorder,CODEC
 
 
 def worker(directory, commands, previews, events, camera_id=None):
+    from lab_update import hold_app_lease
+    hold_app_lease("ThermalLab")
     recorder=None; optical=None; destination=None; manifest=None; last_raw=None; record_origin=0
     settings=validate_settings({}); revision=0; camera=None
     parent=multiprocessing.parent_process();parent_watch_stop=threading.Event()

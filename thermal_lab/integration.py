@@ -250,6 +250,8 @@ def make_server(service,token,port=0):
 
 
 def main():
+    from lab_update import hold_app_lease
+    hold_app_lease("ThermalLab")
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--topview-directory',required=True,type=Path)
     parser.add_argument('--recordings',type=Path,default=Path.home()/'Thermal-Lab-Recordings')

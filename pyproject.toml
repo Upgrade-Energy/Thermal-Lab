@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "upgrade-energy-thermal-lab"
-version = "0.1.0.dev14"
+version = "0.1.0.dev15"
 description = "Standalone thermal camera capture, numerical measurements and recording"
 requires-python = ">=3.12"
 dependencies = []
@@ -19,3 +19,6 @@ thermal-lab-service = "thermal_lab.integration:main"
 
 [tool.setuptools.packages.find]
 include = ["thermal_lab*"]
+
+[tool.setuptools]
+py-modules = ["lab_update"]

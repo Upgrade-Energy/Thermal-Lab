@@ -54,7 +54,7 @@ class Desktop:
         self.alignment_sliders={k:tk.DoubleVar(value=v) for k,v in self.settings['alignment'].items()}
         header=ttk.Frame(root,padding=(18,12));header.pack(fill='x')
         ttk.Label(header,text='THERMAL LAB',font=('Segoe UI',17,'bold')).pack(side='left')
-        ttk.Label(header,text='LIVE INSPECTION  /  DEV14',foreground='#8ba4be').pack(side='left',padx=22)
+        ttk.Label(header,text='LIVE INSPECTION  /  DEV15',foreground='#8ba4be').pack(side='left',padx=22)
         self.connect_button=ttk.Button(header,text='Connect camera',command=self.connect);self.connect_button.pack(side='right')
         self.record_button=ttk.Button(header,text='Record session',command=self.toggle_record,state='disabled');self.record_button.pack(side='right',padx=8)
         self.optical_check=ttk.Checkbutton(header,text='Optical video · lossless',variable=self.record_optical)
@@ -71,6 +71,10 @@ class Desktop:
         self.refresh_button=ttk.Button(cameras,text='Refresh',command=self.refresh_cameras);self.refresh_button.pack(side='left')
         ttk.Button(cameras,text='Review recordings',command=self.review_recordings).pack(side='left',padx=5)
         ttk.Button(cameras,text='Open another camera window',command=self.another_camera).pack(side='left',padx=8)
+        utility=ttk.Frame(root,padding=(18,0,18,6));utility.pack(fill='x')
+        from lab_update import open_updates
+        ttk.Button(utility,text='Check for updates',command=open_updates).pack(side='right')
+        ttk.Button(utility,text='Power Lab service',command=self.open_service).pack(side='right',padx=8)
         self.connection_info=tk.StringVar(value='Checking camera connections…')
         ttk.Label(root,textvariable=self.connection_info,padding=(18,4),foreground='#d7c991',wraplength=1350).pack(fill='x')
         ttk.Label(root,textvariable=self.status,padding=(18,9),foreground='#72d7c5').pack(fill='x')
@@ -165,6 +169,11 @@ class Desktop:
         subprocess.Popen(command,cwd=str(Path(__file__).resolve().parents[1]),
                          creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
 
+    def open_service(self):
+        from .service_manager import save_preferences
+        save_preferences(self.path.get(), self.args.recordings)
+        subprocess.Popen([sys.executable,"-m","thermal_lab.service_manager"], cwd=str(Path(__file__).resolve().parents[1]), creationflags=getattr(subprocess,"CREATE_NO_WINDOW",0))
+
     def review_recordings(self):
         command=[sys.executable,'-m','thermal_lab.review','--recordings',str(self.args.recordings)]
         if self.record_path and not self.recording:command+=['--session',str(self.record_path)]
@@ -194,6 +203,8 @@ class Desktop:
             except queue.Full:self.status.set('Camera command queue is full; retry after it responds')
 
     def connect(self):
+        from .service_manager import save_preferences
+        save_preferences(self.path.get(), self.args.recordings)
         if self.process and self.process.is_alive():
             self.send('stop');self.stop_deadline=time.monotonic()+7
             self.invalidate_stream()
@@ -540,12 +551,19 @@ class Desktop:
 
 
 def main():
+    from lab_update import hold_app_lease
+    hold_app_lease("ThermalLab")
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--topview-directory',type=Path)
     parser.add_argument('--recordings',type=Path,default=Path.home()/'Thermal-Lab-Recordings')
     parser.add_argument('--workspace',type=Path,default=Path.home()/'.thermal-lab/workspace.json')
     parser.add_argument('--camera-id',help='Windows PnP camera identity; indexes are never persisted')
-    args=parser.parse_args();root=tk.Tk();Desktop(root,args);root.mainloop()
+    args=parser.parse_args()
+    if args.topview_directory is None:
+        from .service_manager import preferences
+        saved=preferences().get("topview_directory")
+        if saved:args.topview_directory=Path(saved)
+    root=tk.Tk();Desktop(root,args);root.mainloop()
 
 
 if __name__=='__main__':main()

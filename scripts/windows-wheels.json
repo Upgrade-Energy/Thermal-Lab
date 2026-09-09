@@ -1,0 +1,27 @@
+[
+  {
+    "filename": "imageio_ffmpeg-0.6.0-py3-none-win_amd64.whl",
+    "sha256": "02fa47c83703c37df6bfe4896aab339013f62bf02c5ebf2dce6da56af04ffc0a",
+    "requirement": "imageio-ffmpeg==0.6.0"
+  },
+  {
+    "filename": "lz4-4.4.5-cp314-cp314-win_amd64.whl",
+    "sha256": "92159782a4502858a21e0079d77cdcaade23e8a5d252ddf46b0652604300d7be",
+    "requirement": "lz4==4.4.5"
+  },
+  {
+    "filename": "numpy-2.5.3-cp314-cp314-win_amd64.whl",
+    "sha256": "2c25dfa72943e4336ddb6b0ee4277b47a0c85bede0807530ec68103bf58e2c10",
+    "requirement": "numpy==2.5.3"
+  },
+  {
+    "filename": "opencv_python_headless-4.14.0.94-cp37-abi3-win_amd64.whl",
+    "sha256": "cbed65415b8f6a9541c705afe3e64795840524d0ff3bc58f507826284a1dc64b",
+    "requirement": "opencv-python-headless==4.14.0.94"
+  },
+  {
+    "filename": "pillow-12.3.0-cp314-cp314-win_amd64.whl",
+    "sha256": "fdafc9cce40277e0f7a0feabce0ee50dd2fa1800f3b38015e51296b5e814048d",
+    "requirement": "pillow==12.3.0"
+  }
+]

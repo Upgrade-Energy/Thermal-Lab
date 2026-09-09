@@ -4,7 +4,9 @@ Standalone thermal camera capture, numerical measurements and recording.
 **Power Lab is not required.** This repository owns thermal-camera development;
 Power Lab integrates through an optional, versioned local interface.
 
-Version 0.1.0 DEV14 improves [selected-subject fitting](docs/Subject-Alignment-DEV14.md)
+Version 0.1.0 DEV15 adds a standalone Windows installer, Check for updates, and a Power Lab service launcher.
+
+The included DEV14 functionality improves [selected-subject fitting](docs/Subject-Alignment-DEV14.md)
 and adds zoomed shared-point guidance for targets such as faces. Automatic matching
 can still be ambiguous; perfect registration of every subject is not guaranteed.
 It includes the DEV13 [selected-area alignment fixes](docs/Selected-Area-Alignment-Fix.md)
@@ -44,6 +46,12 @@ See the [TopView feature comparison and proposed UI priorities](docs/TopView-Fea
 for overlay alignment, precise measurement placement and recording/playback scope.
 
 ## Open the desktop app
+
+Run `Thermal-Lab-Setup-0.1.0-dev15.exe`, then open the **Thermal Lab** desktop shortcut.
+Python and desktop dependencies are bundled. See [installation and updates](docs/Windows-Installation.md).
+TopView and its camera drivers are still required for physical capture.
+
+### Running from source
 
 Install Python 3.12+ x64 with Tcl/Tk support, then install the desktop dependencies:
 
@@ -149,3 +157,7 @@ development verified on 7 September 2026. Historical evidence is labeled as
 pre-extraction. New changes to the camera adapter and tools belong here.
 The legacy `Local\PowerLabTC001MaxCapture` mutex name is intentionally retained
 to prevent old and new capture workers from opening the same camera together.
+
+## Windows installer and updates
+
+See [Windows installation and updates](docs/Windows-Installation.md). Run the standalone Setup EXE, then use **Check for updates** for future packaged releases.

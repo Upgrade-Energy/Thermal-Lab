@@ -8,3 +8,9 @@ build/
 *.egg-info/
 *.dll
 *.exe
+
+build/
+dist/
+windows-evidence/
+docs/screenshots-dev5/
+docs/screenshots-dev15/
