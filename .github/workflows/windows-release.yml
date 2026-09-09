@@ -46,7 +46,7 @@ jobs:
         with:
           name: windows-installer
           path: dist
-      - run: python -m pip install Pillow
+      - run: python -m pip install Pillow psutil
       - name: Install, launch, busy-update and preservation checks
         run: python scripts/verify_windows_install.py
       - uses: actions/upload-artifact@v4
@@ -67,6 +67,7 @@ jobs:
           name: windows-installer
           path: dist
       - name: Publish a new version after Windows verification
+        id: publish
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
@@ -80,11 +81,14 @@ jobs:
           flags=()
           if [[ "$version" == *dev* || "$version" == *rc* || "$version" == *beta* || "$version" == *alpha* ]]; then flags+=(--prerelease); fi
           gh release create "v$version" dist/*-Setup-*.exe dist/*-Setup-*.exe.sha256 --target "$GITHUB_SHA" --title "$name $version" --notes-file docs/Installer-Release-Notes.md "${flags[@]}"
+          echo "created=true" >> "$GITHUB_OUTPUT"
       - name: Verify real GitHub update discovery and download
+        if: steps.publish.outputs.created == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: python scripts/verify_release_download.py
       - uses: actions/upload-artifact@v4
+        if: steps.publish.outputs.created == 'true'
         with:
           name: release-verification
           path: release-evidence

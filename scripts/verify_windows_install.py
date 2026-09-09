@@ -7,6 +7,7 @@ import subprocess
 import sys
 import time
 import urllib.request
+import psutil
 
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
 from lab_update import app_running
@@ -33,6 +34,21 @@ def close_windows(pid):
     user.EnumWindows(visit,0)
 
 
+def open_shortcut(shortcut, launcher, mode):
+    """Use the same Windows shortcut and VBS launcher the lab user opens."""
+    os.startfile(str(shortcut))
+    matched = []
+    def find_process():
+        for process in psutil.process_iter(['cmdline']):
+            args = process.info['cmdline'] or []
+            if args and args[-1] == mode and any(os.path.normcase(arg) == os.path.normcase(str(launcher)) for arg in args):
+                matched.append(process)
+                return True
+        return False
+    wait_for(find_process)
+    return matched[0]
+
+
 def main():
     assert os.name=='nt'
     settings=json.loads((ROOT/'release.json').read_text());app=settings['app_id']
@@ -45,15 +61,16 @@ def main():
     pointer=(installed/'current.txt').read_text().strip();version=installed/'versions'/pointer
     runtime=version/'runtime/pythonw.exe';launcher=version/'launch_installed.py'
     assert (installed/'Launch.vbs').is_file()
-    assert (Path(os.environ['APPDATA'])/'Microsoft/Windows/Start Menu/Programs/Upgrade Energy'/f"{settings['name']}.lnk").exists()
+    shortcuts=Path(os.environ['APPDATA'])/'Microsoft/Windows/Start Menu/Programs/Upgrade Energy'
+    assert (shortcuts/f"{settings['name']}.lnk").exists()
     evidence=ROOT/'windows-evidence';evidence.mkdir(exist_ok=True)
-    child=subprocess.Popen([str(runtime),str(launcher),'app'])
+    child=open_shortcut(shortcuts/f"{settings['name']}.lnk",launcher,'app')
     # Exercise current-user Windows credential encryption without real credentials.
     subprocess.run([str(version/'runtime/python.exe'),'-c',
         "from lab_update import _protect; value=b'ci-synthetic-read-access'; encrypted=_protect(value); assert encrypted != value; assert _protect(encrypted, True) == value"],cwd=version,check=True,timeout=30)
     updater=None
     try:
-        wait_for(lambda:app_running(app));assert child.poll() is None
+        wait_for(lambda:app_running(app));assert child.is_running()
         time.sleep(3)
         if app=='PowerLab':
             url=(data/'launch-url.txt').read_text().strip()
@@ -64,7 +81,7 @@ def main():
         result=subprocess.run([str(installer),'/S'],timeout=60)
         assert result.returncode==3,('Running app must block installation',result.returncode)
         assert (installed/'current.txt').read_text().strip()==pointer
-        assert child.poll() is None
+        assert child.is_running()
         if app=='PowerLab':
             import re
             token=re.search(r'name="powerlab-token" content="([^"]+)"',html).group(1)
@@ -72,12 +89,12 @@ def main():
             urllib.request.urlopen(request,timeout=10).close()
         else:close_windows(child.pid)
         child.wait(timeout=25);wait_for(lambda:not app_running(app))
-        updater=subprocess.Popen([str(runtime),str(launcher),'updates'])
-        time.sleep(4);assert updater.poll() is None
+        updater=open_shortcut(shortcuts/f"{settings['name']} - Check for updates.lnk",launcher,'updates')
+        time.sleep(4);assert updater.is_running()
         ImageGrab.grab().save(evidence/'check-for-updates.png')
         # The separate updater remains open while the installer replaces the selected version.
         result=subprocess.run([str(installer),'/S'],timeout=240);assert result.returncode==0,result.returncode
-        assert updater.poll() is None
+        assert updater.is_running()
         assert (installed/'current.txt').read_text().strip()!=pointer, 'Reinstall must use a fresh directory'
         assert version.is_dir(), 'Previous runtime must remain available to the updater'
         assert sentinel.read_text()=='User settings and recordings must survive.'
@@ -87,11 +104,11 @@ def main():
         wait_for(lambda:not (installed/'current.txt').exists())
         assert sentinel.read_text()=='User settings and recordings must survive.'
         assert thermal_saved.read_text()=='Original camera layout marker'
-        (evidence/'verification.json').write_text(json.dumps(dict(app=app,version=settings['version'],install=True,app_launch=True,busy_install_blocked=True,update_dialog=True,credential_encryption=True,reinstall=True,settings_preserved=True,uninstall_preserves_data=True,hardware_tested=False),indent=2))
+        (evidence/'verification.json').write_text(json.dumps(dict(app=app,version=settings['version'],install=True,app_launch=True,shortcuts_launched=True,busy_install_blocked=True,update_dialog=True,credential_encryption=True,reinstall=True,settings_preserved=True,uninstall_preserves_data=True,hardware_tested=False),indent=2))
         print('PASS: Windows install, app and updater launch, busy-install lock, reinstall and data preservation')
     finally:
         for process in [child,updater]:
-            if process and process.poll() is None:process.terminate();process.wait(timeout=10)
+            if process and process.is_running():process.terminate();process.wait(timeout=10)
 
 
 if __name__=='__main__':main()
