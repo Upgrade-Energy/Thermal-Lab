@@ -560,12 +560,19 @@ class Desktop:
 
 
 def main():
+    from lab_update import hold_app_lease
+    hold_app_lease('ThermalLab')
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--topview-directory',type=Path)
     parser.add_argument('--recordings',type=Path,default=Path.home()/'Thermal-Lab-Recordings')
     parser.add_argument('--workspace',type=Path,default=Path.home()/'.thermal-lab/workspace.json')
     parser.add_argument('--camera-id',help='Windows PnP camera identity; indexes are never persisted')
-    args=parser.parse_args();root=tk.Tk();Desktop(root,args);root.mainloop()
+    args=parser.parse_args()
+    if args.topview_directory is None:
+        from .service_manager import preferences
+        saved=preferences().get('topview_directory')
+        if saved:args.topview_directory=Path(saved)
+    root=tk.Tk();Desktop(root,args);root.mainloop()
 
 
 if __name__=='__main__':main()

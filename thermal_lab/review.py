@@ -459,6 +459,8 @@ class Review:
 
 
 def main():
+    from lab_update import hold_app_lease
+    hold_app_lease('ThermalLab')
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--session',type=Path)
     parser.add_argument('--recordings',type=Path,default=Path.home()/'Thermal-Lab-Recordings')
