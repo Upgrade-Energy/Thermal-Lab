@@ -54,11 +54,11 @@ def render_frame(recording,index,options):
     values=measurement_values(frame,settings) if options['settings'] is not None else frame.get('measurements',{})
     if options['labels']:
         draw=ImageDraw.Draw(picture);font=label_font()
-        def label(x,y,text,color='white'):
+        def label(x,y,text,color='white',header=False):
             # Keep labels within the image, including geometry near its edges.
             while draw.textlength(text,font=font)>picture.width-16 and len(text)>4:text=text[:-4]+'…'
             box=draw.textbbox((0,0),text,font=font);width=box[2];height=box[3]-box[1]
-            x=max(4,min(x,picture.width-width-8));y=max(4,min(y,picture.height-height-10))
+            x=max(4,min(x,picture.width-width-8));y=max(4 if header else 38,min(y,picture.height-height-10))
             draw.rectangle((x-3,y-3,x+width+3,y+height+5),fill='#111923')
             draw.text((x,y-box[1]),text,font=font,fill=color)
         for kind in ('points','areas'):
@@ -75,9 +75,10 @@ def render_frame(recording,index,options):
                 else:draw.ellipse((x-5,y-5,x+5,y+5),outline='#67ffe0',width=2)
                 value=values.get(item['id'],{})
                 text=f"{value['value']:.3f} °C" if 'value' in value else ' / '.join(f'{value[k]:.2f}' for k in ('min','mean','max') if k in value)+' °C (min/mean/max)'
-                label(x+9,y-24,item['name']+' · '+text,'#67ffe0')
+                color='#ffb389' if item.get('tracking')=='hottest' else '#81d7ff' if item.get('tracking')=='coldest' else '#67ffe0'
+                label(x+9,y-24,item['name']+' · '+text,color)
         basis='ANALYSIS' if options['settings'] is not None else 'RECORDED'
-        label(8,8,f"{basis} · {options['mode']} · frame {index+1} · {frame['elapsed_s']:.3f} s · {limits[0]:.1f} to {limits[1]:.1f} °C apparent")
+        label(8,8,f"{basis} · {options['mode']} · frame {index+1} · {frame['elapsed_s']:.3f} s · {limits[0]:.1f} to {limits[1]:.1f} °C apparent",header=True)
     return picture,dict(source_frame=index,source_elapsed_s=frame['elapsed_s'],measurements=values)
 
 

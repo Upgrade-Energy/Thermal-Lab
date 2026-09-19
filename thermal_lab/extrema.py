@@ -31,9 +31,18 @@ def draw_extrema(canvas,markers,viewport,rotation,tag='extrema'):
         bounds=canvas.bbox(label);w=bounds[2]-bounds[0]+16;h=bounds[3]-bounds[1]+10
         if w>right-left or h>bottom-top:
             canvas.delete(label);continue
-        lx=max(left,min(px+13,right-w));ly=max(top,min(py-h-9,bottom-h))
-        if any(lx<b[2] and lx+w>b[0] and ly<b[3] and ly+h>b[1] for b in boxes):
-            ly=max(top,min(py+14,bottom-h))
+        def overlap(location):
+            lx,ly=location
+            return sum(max(0,min(lx+w,b[2])-max(lx,b[0]))*max(0,min(ly+h,b[3])-max(ly,b[1])) for b in boxes)
+        candidates=[]
+        for cy in [py-h-9,py+14]+[edge for b in boxes for edge in (b[3]+6,b[1]-h-6)]:
+            for cx in (px+13,px-w-13):
+                location=(max(left,min(cx,right-w)),max(top,min(cy,bottom-h)))
+                candidates.append(location)
+                if not overlap(location):break
+            if not overlap(candidates[-1]):break
+        lx,ly=min(candidates,key=overlap)
+        canvas.create_line(px,py,max(lx,min(px,lx+w)),max(ly,min(py,ly+h)),fill=color,width=1,tags=tag)
         canvas.coords(label,lx+8,ly+5)
         box=canvas.create_rectangle(lx,ly,lx+w,ly+h,fill='#14243a',outline=color,width=1,tags=tag)
         canvas.tag_raise(label,box);boxes.append((lx,ly,lx+w,ly+h))

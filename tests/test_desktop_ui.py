@@ -79,6 +79,16 @@ class NativeWorkspaceTests(unittest.TestCase):
         app.selected=region;app.remove()
         self.assertFalse(app.settings['areas']);self.assertFalse(app.settings['points'])
 
+    def test_coincident_tracker_labels_remain_readable(self):
+        from thermal_lab.extrema import draw_extrema
+        app=self.desktop();app.canvas.delete('all')
+        marks=[dict(label=name,x=128,y=96,value=22.,color='white') for name in ('Hottest image','Coldest image','Hottest region','Coldest region')]
+        draw_extrema(app.canvas,marks,(0,0,2,256,192,0,512,0,384),0,tag='trackers')
+        boxes=[app.canvas.coords(i) for i in app.canvas.find_withtag('trackers') if app.canvas.type(i)=='rectangle']
+        self.assertEqual(len(boxes),4)
+        for i,a in enumerate(boxes):
+            for b in boxes[i+1:]:self.assertFalse(a[0]<b[2] and a[2]>b[0] and a[1]<b[3] and a[3]>b[1])
+
     def test_review_tracking_replays_and_analysis_can_add_to_old_frames(self):
         from test_tracking import fixture
         from thermal_lab.analysis import Analysis
