@@ -128,6 +128,12 @@ class Desktop:
         subprocess.Popen(command,cwd=str(Path(__file__).resolve().parents[1]),
                          creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
 
+    def open_service(self):
+        from .service_manager import save_preferences
+        save_preferences(self.path.get(),self.args.recordings)
+        subprocess.Popen([sys.executable,'-m','thermal_lab.service_manager'],
+                         cwd=str(Path(__file__).resolve().parents[1]),creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
+
     def open_measurement_csv(self):
         if not self.csv_path:return
         try:subprocess.Popen(['explorer.exe','/select,',str(self.csv_path)])
@@ -159,6 +165,8 @@ class Desktop:
             except queue.Full:self.status.set('Camera command queue is full; retry after it responds')
 
     def connect(self):
+        from .service_manager import save_preferences
+        save_preferences(self.path.get(),self.args.recordings)
         if self.process and self.process.is_alive():
             self.send('stop');self.stop_deadline=time.monotonic()+7
             self.invalidate_stream()

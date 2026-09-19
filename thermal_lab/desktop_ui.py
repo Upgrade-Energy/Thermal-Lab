@@ -26,6 +26,7 @@ def build(app):
     workspace=ttk.Menubutton(header,text='Workspace  ▾');workspace.pack(side='right',padx=8)
     actions=ui.menu(workspace);workspace.configure(menu=actions)
     for text,command in [('Review recordings…',a.review_recordings),('Open another camera window',a.another_camera),
+                         ('Power Lab service…',a.open_service),
                          ('Save layout…',a.save),('Load layout…',a.load)]:actions.add_command(label=text,command=command)
     from lab_update import open_updates
     actions.add_separator();actions.add_command(label='Check for updates…',command=open_updates)
