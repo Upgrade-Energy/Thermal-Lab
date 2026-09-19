@@ -14,3 +14,14 @@ Verified locally on Windows on 2026-09-19 with a connected TOPDON TC001 Max. No 
 This is software consistency and actual camera capture verification, not a new absolute-temperature calibration or exposure synchronization qualification. A controlled moving synthetic target test also verifies location changes independently of the stationary hardware scene.
 
 The release includes earlier local GUI, polygon, camera-name, timer and automatic-CSV improvements that had not been included in DEV16. Those original local files were preserved separately while this release was developed from the installer branch.
+
+## Release and installed-app verification
+
+- Published [v0.1.0-dev17](https://github.com/Upgrade-Energy/Thermal-Lab/releases/tag/v0.1.0-dev17) from `6ca495caccdad23da9630532075e3ea0c59d7c06`.
+- [Windows installer workflow](https://github.com/Upgrade-Energy/Thermal-Lab/actions/runs/35474719235) passed build, Windows installation, application/update shortcuts, busy-update protection, data preservation, and production update discovery/download. Windows and Linux camera tests also passed.
+- Downloaded using the production updater and verified the 78,601,822-byte installer against SHA-256 `a7973728b21aa0df22dd08368342952500d2bb17593b5f1f16a7a35ec634004c`. Current-version check correctly returned no newer update.
+- Installed on the local PC and preserved all three existing camera layouts. The first shell-launched installation was redirected by Codex's MSIX filesystem virtualization; reinstalled through Windows Explorer and verified the ordinary desktop shortcut opens the app under `%LOCALAPPDATA%/Programs/UpgradeEnergy/ThermalLab`, outside Codex's package cache.
+- Opened the actual installed release from its desktop shortcut, connected the TC001 Max, and inspected live full-quality thermal/optical frames. Added whole-image hottest and coldest trackers to the existing layout and left the app previewing with both enabled. No recording is active.
+- Inspected the final four-tracker polygon replay, corrected PNG label placement, exported a hardware history CSV, and decoded a synthetic moving-tracker MP4 (19 frames, 1024 × 768, final source frame included).
+
+The private repository's updater requires GitHub access. For local verification, the existing Git credential was used only in the verification process; it was not copied into persistent updater credential storage.
