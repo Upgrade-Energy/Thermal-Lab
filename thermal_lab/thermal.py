@@ -13,6 +13,7 @@ import threading
 from collections import deque
 from .validation import ValidationError, finite
 from .validation import integer
+from .regions import polygon_pixels, vertices
 
 WIDTH,HEIGHT=32,24
 FRAME_INDEX=struct.Struct('<dQI') # elapsed seconds, compressed byte offset, member length
@@ -27,11 +28,19 @@ def measurements(frame,camera):
     w,h=frame['width'],frame['height'];values=frame['temperatures'];out={}
     def xy(x,y):return min(w-1,int(x*w)),min(h-1,int(y*h))
     for p in camera['points']:
+        if p.get('tracking'):continue
         x,y=xy(p['x'],p['y']);out[p['name']]=dict(value=values[y*w+x],kind='point')
     for p in camera['areas']:
-        x,y=xy(p['x'],p['y']);x2,y2=xy(p['x2'],p['y2'])
-        block=[values[v*w+u] for v in range(y,y2+1) for u in range(x,x2+1)]
+        if p.get('shape')=='polygon':
+            block=[values[i] for i in polygon_pixels(tuple(vertices(p)),w,h)]
+            if not block:raise ValidationError('Polygon contains no thermal pixel centers')
+        else:
+            x,y=xy(p['x'],p['y']);x2,y2=xy(p['x2'],p['y2'])
+            block=[values[v*w+u] for v in range(y,y2+1) for u in range(x,x2+1)]
         out[p['name']]=dict(min=min(block),mean=sum(block)/len(block),max=max(block),kind='area')
+    if any(p.get('tracking') for p in camera['points']):
+        from .tracking import tracked_values
+        out.update(tracked_values(frame,camera['points'],camera['areas']))
     return out
 
 def simulation_frame(camera,index,elapsed,temperature):
@@ -47,11 +56,12 @@ def simulation_frame(camera,index,elapsed,temperature):
 
 class Recorder:
     """One recorder thread, bounded queue. Disk/queue failures become visible faults."""
-    def __init__(self,cameras,pre_s,compression_level=9):
+    def __init__(self,cameras,pre_s,compression_level=9,measurement_csv=False):
         self.compression_level=integer(compression_level,'Compression level',0,9)
         self.cameras=cameras;self.buffer=deque(maxlen=max(1,math.ceil(pre_s*2)+1))
         self.frames=[];self.file=None;self.worker=None;self.error=None;self.count=0
         self.q=queue.Queue(maxsize=120);self.closed=False;self.lock=threading.Lock()
+        self.write_measurement_csv=measurement_csv;self.measurement_csv=None
     def preview(self,elapsed,temp):
         frames=[simulation_frame(c,i,elapsed,temp) for i,c in enumerate(self.cameras)]
         return self.ingest(frames)
@@ -80,8 +90,15 @@ class Recorder:
     def start(self,path):
         if self.closed or self.worker:raise RuntimeError('Thermal recorder cannot be restarted')
         self.file=open(path,'wb')
-        try:self.index_file=open(path.with_name('thermal.idx'),'wb')
-        except Exception:self.file.close();raise
+        try:
+            self.index_file=open(path.with_name('thermal.idx'),'wb')
+            if self.write_measurement_csv:
+                from .measurement_csv import MeasurementCSV
+                self.measurement_csv=MeasurementCSV(path.parent)
+        except Exception:
+            self.file.close()
+            if hasattr(self,'index_file'):self.index_file.close()
+            raise
         self.worker=threading.Thread(target=self._write,name='Thermal recorder',daemon=True);self.worker.start()
         for frames in self.buffer:self._enqueue(frames)
         self.buffer.clear()
@@ -102,11 +119,15 @@ class Recorder:
                 offset=self.file.tell();self.file.write(member);self.file.flush()
                 if frames:
                     self.index_file.write(FRAME_INDEX.pack(frames[0]['elapsed_s'],offset,len(member)));self.index_file.flush()
+                if self.measurement_csv:
+                    for index,frame in enumerate(frames,self.count):self.measurement_csv.write(frame,index)
                 self.count+=len(frames)
         except Exception as exc:self.error='Thermal recording failed: '+str(exc)
         finally:
-            try:self.file.close();self.index_file.close()
-            except Exception as exc:self.error='Thermal file finalization failed: '+str(exc)
+            for stream in (self.file,self.index_file,self.measurement_csv):
+                if stream is not None:
+                    try:stream.close()
+                    except Exception as exc:self.error='Thermal file finalization failed: '+str(exc)
     def close(self):
         if self.closed:return
         self.closed=True

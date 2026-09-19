@@ -10,6 +10,7 @@ from pathlib import Path
 from .thermal import FRAME_INDEX, validate_frame
 from .workspace import validate_settings, measurement_values
 from .optical_recording import OpticalRecording,SUPPORTED_CODECS
+from .tracking import geometry_for_history
 
 
 class Recording:
@@ -82,7 +83,7 @@ class Recording:
             definitions={v['id']:v for kind in ('points','areas') for v in frame.get('workspace',{}).get(kind,[])}
             for identifier,values in frame.get('measurements',{}).items():
                 definition=definitions.get(identifier,{})
-                geometry=json.dumps({k:v for k,v in definition.items() if k not in ('name','id')},sort_keys=True)
+                geometry=json.dumps(geometry_for_history(definition,definitions),sort_keys=True)
                 for statistic in ('value','min','mean','max'):
                     if statistic not in values:continue
                     value=values[statistic]
@@ -91,6 +92,8 @@ class Recording:
                     entry=series.setdefault(key,dict(name=definition.get('name',identifier),samples=[]))
                     entry['name']=definition.get('name',identifier)
                     entry['samples'].append((index,frame['elapsed_s'],value,geometry))
+                    if definition.get('tracking'):
+                        entry.setdefault('positions',{})[index]={k:values[k] for k in ('x','y','pixel_x','pixel_y','tracking')}
                     samples+=1
                     if samples>2_000_000:raise ValueError('History exceeds two million measurement samples')
             if index%100==0:progress(index+1,len(self.entries))
@@ -102,7 +105,7 @@ def export_history(path,recording,series,analysis_fingerprint=None):
     # Exclusive creation protects an existing export even when used outside the UI.
     with Path(path).open('x',newline='',encoding='utf-8-sig') as stream:
         writer=csv.writer(stream)
-        writer.writerow(['camera_id','source','measurement_id','latest_name','statistic','frame_index','elapsed_s','temperature_c','geometry','measurement_basis','recording_sha256'])
+        writer.writerow(['camera_id','source','measurement_id','latest_name','statistic','frame_index','elapsed_s','temperature_c','geometry','measurement_basis','recording_sha256','tracking','x','y','pixel_x','pixel_y'])
         def safe(value):
             value=str(value)
             return "'"+value if value.startswith(('=','+','-','@','\t','\r')) else value
@@ -110,4 +113,5 @@ def export_history(path,recording,series,analysis_fingerprint=None):
             for index,elapsed,value,geometry in entry['samples']:
                 writer.writerow([safe(recording.manifest['camera_id']),safe(recording.manifest['source']),
                                  safe(identifier),safe(entry['name']),statistic,index,elapsed,value,geometry,
-                                 'offline_fixed_geometry_all_frames' if analysis_fingerprint else 'original_recorded',analysis_fingerprint or ''])
+                                 'offline_fixed_geometry_all_frames' if analysis_fingerprint else 'original_recorded',analysis_fingerprint or '']+
+                                [entry.get('positions',{}).get(index,{}).get(k,'') for k in ('tracking','x','y','pixel_x','pixel_y')])

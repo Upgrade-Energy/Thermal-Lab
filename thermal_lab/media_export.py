@@ -13,6 +13,8 @@ from PIL import Image,ImageDraw,ImageFont,PngImagePlugin
 from .analysis import recording_fingerprint
 from .imaging import thermal_image,optical_plane_image,aligned_optical,rotate_image,sensor_to_view
 from .workspace import validate_settings,measurement_values
+from .regions import vertices
+from .tracking import positioned
 
 
 class ExportCancelled(Exception):pass
@@ -61,8 +63,13 @@ def render_frame(recording,index,options):
             draw.text((x,y-box[1]),text,font=font,fill=color)
         for kind in ('points','areas'):
             for item in settings.get(kind,[]):
+                item=positioned(item,values)
+                if item is None:continue
                 x,y=sensor_to_view(item['x']*256,item['y']*192,rotation);x*=4;y*=4
-                if 'x2' in item:
+                if item.get('shape')=='polygon':
+                    polygon=[tuple(v*4 for v in sensor_to_view(px*256,py*192,rotation)) for px,py in vertices(item)]
+                    draw.line(polygon+[polygon[0]],fill='#67ffe0',width=2)
+                elif 'x2' in item:
                     x2,y2=sensor_to_view(item['x2']*256,item['y2']*192,rotation);x2*=4;y2*=4
                     draw.rectangle((min(x,x2),min(y,y2),max(x,x2),max(y,y2)),outline='#67ffe0',width=2)
                 else:draw.ellipse((x-5,y-5,x+5,y+5),outline='#67ffe0',width=2)

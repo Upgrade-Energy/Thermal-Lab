@@ -12,10 +12,17 @@ from tkinter import ttk,filedialog,messagebox
 from PIL import Image,ImageTk
 
 from .playback import Recording,export_history
+from . import ui_theme
+from .extrema import extrema, draw_extrema
+from .review_ui import build
 from .analysis import Analysis
 from .workspace import measurement_values
 from .media_export import export_png,export_mp4,ExportCancelled
 from .imaging import thermal_image,rotate_image,sensor_to_view,view_to_sensor,optical_plane_image,aligned_optical
+from .regions import area_contains,moved,vertex_at,with_vertex
+from .polygon_tool import draw_region
+from .tracking import add_tracker, remove_measurement, positioned, markers, overview_markers
+from . import __version__
 
 
 class Review:
@@ -25,72 +32,17 @@ class Review:
         self.messages=queue.Queue();self.generation=0;self.position=None;self.photo=None
         self.analysis=None;self.drag=None;self.chosen=None;self.scan_after=None
         self.media_messages=queue.Queue();self.media_cancel=threading.Event();self.media_busy=False;self.media_closing=False
-        root.title('Thermal Lab · Recording review');root.geometry('1280x900');root.minsize(1000,750)
-        root.configure(bg='#111923');root.protocol('WM_DELETE_WINDOW',self.close)
-        style=ttk.Style();style.theme_use('clam')
-        style.configure('.',background='#172331',foreground='#e3ebf5',fieldbackground='#233448',font=('Segoe UI',10))
-        style.configure('TButton',padding=(10,7));style.configure('Treeview',rowheight=27,background='#172331',fieldbackground='#172331',foreground='#e3ebf5')
-        style.map('TButton',background=[('active','#345575'),('pressed','#345575')],foreground=[('active','#ffffff')])
-        style.map('TCombobox',fieldbackground=[('readonly','#233448')],foreground=[('readonly','#e3ebf5')])
-        style.map('TRadiobutton',background=[('active','#233448')],foreground=[('active','#e3ebf5')])
+        root.title('Thermal Lab · Recording review');root.geometry('1400x940');root.minsize(1180,850)
+        ui_theme.install(root);root.protocol('WM_DELETE_WINDOW',self.close)
         self.status=tk.StringVar(value='Open a finalized recording folder to begin')
         self.info=tk.StringVar(value='OFFLINE · numerical thermal playback · no camera connection')
         self.palette=tk.StringVar(value='Iron');self.rotation=tk.StringVar(value='180')
         self.mode=tk.StringVar(value='Thermal');self.archive_info=tk.StringVar(value='Measurements and geometry follow the original recording.')
         self.speed=tk.StringVar(value='1');self.position_var=tk.DoubleVar();self.selected=tk.StringVar()
         self.basis=tk.StringVar(value='Recorded');self.tool=tk.StringVar(value='Select');self.edit_name=tk.StringVar()
+        self.show_extrema=tk.BooleanVar(value=True)
         self.export_labels=tk.BooleanVar(value=True);self.media_status=tk.StringVar(value='Export uses current view · MP4: full recording at 1×, 25 fps')
-        top=ttk.Frame(root,padding=12);top.pack(fill='x')
-        ttk.Label(top,text='THERMAL LAB  /  RECORDING REVIEW',font=('Segoe UI',15,'bold')).pack(side='left')
-        ttk.Button(top,text='Open recording…',command=self.browse).pack(side='right')
-        self.export=ttk.Button(top,text='Export history…',command=self.export_csv,state='disabled');self.export.pack(side='right',padx=8)
-        self.mp4_button=ttk.Button(top,text='Export MP4…',command=lambda:self.media_export('mp4'));self.mp4_button.pack(side='right',padx=4)
-        self.png_button=ttk.Button(top,text='Save PNG…',command=lambda:self.media_export('png'));self.png_button.pack(side='right',padx=4)
-        ttk.Label(root,textvariable=self.status,padding=(12,4),wraplength=1200).pack(fill='x')
-        controls=ttk.Frame(root,padding=8);controls.pack(fill='x')
-        self.play_button=ttk.Button(controls,text='Play',command=self.play,state='disabled');self.play_button.pack(side='left')
-        ttk.Button(controls,text='Previous',command=lambda:self.step(-1)).pack(side='left',padx=4)
-        ttk.Button(controls,text='Next',command=lambda:self.step(1)).pack(side='left')
-        for label,var,values in [('Speed',self.speed,['0.25','0.5','1','2','4']),('Palette',self.palette,['Iron','Rainbow','White hot','Black hot']),('Rotation',self.rotation,['0','90','180','270'])]:
-            ttk.Label(controls,text=label).pack(side='left',padx=(15,4))
-            box=ttk.Combobox(controls,textvariable=var,values=values,width=10,state='readonly');box.pack(side='left')
-            box.bind('<<ComboboxSelected>>',lambda e:self.view_changed())
-        editor=ttk.Frame(root,padding=(12,3));editor.pack(fill='x')
-        basis_box=ttk.Combobox(editor,textvariable=self.basis,values=['Recorded','Analysis'],state='readonly',width=10)
-        basis_box.pack(side='left');basis_box.bind('<<ComboboxSelected>>',lambda e:self.change_basis())
-        for tool in ('Select','Point','Rectangle'):
-            ttk.Radiobutton(editor,text=tool,variable=self.tool,value=tool).pack(side='left',padx=4)
-        name_entry=ttk.Entry(editor,textvariable=self.edit_name,width=18);name_entry.pack(side='left',padx=5)
-        name_entry.bind('<FocusIn>',lambda e:self.pause())
-        for label,command in [('Rename',self.rename),('Remove',self.remove),('Save analysis…',self.save_analysis),('Load analysis…',self.load_analysis)]:
-            ttk.Button(editor,text=label,command=command).pack(side='left',padx=3)
-        self.analysis_note=tk.StringVar(value='Recorded measurements · select Analysis to add or move points and regions')
-        ttk.Label(root,textvariable=self.analysis_note,padding=(12,2)).pack(fill='x')
-        exports=ttk.Frame(root,padding=(12,2));exports.pack(fill='x')
-        ttk.Checkbutton(exports,text='Export temperature labels',variable=self.export_labels).pack(side='left')
-        ttk.Label(exports,textvariable=self.media_status,wraplength=850).pack(side='left',padx=15)
-        body=ttk.Frame(root,padding=(12,4));body.pack(fill='both',expand=True)
-        self.canvas=tk.Canvas(body,bg='#0b1119',highlightthickness=0);self.canvas.pack(side='left',fill='both',expand=True)
-        self.canvas.bind('<Configure>',lambda e:self.render());self.canvas.bind('<Motion>',self.hover)
-        self.canvas.bind('<ButtonPress-1>',self.press);self.canvas.bind('<B1-Motion>',self.motion);self.canvas.bind('<ButtonRelease-1>',self.release)
-        side=ttk.Frame(body,padding=(12,0,0,0));side.pack(side='right',fill='y')
-        ttk.Label(side,text='MEASUREMENTS · °C').pack(anchor='w')
-        self.table=ttk.Treeview(side,columns=('name','value'),show='headings',height=7)
-        self.table.heading('name',text='Name');self.table.heading('value',text='Value / min · mean · max')
-        self.table.column('name',width=110);self.table.column('value',width=180);self.table.pack(fill='both',expand=True,pady=8)
-        self.table.bind('<<TreeviewSelect>>',self.select_row)
-        self.mode_box=ttk.Combobox(side,textvariable=self.mode,values=['Thermal'],state='readonly')
-        self.mode_box.pack(fill='x');self.mode_box.bind('<<ComboboxSelected>>',lambda e:self.show(self.index))
-        ttk.Label(side,textvariable=self.archive_info,wraplength=290,foreground='#aac0d3').pack(anchor='w',pady=8)
-        self.timeline=ttk.Scale(root,variable=self.position_var,from_=0,to=1,command=self.seek);self.timeline.pack(fill='x',padx=12,pady=4)
-        ttk.Label(root,textvariable=self.info,padding=(12,3)).pack(fill='x')
-        row=ttk.Frame(root,padding=(12,3));row.pack(fill='x')
-        ttk.Label(row,text='TEMPERATURE HISTORY · °C').pack(side='left')
-        self.series_box=ttk.Combobox(row,textvariable=self.selected,state='readonly',width=55);self.series_box.pack(side='left',padx=15)
-        self.series_box.bind('<<ComboboxSelected>>',lambda e:self.plot())
-        ttk.Label(row,text='Click graph to seek · gaps mark missing or moved measurements').pack(side='left')
-        self.graph=tk.Canvas(root,bg='#0b1119',height=220,highlightthickness=0);self.graph.pack(fill='x',padx=12,pady=(4,12))
-        self.graph.bind('<Configure>',lambda e:self.plot());self.graph.bind('<Button-1>',self.graph_seek)
+        build(self)
         root.after(40,self.tick)
         if args.session:root.after(100,lambda:self.open(args.session))
 
@@ -99,9 +51,11 @@ class Review:
         if path:self.open(path)
 
     def open(self,path):
+        self.polygon.cancel()
         self.pause();self.cancel.set();self.cancel=threading.Event();self.generation+=1
         self.recording=None;self.frame=None;self.optical=None;self.series={};self.keys=[];self.position=None
         self.analysis=None;self.basis.set('Recorded');self.chosen=None;self.drag=None
+        self.tracking_panel.pack_forget();self.edit_tools.pack_forget()
         self.analysis_note.set('Recorded measurements · select Analysis to add or move points and regions')
         self.mode.set('Thermal');self.mode_box.configure(values=['Thermal'])
         self.history_ready=False
@@ -111,11 +65,12 @@ class Review:
         self.render();self.plot()
         try:
             recording=Recording(path);self.recording=recording
+            self.camera_label=recording.read(0).get('workspace',{}).get('camera_name') or recording.manifest['camera_id']
             self.mode_box.configure(values=['Thermal','Optical','Blend'] if recording.optical else ['Thermal'])
-            self.archive_info.set(('Lossless optical video paired with each thermal frame. Exposure synchronization is unqualified.' if recording.optical else 'Thermal frames only. This archive has no continuous optical video.')+'\n\nOptical alignment follows the original recording. Blend uses 55% thermal opacity. Choose Recorded or Analysis for measurements.')
+            self.archive_info.set(self.camera_label+'\n'+recording.manifest['camera_id']+'\n\n'+('Lossless optical video paired with each thermal frame. Exposure synchronization is unqualified.' if recording.optical else 'Thermal frames only. This archive has no continuous optical video.')+'\n\nOptical alignment follows the original recording. Blend uses 55% thermal opacity. Choose Recorded or Analysis for measurements.')
             self.timeline.configure(to=max(1,len(recording.entries)-1));self.show(0)
-            self.play_button.configure(state='normal');self.root.title('Thermal Lab · Review · '+recording.path.name+' · DEV14')
-            self.status.set(f"{recording.path.name} · {recording.manifest['camera_id']} · {recording.manifest['source']} · Loading histories…")
+            self.play_button.configure(state='normal');self.root.title('Thermal Lab · Review · '+self.camera_label+' · '+recording.path.name+' · '+__version__)
+            self.status.set(f"{recording.path.name} · {self.camera_label} · Loading histories…")
             self.start_histories()
         except Exception as exc:
             self.recording=None;self.status.set('Cannot open recording: '+str(exc))
@@ -139,15 +94,20 @@ class Review:
         threading.Thread(target=scan,daemon=True,name='Measurement histories').start()
 
     def change_basis(self):
+        self.polygon.cancel()
         self.pause();self.drag=None;self.chosen=None;self.edit_name.set('')
         try:
             if self.basis.get()=='Analysis':
                 if not self.recording:raise ValueError('Open a recording first')
                 if self.analysis is None:self.analysis=Analysis(self.recording)
-                self.analysis_note.set('ANALYSIS · fixed geometry across all frames · edits autosave separately · select and drag to move')
+                self.analysis_note.set('ANALYSIS · definitions apply to all frames · edits autosave separately · trackers follow the extreme pixel')
             else:self.analysis_note.set('ORIGINAL RECORDED measurements · geometry follows each recorded frame')
         except Exception as exc:
             self.basis.set('Recorded');self.status.set('Analysis unavailable: '+str(exc))
+        if self.basis.get()=='Analysis':
+            self.tracking_panel.pack(fill='x',before=self.measurement_table_frame)
+            self.edit_tools.pack(fill='x',pady=8,before=self.measurement_table_frame)
+        else:self.tracking_panel.pack_forget();self.edit_tools.pack_forget()
         self.render();self.rows();self.start_histories()
 
     def layout(self):
@@ -160,10 +120,22 @@ class Review:
 
     def edited(self,settings):
         try:self.analysis.update(settings)
-        except Exception as exc:self.status.set('Analysis not saved: '+str(exc));return
+        except Exception as exc:self.status.set('Analysis not saved: '+str(exc));return False
         self.render();self.rows();self.invalidate_histories()
         self.status.set('Analysis autosaved; recalculating histories…')
         self.scan_after=self.root.after(400,self.start_histories)
+        return True
+
+    def polygon_viewports(self):
+        if not self.position:return []
+        return [(*self.position,0,self.canvas.winfo_width(),20,self.canvas.winfo_height())]
+
+    def add_polygon(self,geometry):
+        settings=copy.deepcopy(self.analysis.settings)
+        identifier=uuid.uuid4().hex
+        settings['areas'].append(dict(id=identifier,name='Polygon '+str(len(settings['areas'])+1),**geometry))
+        if not self.edited(settings):raise ValueError(self.status.get())
+        self.chosen=identifier;self.edit_name.set(settings['areas'][-1]['name']);self.rows();self.render()
 
     def sensor(self,event):
         if not self.position:return None
@@ -172,8 +144,20 @@ class Review:
         sx,sy=view_to_sensor(vx,vy,int(self.rotation.get()))
         return min(.999999999,max(0,sx/256)),min(.999999999,max(0,sy/192))
 
+    def add_tracking(self,tracking):
+        if self.basis.get()!='Analysis' or not self.analysis:
+            self.status.set('Choose Analysis in the Layout menu to add trackers to this recording');return
+        self.pause()
+        try:
+            settings,item=add_tracker(self.analysis.settings,tracking,self.chosen,self.tracking_scope.get()=='Selected region')
+            self.chosen=item['id'];self.edit_name.set(item['name']);self.tool.set('Select')
+            self.edited(settings)
+        except Exception as exc:self.status.set(str(exc))
+
     def press(self,event):
         if self.basis.get()!='Analysis' or not self.analysis or not self.frame:return
+        self.pause()
+        if self.polygon.click(event):return
         point=self.sensor(event)
         if point is None:return
         self.pause();self.drag=None;x,y=point
@@ -183,15 +167,28 @@ class Review:
             self.edited(settings)
         elif self.tool.get()=='Rectangle':self.drag=('rectangle',point,None)
         else:
-            candidates=[v for kind in ('points','areas') for v in self.analysis.settings[kind]]
-            item=next((v for v in reversed(candidates) if 'x2' in v and v['x']<=x<=v['x2'] and v['y']<=y<=v['y2']),None)
+            values=self.values()
+            candidates=[positioned(v,values) for kind in ('points','areas') for v in self.analysis.settings[kind]]
+            candidates=[v for v in candidates if v is not None]
+            item=next((v for v in reversed(candidates) if 'x2' in v and (area_contains(v,x,y) or (v['id']==self.chosen and vertex_at(v,x,y) is not None))),None)
             near=[v for v in candidates if 'x2' not in v and ((v['x']-x)*256)**2+((v['y']-y)*192)**2<64]
             if near:item=min(near,key=lambda v:((v['x']-x)*256)**2+((v['y']-y)*192)**2)
+            corner=vertex_at(item,x,y) if item and item['id']==self.chosen else None
             self.chosen=item['id'] if item else None
-            if item:self.drag=('move',point,copy.deepcopy(item));self.edit_name.set(item['name'])
+            if item:
+                if not item.get('tracking'):self.drag=('move',point,copy.deepcopy(item),corner)
+                self.edit_name.set(item['name'])
             self.rows();self.render()
 
     def motion(self,event):
+        if self.drag and self.drag[0]=='move' and self.drag[2].get('shape')=='polygon':
+            point=self.sensor(event)
+            if point:
+                old=self.drag[2]
+                try:candidate=with_vertex(old,self.drag[3],*point) if self.drag[3] is not None else moved(old,point[0]-self.drag[1][0],point[1]-self.drag[1][1])
+                except ValueError as exc:self.status.set(str(exc));return
+                self.render();draw_region(self.canvas,candidate,self.polygon_viewports()[0],int(self.rotation.get()),True)
+            return
         if not self.drag or self.drag[0]!='rectangle' or not self.position:return
         self.canvas.delete('draft');point=self.sensor(event)
         if point:
@@ -211,14 +208,13 @@ class Review:
             self.chosen=uuid.uuid4().hex
             settings['areas'].append(dict(id=self.chosen,name='Region '+str(len(settings['areas'])+1),x=min(x,start[0]),y=min(y,start[1]),x2=max(x,start[0]),y2=max(y,start[1])))
         else:
-            old=drag[2];dx=max(-old['x'],min(.999999999-old.get('x2',old['x']),x-start[0]));dy=max(-old['y'],min(.999999999-old.get('y2',old['y']),y-start[1]))
+            old=drag[2]
+            corner=drag[3] if len(drag)>3 else None
+            try:candidate=with_vertex(old,corner,x,y) if corner is not None else moved(old,x-start[0],y-start[1])
+            except ValueError as exc:self.render();self.status.set(str(exc));return
             for kind in ('points','areas'):
                 for item in settings[kind]:
-                    if item['id']==old['id']:
-                        for key in ('x','x2'):
-                            if key in item:item[key]=old[key]+dx
-                        for key in ('y','y2'):
-                            if key in item:item[key]=old[key]+dy
+                    if item['id']==old['id']:item.update(candidate)
         self.edited(settings)
 
     def select_row(self,event=None):
@@ -228,6 +224,8 @@ class Review:
         for kind in ('points','areas'):
             for item in self.layout().get(kind,[]):
                 if item['id']==self.chosen:self.edit_name.set(item['name'])
+        key=next((k for k in self.keys if k[0]==self.chosen),None)
+        if key is not None:self.series_box.current(self.keys.index(key));self.plot()
 
     def rename(self):
         if self.basis.get()!='Analysis' or not self.analysis or not self.chosen:return
@@ -239,8 +237,7 @@ class Review:
 
     def remove(self):
         if self.basis.get()!='Analysis' or not self.analysis or not self.chosen:return
-        settings=copy.deepcopy(self.analysis.settings)
-        for kind in ('points','areas'):settings[kind]=[v for v in settings[kind] if v['id']!=self.chosen]
+        settings=remove_measurement(self.analysis.settings,self.chosen)
         self.chosen=None;self.edited(settings)
 
     def save_analysis(self):
@@ -315,14 +312,24 @@ class Review:
         self.canvas.create_text(10,10,text=f'{limits[0]:.1f} → {limits[1]:.1f} °C · recorded {self.mode.get().lower()}',fill='white',anchor='w')
         for kind in ('points','areas'):
             for item in self.layout().get(kind,[]):
+                if item.get('tracking'):continue
                 px,py=sensor_to_view(item['x']*256,item['y']*192,rotation);px=x+px*scale;py=y+py*scale
-                if 'x2' in item:
+                if item.get('shape')=='polygon':
+                    draw_region(self.canvas,item,self.polygon_viewports()[0],rotation,item['id']==self.chosen and self.basis.get()=='Analysis')
+                elif 'x2' in item:
                     qx,qy=sensor_to_view(item['x2']*256,item['y2']*192,rotation)
                     self.canvas.create_rectangle(px,py,x+qx*scale,y+qy*scale,outline='#67ffe0',width=2)
                 else:self.canvas.create_oval(px-4,py-4,px+4,py+4,outline='#67ffe0',width=2)
                 self.canvas.create_text(px+6,py-6,text=item['name'],fill='#67ffe0',anchor='sw')
 
+        self.polygon.draw()
+        if self.show_extrema.get() and self.mode.get()!='Optical':
+            draw_extrema(self.canvas,overview_markers(extrema(self.frame['temperatures']),self.layout()),(x,y,scale,width,height,0,cw,20,ch),rotation)
+        if self.mode.get()!='Optical':
+            draw_extrema(self.canvas,markers(self.layout(),self.values()),(x,y,scale,width,height,x,x+width*scale,y,y+height*scale),rotation,tag='trackers')
+
     def hover(self,event):
+        self.polygon.hover(event)
         if not self.frame or not self.position:return
         x,y,scale,width,height=self.position;vx=(event.x-x)/scale;vy=(event.y-y)/scale
         if 0<=vx<width and 0<=vy<height:
@@ -335,6 +342,7 @@ class Review:
         names={v['id']:v['name'] for kind in ('points','areas') for v in self.layout().get(kind,[])}
         for key,value in self.values().items():
             text=f"{value['value']:.3f}" if 'value' in value else ' · '.join(f'{value[k]:.2f}' for k in ('min','mean','max'))
+            if value.get('tracking'):text+=f" · ({value['pixel_x']}, {value['pixel_y']})"
             self.table.insert('','end',iid=key,values=(names.get(key,key),text))
         if self.chosen and self.table.exists(self.chosen):self.table.selection_set(self.chosen)
 
@@ -433,7 +441,7 @@ class Review:
                     labels=[f"{data[key]['name']} · {key[1]} · {key[0][:12]}" for key in self.keys]
                     self.series_box.configure(values=labels)
                     if labels:self.series_box.current(0);self.export.configure(state='normal')
-                    self.plot();self.status.set(f"{self.recording.path.name} · {self.recording.manifest['camera_id']} · {self.basis.get()} history checked · apparent temperatures")
+                    self.plot();self.status.set(f"{self.recording.path.name} · {self.camera_label} · {self.basis.get()} history checked · apparent temperatures")
                 elif kind=='error':self.status.set('History unavailable: '+data)
         except queue.Empty:pass
         if self.playing and self.recording:
@@ -451,8 +459,6 @@ class Review:
 
 
 def main():
-    from lab_update import hold_app_lease
-    hold_app_lease("ThermalLab")
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--session',type=Path)
     parser.add_argument('--recordings',type=Path,default=Path.home()/'Thermal-Lab-Recordings')

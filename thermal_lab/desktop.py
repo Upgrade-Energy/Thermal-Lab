@@ -20,6 +20,14 @@ from .imaging import optical_image, aligned_optical, thermal_image, rotate_image
 from .workspace import validate_settings, read_settings, save_settings, measurement_values
 from .camera_diagnostics import pnp_devices
 from .connection_guidance import connection_guidance
+from . import ui_theme
+from .desktop_ui import build
+from .extrema import extrema, draw_extrema
+from .camera_names import read_names, save_name, display_name
+from .recording_clock import RecordingClock
+from .regions import area_contains, moved, vertex_at, with_vertex
+from .polygon_tool import draw_region
+from .tracking import add_tracker, remove_measurement, positioned, markers, overview_markers
 
 
 class Desktop:
@@ -28,20 +36,17 @@ class Desktop:
         self.frame=None;self.optical=None;self.received_at=0;self.drag=None;self.viewports=[]
         self.stream_active=False;self.record_pending=False
         self.settings=validate_settings({});self.recording=False;self.record_path=None
+        self.clock=RecordingClock()
         self.selected=None;self.zoom=1;self.pan=[0,0];self.photos=[]
         self.ctx=mp.get_context('spawn');self.commands=None
         self.workspace_path=args.workspace
         self.camera_choice=tk.StringVar(value=args.camera_id or '')
-        root.title('Thermal Lab · Live inspection');root.geometry('1440x960');root.minsize(1080,900)
-        root.configure(bg='#111923');root.protocol('WM_DELETE_WINDOW',self.close)
-        style=ttk.Style();style.theme_use('clam')
-        style.configure('.',background='#172331',foreground='#e3ebf5',fieldbackground='#233448',font=('Segoe UI',10))
-        style.configure('TButton',padding=(10,7));style.map('TButton',background=[('active','#345575')])
-        style.configure('Treeview',rowheight=30,background='#172331',fieldbackground='#172331',foreground='#e3ebf5')
-        style.map('Treeview',background=[('selected','#305b77')])
-        style.map('TCombobox',fieldbackground=[('readonly','#233448')],foreground=[('readonly','#e3ebf5')])
-        for widget in ('TRadiobutton','TCheckbutton'):
-            style.map(widget,background=[('active','#233448')],foreground=[('active','#e3ebf5')])
+        root.title('Thermal Lab · Live inspection');root.geometry('1440x940');root.minsize(1180,850)
+        ui_theme.install(root);root.protocol('WM_DELETE_WINDOW',self.close)
+        self.names_path=Path.home()/'.thermal-lab/camera-names.json'
+        try:self.camera_names=read_names(self.names_path)
+        except Exception:self.camera_names={}
+        self.camera_ids=[]
         self.mode=tk.StringVar(value='Blend');self.palette=tk.StringVar(value='Iron');self.rotation=tk.StringVar(value='180')
         self.record_optical=tk.BooleanVar(value=True)
         self.tool=tk.StringVar(value='Select');self.opacity=tk.DoubleVar(value=.55);self.automatic=tk.BooleanVar(value=True)
@@ -52,95 +57,41 @@ class Desktop:
         self.cursor=tk.StringVar(value='Choose Point or Rectangle, then mark the image')
         self.name=tk.StringVar();self.alignment={k:tk.StringVar(value=str(v)) for k,v in self.settings['alignment'].items()}
         self.alignment_sliders={k:tk.DoubleVar(value=v) for k,v in self.settings['alignment'].items()}
-        header=ttk.Frame(root,padding=(18,12));header.pack(fill='x')
-        ttk.Label(header,text='THERMAL LAB',font=('Segoe UI',17,'bold')).pack(side='left')
-        ttk.Label(header,text='LIVE INSPECTION  /  DEV16',foreground='#8ba4be').pack(side='left',padx=22)
-        self.connect_button=ttk.Button(header,text='Connect camera',command=self.connect);self.connect_button.pack(side='right')
-        self.record_button=ttk.Button(header,text='Record session',command=self.toggle_record,state='disabled');self.record_button.pack(side='right',padx=8)
-        self.optical_check=ttk.Checkbutton(header,text='Optical video · lossless',variable=self.record_optical)
-        self.optical_check.pack(side='right',padx=8)
-        connection=ttk.Frame(root,padding=(18,0,18,10));connection.pack(fill='x')
-        ttk.Label(connection,text='TopView installation').pack(side='left')
-        ttk.Entry(connection,textvariable=self.path).pack(side='left',fill='x',expand=True,padx=10)
-        ttk.Button(connection,text='Browse…',command=self.browse).pack(side='left')
-        cameras=ttk.Frame(root,padding=(18,0,18,6));cameras.pack(fill='x')
-        ttk.Label(cameras,text='Camera').pack(side='left')
-        self.camera_box=ttk.Combobox(cameras,textvariable=self.camera_choice,state='readonly',width=65)
-        self.camera_box.pack(side='left',fill='x',expand=True,padx=10)
-        self.camera_box.bind('<<ComboboxSelected>>',lambda e:self.select_camera_layout())
-        self.refresh_button=ttk.Button(cameras,text='Refresh',command=self.refresh_cameras);self.refresh_button.pack(side='left')
-        ttk.Button(cameras,text='Review recordings',command=self.review_recordings).pack(side='left',padx=5)
-        ttk.Button(cameras,text='Open another camera window',command=self.another_camera).pack(side='left',padx=8)
-        utility=ttk.Frame(root,padding=(18,0,18,6));utility.pack(fill='x')
-        from lab_update import open_updates
-        ttk.Button(utility,text='Check for updates',command=open_updates).pack(side='right')
-        ttk.Button(utility,text='Power Lab service',command=self.open_service).pack(side='right',padx=8)
-        self.connection_info=tk.StringVar(value='Checking camera connections…')
-        ttk.Label(root,textvariable=self.connection_info,padding=(18,4),foreground='#d7c991',wraplength=1350).pack(fill='x')
-        ttk.Label(root,textvariable=self.status,padding=(18,9),foreground='#72d7c5').pack(fill='x')
-        body=ttk.Panedwindow(root,orient='horizontal');body.pack(fill='both',expand=True,padx=12,pady=8)
-        left=ttk.Frame(body);right=ttk.Frame(body,padding=12);body.add(left,weight=4);body.add(right,weight=1)
-        toolbar=ttk.Frame(left,padding=(4,4));toolbar.pack(fill='x')
-        for variable,values,width in [(self.mode,['Thermal','Optical','Blend','Side by side'],14),
-                                      (self.palette,['Iron','Rainbow','White hot','Black hot'],11),
-                                      (self.rotation,['0','90','180','270'],5)]:
-            box=ttk.Combobox(toolbar,textvariable=variable,values=values,width=width,state='readonly')
-            box.pack(side='left',padx=3);box.bind('<<ComboboxSelected>>',lambda e:self.render())
-        ttk.Button(toolbar,text='Fit',command=self.fit).pack(side='right')
-        tools=ttk.Frame(left,padding=4);tools.pack(fill='x')
-        for label in ['Select','Point','Rectangle','Align optical','Pan']:
-            ttk.Radiobutton(tools,text=label,variable=self.tool,value=label).pack(side='left',padx=5)
-        self.canvas=tk.Canvas(left,bg='#0b1119',highlightthickness=0,cursor='crosshair');self.canvas.pack(fill='both',expand=True)
-        self.canvas.bind('<Configure>',lambda e:self.render());self.canvas.bind('<ButtonPress-1>',self.press)
-        self.canvas.bind('<B1-Motion>',self.motion);self.canvas.bind('<ButtonRelease-1>',self.release)
-        self.canvas.bind('<Motion>',self.hover);self.canvas.bind('<MouseWheel>',self.wheel)
-        ttk.Label(left,textvariable=self.cursor,padding=8).pack(fill='x')
-        ttk.Label(right,text='OPTICAL ALIGNMENT',font=('Segoe UI',11,'bold')).pack(anchor='w')
-        ttk.Label(right,text='Moves the optical layer; thermal pixels stay fixed.',wraplength=320,foreground='#9aafc3').pack(anchor='w',pady=(4,8))
-        ttk.Label(right,text='Thermal opacity').pack(anchor='w')
-        ttk.Scale(right,from_=0,to=1,variable=self.opacity,command=lambda _:self.render()).pack(fill='x')
-        for key,label in [('dx','X offset · px'),('dy','Y offset · px'),('scale','Optical scale'),('angle','Rotation · °')]:
-            low,high,step={'dx':(-512,512,1),'dy':(-384,384,1),'scale':(.1,8,.02),'angle':(-180,180,1)}[key]
-            row=ttk.Frame(right);row.pack(fill='x',pady=3)
-            ttk.Label(row,text=label,width=17).pack(side='left')
-            spin=ttk.Spinbox(row,textvariable=self.alignment[key],from_=low,
-                             to=high,increment=step,width=8,command=self.apply_alignment)
-            spin.pack(side='right');spin.bind('<Return>',lambda e:self.apply_alignment());spin.bind('<FocusOut>',lambda e:self.apply_alignment())
-            ttk.Scale(row,from_=low,to=high,variable=self.alignment_sliders[key],
-                      command=lambda value,k=key:self.slide_alignment(k,value)).pack(side='left',fill='x',expand=True,padx=5)
-        row=ttk.Frame(right);row.pack(fill='x',pady=6)
-        ttk.Checkbutton(row,text='Lock',variable=self.locked).pack(side='left')
-        ttk.Button(row,text='Align selected area…',command=self.open_alignment_tool).pack(side='left',padx=5)
-        ttk.Button(row,text='Experimental / calibrate…',command=self.open_smart_alignment_tool).pack(side='left',padx=3)
-        ttk.Button(row,text='Reset',command=self.reset_alignment).pack(side='right')
-        ttk.Separator(right).pack(fill='x',pady=10)
-        row=ttk.Frame(right);row.pack(fill='x')
-        ttk.Label(row,text='TEMPERATURE SCALE',font=('Segoe UI',11,'bold')).pack(side='left')
-        ttk.Checkbutton(right,text='Automatic range',variable=self.automatic,command=self.render).pack(anchor='w')
-        row=ttk.Frame(right);row.pack(fill='x')
-        for label,var in [('Low °C',self.low),('High °C',self.high)]:
-            ttk.Label(row,text=label).pack(side='left');entry=ttk.Entry(row,textvariable=var,width=6);entry.pack(side='left',padx=4)
-            entry.bind('<Return>',lambda e:self.render());entry.bind('<FocusOut>',lambda e:self.render())
-        ttk.Separator(right).pack(fill='x',pady=10)
-        ttk.Label(right,text='MEASUREMENTS · °C',font=('Segoe UI',11,'bold')).pack(anchor='w',pady=(0,6))
-        self.table=ttk.Treeview(right,columns=('name','value'),show='headings',height=2,selectmode='browse')
-        self.table.heading('name',text='Name');self.table.heading('value',text='Value / min · mean · max')
-        self.table.column('name',width=110,minwidth=70);self.table.column('value',width=195,minwidth=150)
-        self.table.pack(fill='both',expand=True);self.table.bind('<<TreeviewSelect>>',self.select_row)
-        ttk.Entry(right,textvariable=self.name).pack(fill='x',pady=(7,3))
-        row=ttk.Frame(right);row.pack(fill='x')
-        ttk.Button(row,text='Rename',command=self.rename).pack(side='left')
-        ttk.Button(row,text='Remove',command=self.remove).pack(side='right')
-        ttk.Label(right,text='Select and drag a point or region to move it. Draw a new rectangle to change its size.',wraplength=320,foreground='#9aafc3').pack(anchor='w',pady=7)
-        row=ttk.Frame(right);row.pack(fill='x')
-        ttk.Button(row,text='Save layout…',command=self.save).pack(side='left')
-        ttk.Button(row,text='Load layout…',command=self.load).pack(side='right')
-        ttk.Label(root,textvariable=self.info,padding=(18,8),foreground='#b2c2d2').pack(side='bottom',fill='x',before=body)
+        build(self)
         if args.workspace.exists():
             try:self.settings=read_settings(args.workspace);self.sync_alignment();self.refresh_rows()
             except Exception as exc:self.status.set(f'Layout not loaded: {exc}')
         root.after(80,self.poll)
         self.refresh_cameras()
+
+    def reload_camera_names(self):
+        try:self.camera_names=read_names(self.names_path)
+        except Exception as exc:self.status.set('Camera names could not be refreshed: '+str(exc))
+
+    def update_camera_choices(self):
+        # Other camera windows share the registry, not this process's cached map.
+        self.reload_camera_names()
+        labels=[display_name(c,self.camera_names)+'  ·  '+str(i+1) for i,c in enumerate(self.camera_ids)]
+        self.camera_box.configure(values=labels)
+        current=self.camera_choice.get()
+        if current in self.camera_ids:self.camera_display.set(labels[self.camera_ids.index(current)])
+        else:self.camera_display.set(display_name(current,self.camera_names))
+        self.camera_name.set(self.camera_names.get(current.casefold(),''))
+        self.camera_identity.set(current or 'Connect a TC001 Max, then choose Refresh.')
+        self.root.title('Thermal Lab · '+display_name(current,self.camera_names))
+
+    def choose_camera(self,_=None):
+        index=self.camera_box.current()
+        if 0<=index<len(self.camera_ids):
+            self.camera_choice.set(self.camera_ids[index]);self.select_camera_layout()
+
+    def rename_camera(self):
+        try:
+            self.camera_names=save_name(self.names_path,self.camera_choice.get(),self.camera_name.get())
+            self.settings['camera_name']=self.camera_name.get().strip()
+            self.changed();self.update_camera_choices()
+            self.status.set('Camera name saved · '+display_name(self.camera_choice.get(),self.camera_names))
+        except Exception as exc:self.status.set(str(exc))
 
     def refresh_cameras(self):
         if self.process and self.process.is_alive():return
@@ -148,8 +99,9 @@ class Desktop:
             discovered=pnp_devices()
             self.connection_info.set(connection_guidance(discovered))
             devices=[d['instance_id'] for d in discovered if d.get('problem_code')==0]
-            self.camera_box.configure(values=devices)
+            self.camera_ids=devices
             if self.camera_choice.get() not in devices:self.camera_choice.set(devices[0] if devices else '')
+            self.update_camera_choices()
             if self.camera_choice.get():self.select_camera_layout()
             if not devices:self.status.set('No healthy TC001 Max detected; connect it and press Refresh')
         except Exception as exc:self.status.set('Camera discovery failed: '+str(exc))
@@ -158,21 +110,17 @@ class Desktop:
         if self.process and self.process.is_alive():return
         try:
             self.prepare_camera_layout(self.camera_choice.get())
+            self.update_camera_choices()
             self.frame=None;self.optical=None;self.received_at=0;self.render()
         except Exception as exc:self.status.set('Layout error: '+str(exc))
 
     def another_camera(self):
-        others=[d for d in self.camera_box['values'] if d!=self.camera_choice.get()]
+        others=[d for d in self.camera_ids if d!=self.camera_choice.get()]
         command=[sys.executable,'-m','thermal_lab.desktop','--topview-directory',self.path.get(),
                  '--recordings',str(self.args.recordings),'--workspace',str(self.args.workspace)]
         if others:command+=['--camera-id',others[0]]
         subprocess.Popen(command,cwd=str(Path(__file__).resolve().parents[1]),
                          creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
-
-    def open_service(self):
-        from .service_manager import save_preferences
-        save_preferences(self.path.get(), self.args.recordings)
-        subprocess.Popen([sys.executable,"-m","thermal_lab.service_manager"], cwd=str(Path(__file__).resolve().parents[1]), creationflags=getattr(subprocess,"CREATE_NO_WINDOW",0))
 
     def review_recordings(self):
         command=[sys.executable,'-m','thermal_lab.review','--recordings',str(self.args.recordings)]
@@ -180,7 +128,14 @@ class Desktop:
         subprocess.Popen(command,cwd=str(Path(__file__).resolve().parents[1]),
                          creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
 
+    def open_measurement_csv(self):
+        if not self.csv_path:return
+        try:subprocess.Popen(['explorer.exe','/select,',str(self.csv_path)])
+        except OSError as exc:messagebox.showerror('Show CSV failed',str(exc))
+
     def prepare_camera_layout(self, camera_id):
+        if hasattr(self,'polygon'):self.polygon.cancel()
+        if hasattr(self,'names_path'):self.reload_camera_names()
         key=hashlib.sha256(camera_id.casefold().encode()).hexdigest()[:16]
         self.workspace_path=self.args.workspace.with_name(self.args.workspace.stem+'-'+key+'.json')
         if self.workspace_path.exists():
@@ -191,6 +146,7 @@ class Desktop:
             legacy=read_settings(self.args.workspace) if self.args.workspace.exists() else validate_settings({})
             candidate=legacy if legacy.get('camera_id','').casefold()==camera_id.casefold() else validate_settings({})
         self.settings=dict(candidate,camera_id=camera_id);self.selected=None;self.name.set('')
+        if hasattr(self,'camera_names'):self.settings['camera_name']=self.camera_names.get(camera_id.casefold(),'')
         self.sync_alignment();self.refresh_rows()
 
     def browse(self):
@@ -203,8 +159,6 @@ class Desktop:
             except queue.Full:self.status.set('Camera command queue is full; retry after it responds')
 
     def connect(self):
-        from .service_manager import save_preferences
-        save_preferences(self.path.get(), self.args.recordings)
         if self.process and self.process.is_alive():
             self.send('stop');self.stop_deadline=time.monotonic()+7
             self.invalidate_stream()
@@ -223,7 +177,7 @@ class Desktop:
         self.start_deadline=time.monotonic()+30
         self.connect_button.configure(text='Disconnect');self.status.set('CONNECTING · Opening TC001 Max…');self.render()
         self.camera_box.configure(state='disabled');self.refresh_button.configure(state='disabled')
-        self.root.title('Thermal Lab · '+camera_id.rsplit('\\',1)[-1])
+        self.root.title('Thermal Lab · '+display_name(camera_id,self.camera_names))
 
     def toggle_record(self):
         if self.record_pending:return
@@ -238,6 +192,8 @@ class Desktop:
         self.record_button.configure(state='disabled')
 
     def invalidate_stream(self):
+        if hasattr(self,'polygon'):self.polygon.cancel()
+        if hasattr(self,'clock'):self.clock.interrupt()
         self.record_pending=False
         self.stream_active=False;self.frame=None;self.optical=None;self.received_at=0;self.drag=None
         self.record_button.configure(text='Record session',state='disabled')
@@ -261,12 +217,19 @@ class Desktop:
                     elif kind=='recording_started':
                         self.record_pending=False
                         self.recording=True;self.record_path=Path(event['path'])
+                        self.clock.start(event.get('origin_monotonic',time.monotonic()))
+                        self.status.set('RECORDING · '+str(self.record_path))
+                        self.csv_path=None;self.csv_button.configure(state='disabled')
                         self.record_button.configure(text='Stop recording',state='normal')
                     elif kind=='recording_finished':
                         self.record_pending=False
                         self.recording=False;self.record_button.configure(text='Record session',state='normal')
+                        self.clock.finish(event.get('duration_s',0),event['status']=='COMPLETE')
                         self.optical_check.configure(state='normal')
                         self.status.set(f"Recording {event['status']}: {event['frames']} frames · {event['path']}")
+                        self.csv_path=Path(event['measurement_csv']) if event.get('measurement_csv') else None
+                        self.csv_button.configure(state='normal' if self.csv_path else 'disabled')
+                        if self.csv_path:self.status.set(self.status.get()+' · Measurement CSV saved')
                     elif kind=='error':
                         self.status.set('CAMERA ERROR · '+event['message']+' · Reconnect to start a new session')
                         self.invalidate_stream()
@@ -284,8 +247,8 @@ class Desktop:
                 if not self.record_pending:self.record_button.configure(state='normal')
                 if 'waiting for frames' in self.status.get():self.status.set('LIVE · TC001 Max · thermal and optical preview')
                 self.optical=optical_image(sample['raw'])
-                self.info.set(f"Frame {self.frame['arrival_sequence']} · {self.frame['elapsed_s']:.1f} s · 256 × 192 thermal / 1024 × 768 optical · apparent °C · "
-                              +(f"RECORDING {sample['recording_frames']} frames" if self.recording else 'preview; exposure timing unqualified'))
+                self.info.set(f"Frame {self.frame['arrival_sequence']} · camera uptime {self.frame['elapsed_s']:.1f} s · 256 × 192 thermal / 1024 × 768 optical · apparent °C · "
+                              +(f"RECORDING {sample['recording_frames'] or 0} frames" if self.recording else 'preview; exposure timing unqualified'))
                 self.render();self.refresh_values()
             except queue.Empty:pass
             except Exception as exc:self.status.set('DISPLAY ERROR · '+str(exc))
@@ -316,6 +279,7 @@ class Desktop:
                 self.record_button.configure(state='disabled')
                 self.cursor.set('No fresh frame · measurements unavailable');self.render();self.refresh_values()
         if self.closing and not self.process:self.root.destroy();return
+        if hasattr(self,'record_clock'):self.record_clock.set(self.clock.text())
         self.root.after(80,self.poll)
 
     def current_limits(self):
@@ -327,6 +291,10 @@ class Desktop:
     def render(self):
         self.canvas.delete('all');self.photos=[];self.viewports=[]
         cw,ch=self.canvas.winfo_width(),self.canvas.winfo_height()
+        if hasattr(self,'hot_value'):
+            marks=extrema(self.frame['temperatures']) if self.frame and time.monotonic()-self.received_at<=1 else []
+            self.hot_value.set(f"{marks[0]['value']:.1f} °C" if marks else '—')
+            self.cold_value.set(f"{marks[-1]['value']:.1f} °C" if marks else '—')
         if not self.frame or not self.optical:
             self.canvas.create_text(cw/2,ch/2,text='Connect your TC001 Max to begin',fill='#8ba4be',font=('Segoe UI',17));return
         try:
@@ -355,9 +323,12 @@ class Desktop:
             self.canvas.create_image(x+crop_left,y+crop_top,image=photo,anchor='nw')
             self.canvas.create_text(index*panel+12,12,text=label,fill='#e3ebf5',anchor='w',font=('Segoe UI',10,'bold'))
             for item in self.settings['points']+self.settings['areas']:
+                if item.get('tracking'):continue
                 px,py=sensor_to_view(item['x']*256,item['y']*192,rotation);px=x+px*scale;py=y+py*scale
                 color='#ffffff' if item['id']==self.selected else '#67ffe0'
-                if 'x2' in item:
+                if item.get('shape')=='polygon':
+                    draw_region(self.canvas,item,self.viewports[-1],rotation,item['id']==self.selected)
+                elif 'x2' in item:
                     qx,qy=sensor_to_view(item['x2']*256,item['y2']*192,rotation)
                     left_edge,right_edge=sorted((px,x+qx*scale));top_edge,bottom_edge=sorted((py,y+qy*scale))
                     left_edge=max(clip_left,left_edge);right_edge=min(clip_right,right_edge)
@@ -373,6 +344,11 @@ class Desktop:
                 if 'value' in value:label_text+=f"  {value['value']:.1f} °C"
                 if clip_left<=px<clip_right-10 and clip_top+20<=py<clip_bottom:
                     self.canvas.create_text(px+8,py-10,text=label_text,fill=color,anchor='sw',font=('Segoe UI',10,'bold'),width=max(1,clip_right-px-10))
+            if getattr(self,'show_extrema',None) is not None and self.show_extrema.get() and time.monotonic()-self.received_at<=1 and label!='OPTICAL · aligned' and mode!='Optical':
+                draw_extrema(self.canvas,overview_markers(extrema(self.frame['temperatures']),self.settings),self.viewports[-1],rotation)
+            if label!='OPTICAL · aligned' and mode!='Optical':
+                draw_extrema(self.canvas,markers(self.settings,current_values),self.viewports[-1],rotation,tag='trackers')
+        if hasattr(self,'polygon'):self.polygon.draw()
         self.canvas.create_text(12,ch-12,text=f'{limits[0]:.1f} → {limits[1]:.1f} °C  ·  {self.palette.get()}',fill='#ffffff',anchor='w')
         if time.monotonic()-self.received_at>1:
             self.canvas.create_rectangle(0,28,cw,60,fill='#792f34',outline='')
@@ -385,6 +361,7 @@ class Desktop:
         return None
 
     def hover(self,event):
+        self.polygon.hover(event)
         point=self.locate(event)
         if point and self.frame and time.monotonic()-self.received_at<=1:
             x,y=map(int,point);value=self.frame['temperatures'][y*256+x]
@@ -392,14 +369,20 @@ class Desktop:
         else:self.cursor.set('Outside thermal coverage or no fresh frame')
 
     def press(self,event):
+        if self.polygon.click(event):return
         point=self.locate(event)
         if not point or not self.frame or time.monotonic()-self.received_at>1:return
         self.drag=dict(point=point,start=(event.x,event.y),alignment=dict(self.settings['alignment']),pan=list(self.pan))
         if self.tool.get()=='Select':
             candidates=self.settings['points']+self.settings['areas'];found=None
+            values=measurement_values(self.frame,self.settings)
             for item in reversed(candidates):
-                x,y=item['x']*256,item['y']*192
-                if ('x2' in item and x<=point[0]<=item['x2']*256 and y<=point[1]<=item['y2']*192) or ('x2' not in item and abs(x-point[0])<5 and abs(y-point[1])<5):
+                point_item=positioned(item,values)
+                if point_item is None:continue
+                x,y=point_item['x']*256,point_item['y']*192
+                corner=vertex_at(item,point[0]/256,point[1]/192) if item['id']==self.selected else None
+                if ('x2' in item and (corner is not None or area_contains(item,point[0]/256,point[1]/192))) or ('x2' not in item and abs(x-point[0])<5 and abs(y-point[1])<5):
+                    self.drag['corner']=corner
                     found=item;break
             if found:
                 self.selected=found['id'];self.drag['item']=dict(found);self.table.selection_set(self.selected)
@@ -417,13 +400,13 @@ class Desktop:
             self.settings['alignment']['dy']=max(-384,min(384,self.drag['alignment']['dy']+dy))
             self.sync_alignment();self.render()
         elif self.tool.get()=='Select' and 'item' in self.drag:
+            if self.drag['item'].get('tracking'):
+                self.status.set('This tracker follows the extreme pixel; move its search region to change where it looks');return
             original=self.drag['item'];item=next(v for v in self.settings['points']+self.settings['areas'] if v['id']==original['id'])
-            dx=max(-original['x'],min(dx/256,.999999-original.get('x2',original['x'])))
-            dy=max(-original['y'],min(dy/192,.999999-original.get('y2',original['y'])))
-            for key in ('x','x2'):
-                if key in item:item[key]=original[key]+dx
-            for key in ('y','y2'):
-                if key in item:item[key]=original[key]+dy
+            try:
+                candidate=with_vertex(original,self.drag['corner'],point[0]/256,point[1]/192) if self.drag.get('corner') is not None else moved(original,dx/256,dy/192)
+            except ValueError as exc:self.status.set(str(exc));return
+            item.update(candidate)
             self.render();self.refresh_values()
         elif self.tool.get()=='Rectangle':
             self.render();self.canvas.create_rectangle(*self.drag['start'],event.x,event.y,outline='#ffffff',dash=(5,3),width=2)
@@ -445,6 +428,22 @@ class Desktop:
         self.zoom=max(.5,min(4,self.zoom*(1.1 if event.delta>0 else 1/1.1)));self.render()
 
     def fit(self):self.zoom=1;self.pan=[0,0];self.render()
+
+    def add_polygon(self,geometry):
+        number=len(self.settings['areas'])+1
+        if number>64:raise ValueError('Maximum 64 regions')
+        item=dict(id=uuid.uuid4().hex,name=f'Polygon {number}',**geometry)
+        candidate=validate_settings(dict(self.settings,areas=self.settings['areas']+[item]))
+        self.settings=candidate;self.selected=item['id'];self.name.set(item['name'])
+        self.changed();self.refresh_rows();self.render()
+
+    def add_tracking(self,tracking):
+        try:
+            self.settings,item=add_tracker(self.settings,tracking,self.selected,self.tracking_scope.get()=='Selected region')
+            self.selected=item['id'];self.name.set(item['name']);self.tool.set('Select')
+            self.changed();self.refresh_rows();self.render()
+            self.status.set(item['name']+' · tracking temperature and pixel position · saves with Record / Stop')
+        except Exception as exc:self.status.set(str(exc))
 
     def sync_alignment(self):
         for key,var in self.alignment.items():
@@ -494,7 +493,8 @@ class Desktop:
         for identifier in self.table.get_children():self.table.delete(identifier)
         for item in self.settings['points']+self.settings['areas']:
             self.table.insert('', 'end',iid=item['id'],values=(item['name'],'—'))
-        if self.selected and self.table.exists(self.selected):self.table.selection_set(self.selected)
+        if self.selected and self.table.exists(self.selected):
+            self.table.selection_set(self.selected);self.table.see(self.selected)
         self.refresh_values()
 
     def refresh_values(self):
@@ -503,6 +503,7 @@ class Desktop:
         for item in self.settings['points']+self.settings['areas']:
             value=values.get(item['id']);text='—'
             if value:text=f"{value['value']:.2f}" if 'value' in value else f"{value['min']:.1f} · {value['mean']:.1f} · {value['max']:.1f}"
+            if value and value.get('tracking'):text+=f" · ({value['pixel_x']}, {value['pixel_y']})"
             if self.table.exists(item['id']):self.table.item(item['id'],values=(item['name'],text))
 
     def select_row(self,_):
@@ -520,8 +521,15 @@ class Desktop:
         self.changed();self.refresh_rows();self.render()
 
     def remove(self):
-        for kind in ('points','areas'):self.settings[kind]=[v for v in self.settings[kind] if v['id']!=self.selected]
+        self.settings=remove_measurement(self.settings,self.selected)
         self.selected=None;self.name.set('');self.changed();self.refresh_rows();self.render()
+
+    def clear_points(self):
+        if not self.settings['points']:return
+        self.settings['points']=[]
+        self.selected=None;self.drag=None;self.name.set('')
+        self.tool.set('Select')
+        self.changed();self.refresh_rows();self.render()
 
     def save(self):
         path=filedialog.asksaveasfilename(title='Save alignment and measurement layout',defaultextension='.json',filetypes=[('Thermal layout','*.json')])
@@ -530,6 +538,7 @@ class Desktop:
             except Exception as exc:messagebox.showerror('Save failed',str(exc))
 
     def load(self):
+        self.polygon.cancel()
         path=filedialog.askopenfilename(title='Load alignment and measurement layout',filetypes=[('Thermal layout','*.json')])
         if path:
             try:
@@ -551,19 +560,12 @@ class Desktop:
 
 
 def main():
-    from lab_update import hold_app_lease
-    hold_app_lease("ThermalLab")
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--topview-directory',type=Path)
     parser.add_argument('--recordings',type=Path,default=Path.home()/'Thermal-Lab-Recordings')
     parser.add_argument('--workspace',type=Path,default=Path.home()/'.thermal-lab/workspace.json')
     parser.add_argument('--camera-id',help='Windows PnP camera identity; indexes are never persisted')
-    args=parser.parse_args()
-    if args.topview_directory is None:
-        from .service_manager import preferences
-        saved=preferences().get("topview_directory")
-        if saved:args.topview_directory=Path(saved)
-    root=tk.Tk();Desktop(root,args);root.mainloop()
+    args=parser.parse_args();root=tk.Tk();Desktop(root,args);root.mainloop()
 
 
 if __name__=='__main__':main()

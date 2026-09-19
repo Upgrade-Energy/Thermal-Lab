@@ -1,4 +1,5 @@
 """Continuous, confidence-masked preview plus measured stereo calibration workflow."""
+from . import ui_theme
 import copy
 import queue
 import threading
@@ -18,7 +19,7 @@ class SmartAlignmentTool:
         self.frame=None;self.result=None;self.detected=None;self.pairs=[];self.photos=[];self.last_sequence=None;self.generation=0
         try:self.calibration=read_calibration(self.path,self.camera_id);load_error=None
         except Exception as exc:self.calibration=None;load_error=str(exc)
-        self.window=tk.Toplevel(desktop.root);self.window.title('Smart overlay · '+self.camera_id.rsplit('\\',1)[-1]);self.window.geometry('1120x850');self.window.minsize(1000,800)
+        self.window=tk.Toplevel(desktop.root);self.window.title('Smart overlay · '+(desktop.settings.get('camera_name') or self.camera_id.rsplit('\\',1)[-1]));self.window.geometry('1240x880');self.window.minsize(1180,820)
         self.window.transient(desktop.root);self.window.protocol('WM_DELETE_WINDOW',self.close)
         self.message=tk.StringVar();self.details=tk.StringVar();self.calibrating=tk.BooleanVar(value=False);self.hatching=tk.BooleanVar(value=True)
         self.reverse=tk.BooleanVar(value=False);self.square=tk.StringVar(value='25');self.distance=tk.StringVar(value='1.0')
@@ -26,7 +27,7 @@ class SmartAlignmentTool:
             self.pairs,self.spacing=read_session(self.path,self.camera_id);self.square.set(str(self.spacing))
         except Exception as exc:load_error=str(exc)
         body=ttk.Frame(self.window,padding=14);body.pack(fill='both',expand=True)
-        ttk.Label(body,text='SMART OVERLAY · EXPERIMENTAL',font=('Segoe UI',14,'bold')).pack(anchor='w')
+        ttk.Label(body,text='Smart overlay · Experimental',style='Title.TLabel').pack(anchor='w')
         ttk.Label(body,text='Local corrections for different depths. Amber hatching means no trustworthy optical match; numerical thermal pixels stay fixed.',wraplength=1050).pack(anchor='w',pady=6)
         row=ttk.Frame(body);row.pack(fill='x')
         self.once=ttk.Button(row,text='Analyze one pair',command=self.analyze);self.once.pack(side='left')
@@ -53,12 +54,13 @@ class SmartAlignmentTool:
         panels=ttk.Frame(body);panels.pack(fill='both',expand=True,pady=8);self.canvases=[]
         for name in ('THERMAL · original coordinates','OPTICAL / SUPPORTED OVERLAY'):
             panel=ttk.Frame(panels);panel.pack(side='left',fill='both',expand=True,padx=3)
-            ttk.Label(panel,text=name).pack(anchor='w');c=tk.Canvas(panel,width=510,height=360,bg='#0b1119',highlightthickness=0);c.pack(fill='both',expand=True)
+            ttk.Label(panel,text=name).pack(anchor='w');c=tk.Canvas(panel,width=510,height=360,bg=ui_theme.CANVAS,highlightthickness=0);c.pack(fill='both',expand=True)
             c.bind('<Configure>',lambda _:self.draw());self.canvases.append(c)
         self.panels=panels
         ttk.Label(body,textvariable=self.message,wraplength=1050).pack(anchor='w',pady=6)
         ttk.Label(body,text='This preview uses the exact pair being analyzed and may update slower than capture. It does not apply a warp to the measurement workspace or recordings. Depth is not measured; perfect alignment of occluded or unrelated features is impossible.',wraplength=1050,foreground='#9aafc3').pack(anchor='w',pady=6)
         self.update_buttons();self.message.set(load_error or 'Choose Analyze one pair, or collect a measured camera calibration first.')
+        ui_theme.polish(self.window)
         self.window.after(100,self.poll)
 
     def update_buttons(self):

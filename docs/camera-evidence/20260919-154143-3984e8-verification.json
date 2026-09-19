@@ -1,0 +1,123 @@
+{
+  "status": "PASS",
+  "recording": "20260919-154143-3984e8",
+  "frames": 2643,
+  "temperature_values_checked": 129908736,
+  "strictly_increasing_arrivals": true,
+  "first_last_raw_roundtrip_exact": true,
+  "manifest": {
+    "status": "COMPLETE",
+    "source": "HARDWARE",
+    "camera_id": "USB\\VID_3474&PID_4962\\YFDVS000000000001",
+    "dll_sha256": "f7a745d1e056e1dcda6de43ee30483fa5490eeb535bc18bbbd7ff031fcf6d3e6",
+    "timestamp_basis": "host_monotonic_arrival",
+    "temperature_basis": "apparent_raw_kelvin_64",
+    "optical_video_recorded": true,
+    "device_dropped_frames": null,
+    "frames_written": 2643,
+    "started_utc": "2026-09-19T22:41:43.065242+00:00",
+    "initial_workspace": {
+      "schema": 1,
+      "alignment": {
+        "dx": 0.7239197752403577,
+        "dy": -2.3977372360800366,
+        "scale": 1.3227604963869073,
+        "angle": 0.0
+      },
+      "points": [
+        {
+          "id": "1f2faf11087d444ea2cce082fa4b1571",
+          "name": "Point 1",
+          "x": 0.7560599284436493,
+          "y": 0.6623434704830053
+        },
+        {
+          "id": "7907a34b83764e89a397e5a42b2c7415",
+          "name": "Point 2",
+          "x": 0.4786001788908766,
+          "y": 0.8394454382826475
+        },
+        {
+          "id": "a2c17b597e3b47d1ba77bf8f982ff93e",
+          "name": "Point 3",
+          "x": 0.18343023255813962,
+          "y": 0.5226296958855098
+        },
+        {
+          "id": "654f0264aece422288574f26923313d0",
+          "name": "Point 4",
+          "x": 0.565675313059034,
+          "y": 0.4380143112701252
+        },
+        {
+          "id": "21edf53cd5fc46fe9747f9075b36ca93",
+          "name": "Point 5",
+          "x": 0.8888864042933811,
+          "y": 0.5600178890876565
+        },
+        {
+          "id": "b5306042a3bd473d94d58375c91a8ed7",
+          "name": "Hottest \u00b7 whole image",
+          "tracking": "hottest",
+          "x": 0.5,
+          "y": 0.5
+        },
+        {
+          "id": "f3dfd5df0dde4793a77728d9137bfeae",
+          "name": "Coldest \u00b7 whole image",
+          "tracking": "coldest",
+          "x": 0.5,
+          "y": 0.5
+        }
+      ],
+      "areas": [
+        {
+          "id": "f07109385d344c47beb61368b0a101ed",
+          "name": "Polygon 1",
+          "shape": "polygon",
+          "vertices": [
+            {
+              "x": 0.42921080508474574,
+              "y": 0.22499999999999995
+            },
+            {
+              "x": 0.2421875,
+              "y": 0.3718220338983051
+            },
+            {
+              "x": 0.3016154661016949,
+              "y": 0.4836864406779661
+            },
+            {
+              "x": 0.5323358050847458,
+              "y": 0.2739406779661017
+            }
+          ],
+          "x": 0.2421875,
+          "y": 0.22499999999999995,
+          "x2": 0.5323358050847458,
+          "y2": 0.4836864406779661
+        }
+      ],
+      "camera_id": "USB\\VID_3474&PID_4962\\YFDVS000000000001",
+      "camera_name": "Desk camera"
+    },
+    "measurement_csv": "measurements.csv",
+    "measurement_csv_status": "COMPLETE",
+    "measurement_csv_frames": 2643,
+    "measurement_csv_rows": 21144,
+    "optical_codec": "lz4-yuyv422-v1",
+    "optical_width": 1024,
+    "optical_height": 768,
+    "optical_frames_written": 2643,
+    "optical_pairing": "same_native_buffer; host_arrival; exposure_sync_unqualified",
+    "error": null,
+    "duration_s": 105.70299999997951,
+    "finished_utc": "2026-09-19T22:43:28.805519+00:00"
+  },
+  "measurement_csv_rows_checked": 21144,
+  "measurement_csv_exact": true,
+  "optical_pairs_checked": 2643,
+  "unique_optical_frames": 2611,
+  "optical_first_last_raw_exact": true
+}

@@ -4,7 +4,7 @@ Standalone thermal camera capture, numerical measurements and recording.
 **Power Lab is not required.** This repository owns thermal-camera development;
 Power Lab integrates through an optional, versioned local interface.
 
-Version 0.1.0 DEV16 adds a standalone Windows installer, Check for updates, and a Power Lab service launcher.
+Version 0.1.0 DEV17 adds named hottest/coldest trackers that follow changing thermal pixels and save temperature plus position for recording review and CSV. It also packages the refreshed desktop, polygon regions, recording timer, camera names, and automatic measurement CSV previously available in the local development app.
 
 The included DEV14 functionality improves [selected-subject fitting](docs/Subject-Alignment-DEV14.md)
 and adds zoomed shared-point guidance for targets such as faces. Automatic matching
@@ -47,7 +47,7 @@ for overlay alignment, precise measurement placement and recording/playback scop
 
 ## Open the desktop app
 
-Run `Thermal-Lab-Setup-0.1.0-dev16.exe`, then open the **Thermal Lab** desktop shortcut.
+Run `Thermal-Lab-Setup-0.1.0-dev17.exe`, then open the **Thermal Lab** desktop shortcut.
 Python and desktop dependencies are bundled. See [installation and updates](docs/Windows-Installation.md).
 TopView and its camera drivers are still required for physical capture.
 

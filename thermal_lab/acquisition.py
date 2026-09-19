@@ -19,9 +19,7 @@ from .optical_recording import OpticalRecorder,CODEC
 
 
 def worker(directory, commands, previews, events, camera_id=None):
-    from lab_update import hold_app_lease
-    hold_app_lease("ThermalLab")
-    recorder=None; optical=None; destination=None; manifest=None; last_raw=None; record_origin=0
+    recorder=None; optical=None; destination=None; manifest=None; last_raw=None; record_origin=0; record_elapsed=0.
     settings=validate_settings({}); revision=0; camera=None
     parent=multiprocessing.parent_process();parent_watch_stop=threading.Event()
     def watch_parent():
@@ -48,10 +46,20 @@ def worker(directory, commands, previews, events, camera_id=None):
             if optical.count!=recorder.count:error=error or 'Optical/thermal recorded frame counts differ'
         if recorder.count==0:error=error or 'No frames were recorded'
         if last_raw is not None:(destination/'last.frame').write_bytes(last_raw)
+        if recorder.measurement_csv:
+            csv=recorder.measurement_csv
+            if csv.frames!=recorder.count:error=error or 'Measurement CSV/thermal frame counts differ'
+            if not error:
+                try:csv.publish()
+                except Exception as exc:error='Measurement CSV finalization failed: '+str(exc)
+            manifest.update(measurement_csv=csv.path.name,measurement_csv_frames=csv.frames,
+                            measurement_csv_rows=csv.rows,measurement_csv_status='INCOMPLETE' if error else 'COMPLETE')
         manifest.update(status='FAILED' if error else 'COMPLETE',error=error,
-                        frames_written=recorder.count,finished_utc=datetime.now(timezone.utc).isoformat())
+                        frames_written=recorder.count,duration_s=record_elapsed,finished_utc=datetime.now(timezone.utc).isoformat())
+        if error:manifest['measurement_csv_status']='INCOMPLETE'
         save_manifest()
-        event('recording_finished',path=str(destination),status=manifest['status'],frames=recorder.count,error=error)
+        event('recording_finished',path=str(destination),status=manifest['status'],frames=recorder.count,error=error,
+              measurement_csv=str(destination/manifest['measurement_csv']) if not error else None,duration_s=record_elapsed)
         recorder=None
         optical=None
 
@@ -79,11 +87,14 @@ def worker(directory, commands, previews, events, camera_id=None):
                         destination=Path(command['path']);destination.mkdir(parents=True,exist_ok=False)
                         record_origin=first_sample[0]['elapsed_s'] if first_sample else time.monotonic()-camera.origin
                         last_raw=None
+                        record_elapsed=0.
                         manifest=dict(status='RECORDING',source='HARDWARE',camera_id=camera.camera_id,
                                       dll_sha256=DLL_SHA256,timestamp_basis='host_monotonic_arrival',
                                       temperature_basis='apparent_raw_kelvin_64',optical_video_recorded=False,
                                       device_dropped_frames=None,frames_written=0,
-                                      started_utc=datetime.now(timezone.utc).isoformat(),initial_workspace=settings)
+                                      started_utc=datetime.now(timezone.utc).isoformat(),initial_workspace=settings,
+                                      measurement_csv='measurements.partial.csv',measurement_csv_status='RECORDING',
+                                      measurement_csv_frames=0,measurement_csv_rows=0)
                         if command.get('run_id') is not None:
                             run_id=command['run_id'];origin=command.get('run_origin_monotonic')
                             if not isinstance(run_id,str) or not re.fullmatch(r'[a-f0-9]{32}',run_id):raise ValueError('Invalid integration run ID')
@@ -95,10 +106,10 @@ def worker(directory, commands, previews, events, camera_id=None):
                             manifest.update(optical_video_recorded=True,optical_codec=CODEC,optical_width=1024,
                                             optical_height=768,optical_frames_written=0,
                                             optical_pairing='same_native_buffer; host_arrival; exposure_sync_unqualified')
-                        save_manifest();recorder=Recorder([],0,compression_level=1)
+                        save_manifest();recorder=Recorder([],0,compression_level=1,measurement_csv=True)
                         recorder.start(destination/'thermal.jsonl.gz')
                         if command.get('optical',False):optical=OpticalRecorder(destination)
-                        event('recording_started',path=str(destination))
+                        event('recording_started',path=str(destination),origin_monotonic=camera.origin+record_origin)
                     elif action=='finish':finish()
                 if not running:break
                 frame,raw=first_sample if first_sample else camera.read()
@@ -116,6 +127,7 @@ def worker(directory, commands, previews, events, camera_id=None):
                         recorded.update(run_id=manifest['run_id'],run_elapsed_s=camera.origin+frame['elapsed_s']-manifest['run_origin_monotonic'])
                     if optical:recorded['optical_sha256']=optical.ingest(raw,recorded['elapsed_s'],frame['arrival_sequence'])
                     recorder.ingest([recorded])
+                    record_elapsed=recorded['elapsed_s']
                     if last_raw is None:(destination/'first.frame').write_bytes(raw)
                     last_raw=raw
                 # Preview can drop superseded frames; recording keeps every accepted frame.

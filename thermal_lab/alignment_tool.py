@@ -1,4 +1,5 @@
 """Frozen-pair alignment assistant; expensive matching runs outside Tk's thread."""
+from . import ui_theme
 import copy
 import hashlib
 import queue
@@ -27,15 +28,15 @@ class AlignmentTool:
         key=hashlib.sha256(self.camera_id.casefold().encode()).hexdigest()[:16]
         self.profile_path=desktop.args.workspace.parent/'alignment-profiles'/f'{key}.json'
         self.profiles=read_profiles(self.profile_path,self.camera_id)
-        self.window=tk.Toplevel(desktop.root);self.window.title('Auto alignment · '+self.camera_id.rsplit('\\',1)[-1])
-        self.window.geometry('1050x780');self.window.minsize(900,700);self.window.transient(desktop.root)
+        self.window=tk.Toplevel(desktop.root);self.window.title('Auto alignment · '+(desktop.settings.get('camera_name') or self.camera_id.rsplit('\\',1)[-1]))
+        self.window.geometry('1180x820');self.window.minsize(1120,780);self.window.transient(desktop.root)
         self.window.protocol('WM_DELETE_WINDOW',self.close)
         self.message=tk.StringVar();self.name=tk.StringVar(value='Near target');self.distance=tk.StringVar()
         self.preview_mode=tk.StringVar(value='Blend');self.profile_choice=tk.StringVar()
         self.guide=tk.BooleanVar(value=False);self.optical_region=None;self.guided_seed=None
         self.point_mode=False;self.point_pairs=[[],[]];self.zoom_target=tk.BooleanVar(value=False)
         body=ttk.Frame(self.window,padding=14);body.pack(fill='both',expand=True)
-        ttk.Label(body,text='AUTO ALIGNMENT · CHOOSE THE TARGET',font=('Segoe UI',14,'bold')).pack(anchor='w')
+        ttk.Label(body,text='Align a subject',style='Title.TLabel').pack(anchor='w')
         ttk.Label(body,text='1. Box ONE target on the left, with a little background.  2. Preview auto-alignment.  3. Apply to live. No checkerboard is needed for this tool.',wraplength=980).pack(anchor='w',pady=6)
         row=ttk.Frame(body);row.pack(fill='x')
         ttk.Button(row,text='Refresh pair',command=self.capture).pack(side='left')
@@ -53,7 +54,7 @@ class AlignmentTool:
         for label in ('THERMAL · draw target box','CANDIDATE · inspect the same target'):
             panel=ttk.Frame(panels);panel.pack(side='left',fill='both',expand=True,padx=3)
             ttk.Label(panel,text=label).pack(anchor='w')
-            canvas=tk.Canvas(panel,bg='#0b1119',highlightthickness=0,width=480,height=360);canvas.pack(fill='both',expand=True)
+            canvas=tk.Canvas(panel,bg=ui_theme.CANVAS,highlightthickness=0,width=480,height=360);canvas.pack(fill='both',expand=True)
             canvas.bind('<Configure>',lambda _:self.draw());self.canvases.append(canvas)
         self.canvases[0].bind('<ButtonPress-1>',self.press);self.canvases[0].bind('<B1-Motion>',self.drag)
         self.canvases[0].bind('<ButtonRelease-1>',self.release)
@@ -71,7 +72,7 @@ class AlignmentTool:
         ttk.Button(row,text='Predict at distance',command=self.predict).pack(side='left')
         self.apply_button=ttk.Button(row,text='Apply to live',command=self.apply);self.apply_button.pack(side='right')
         ttk.Label(body,text='Distance is entered by you, not measured by the camera. Prediction uses your saved near/far settings within their calibrated range. This aligns one depth plane; it cannot align all depths at once or change thermal measurements.',wraplength=980,foreground='#9aafc3').pack(anchor='w',pady=7)
-        self.frame=None;self.verified=False;self.start=None;self.capture();self.buttons();self.window.after(100,self.poll)
+        self.frame=None;self.verified=False;self.start=None;self.capture();self.buttons();ui_theme.polish(self.window);self.window.after(100,self.poll)
 
     def capture(self):
         if self.searching:self.message.set('Cancel or finish the current search first.');return

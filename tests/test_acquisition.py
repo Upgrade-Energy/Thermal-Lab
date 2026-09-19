@@ -41,6 +41,7 @@ class AcquisitionTests(unittest.TestCase):
             frame=json.loads(gzip.decompress((path/'thermal.jsonl.gz').read_bytes()))[0]
             self.assertEqual(frame['measurements']['probe']['value'],24.5)
             self.assertEqual(frame['workspace']['points'][0]['name'],'Probe')
+            self.assertEqual(manifest['duration_s'],frame['elapsed_s'])
             self.assertFalse(manifest['optical_video_recorded'])
 
     def test_camera_failure_cannot_complete_recording(self):
