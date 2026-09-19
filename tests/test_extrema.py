@@ -22,4 +22,3 @@ class ExtremaTests(unittest.TestCase):
         hot,cold=extrema(values)
         self.assertEqual((hot['value'],cold['value']),(30,21))
         with self.assertRaises(ValueError):extrema([1,2])
-
