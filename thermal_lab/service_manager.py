@@ -10,6 +10,7 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 import urllib.request
 import urllib.parse
+from .topview_setup import resolve_topview
 
 UI_FONT = 'Segoe UI' if os.name == 'nt' else 'Helvetica'
 PREFERENCES = Path.home() / '.thermal-lab' / 'desktop-preferences.json'
@@ -69,7 +70,7 @@ def main():
     def start():
         nonlocal child,log
         try:
-            if not Path(directory.get()).is_dir():raise ValueError('Choose the installed TopView folder first.')
+            directory.set(str(resolve_topview(directory.get())))
             if child and child.poll() is None:raise ValueError('The service is already starting or running.')
             save_preferences(directory.get(),recordings.get())
             log=PREFERENCES.parent.joinpath('service.log').open('a',encoding='utf-8')

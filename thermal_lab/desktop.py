@@ -16,6 +16,7 @@ import sys
 from PIL import Image, ImageTk
 
 from .acquisition import worker
+from .topview_setup import resolve_topview, qualified_root
 from .imaging import optical_image, aligned_optical, thermal_image, rotate_image, sensor_to_view, canvas_to_sensor
 from .workspace import validate_settings, read_settings, save_settings, measurement_values
 from .camera_diagnostics import pnp_devices
@@ -63,6 +64,7 @@ class Desktop:
             except Exception as exc:self.status.set(f'Layout not loaded: {exc}')
         root.after(80,self.poll)
         self.refresh_cameras()
+        self.detect_topview(quiet=True)
 
     def reload_camera_names(self):
         try:self.camera_names=read_names(self.names_path)
@@ -155,9 +157,32 @@ class Desktop:
         if hasattr(self,'camera_names'):self.settings['camera_name']=self.camera_names.get(camera_id.casefold(),'')
         self.sync_alignment();self.refresh_rows()
 
+    def detect_topview(self, quiet=False):
+        from .service_manager import save_preferences
+        if self.process and self.process.is_alive():
+            if not quiet:self.status.set('Disconnect the camera before changing its TopView folder.')
+            return False
+        try:
+            found=resolve_topview(self.path.get())
+            self.path.set(str(found))
+            save_preferences(str(found),self.args.recordings)
+            if not quiet:self.status.set('TopView ready · '+str(found)+' · Connect camera to begin')
+            return True
+        except OSError as exc:
+            self.status.set('Camera setup · '+str(exc))
+            return False
+
     def browse(self):
+        if self.process and self.process.is_alive():
+            self.status.set('Disconnect the camera before changing its TopView folder.');return
         path=filedialog.askdirectory(title='Select TopView installation')
-        if path:self.path.set(path)
+        if path:
+            found=qualified_root(path)
+            if found is None:
+                messagebox.showerror('TopView setup', 'This folder does not contain the compatible TopView 1.30.003 camera library. Select the TopView installation folder containing dll/dll_c001max/libirdvs.dll.',parent=self.root)
+                return
+            self.path.set(str(found));self.detect_topview()
+
 
     def send(self, action, **data):
         if self.process and self.process.is_alive():
@@ -165,13 +190,12 @@ class Desktop:
             except queue.Full:self.status.set('Camera command queue is full; retry after it responds')
 
     def connect(self):
-        from .service_manager import save_preferences
-        save_preferences(self.path.get(),self.args.recordings)
         if self.process and self.process.is_alive():
             self.send('stop');self.stop_deadline=time.monotonic()+7
             self.invalidate_stream()
             self.status.set('Stopping camera and finalizing any recording…');return
         if self.process:self.process.join(timeout=0)
+        if not self.detect_topview():return
         camera_id=self.camera_choice.get()
         if not camera_id:self.status.set('Select a connected camera first');return
         try:self.prepare_camera_layout(camera_id)

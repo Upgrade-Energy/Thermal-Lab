@@ -25,7 +25,7 @@ class NativeWorkspaceTests(unittest.TestCase):
         for job in self.root.tk.call('after','info'):self.root.after_cancel(job)
         self.root.destroy();self.folder.cleanup()
     def desktop(self):
-        with patch('thermal_lab.desktop.pnp_devices',return_value=[]):app=Desktop(self.root,self.args)
+        with patch('thermal_lab.desktop.pnp_devices',return_value=[]),patch('thermal_lab.service_manager.save_preferences'):app=Desktop(self.root,self.args)
         self.root.deiconify();self.root.geometry('1180x850');self.root.update()
         values=[22.0]*49152;values[0]=10;values[-1]=40
         app.frame=dict(width=256,height=192,temperatures=values);app.optical=Image.new('RGB',(1024,768))

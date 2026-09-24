@@ -21,7 +21,7 @@ from .device_hints import DeviceHints, ordered_indexes
 
 FRAME_BYTES = 1770496
 PLANE_BYTES = 98304
-DLL_SHA256 = 'f7a745d1e056e1dcda6de43ee30483fa5490eeb535bc18bbbd7ff031fcf6d3e6'
+from .topview_setup import DLL_SHA256, resolve_topview
 TEMPERATURE_LUT = tuple(round(value / 64 - 273.15, 6) for value in range(65536))
 
 
@@ -81,6 +81,7 @@ class TC001Max:
         self.stream_received = 0
         if sys.platform != 'win32' or c.sizeof(c.c_void_p) != 8:
             raise OSError('TC001 Max adapter requires Windows x64 Python')
+        self.directory = resolve_topview(self.directory)
         library = self.directory / 'dll/dll_c001max/libirdvs.dll'
         if hashlib.sha256(library.read_bytes()).hexdigest() != DLL_SHA256:
             raise OSError('Unqualified libirdvs.dll version; refusing unknown native ABI')
