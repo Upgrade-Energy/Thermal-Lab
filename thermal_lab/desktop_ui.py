@@ -30,6 +30,8 @@ def build(app):
                          ('Save layout…',a.save),('Load layout…',a.load)]:actions.add_command(label=text,command=command)
     from lab_update import open_updates
     actions.add_separator();actions.add_command(label='Check for updates…',command=open_updates)
+    import webbrowser
+    actions.add_command(label='Report a bug…',command=lambda:webbrowser.open('https://github.com/Upgrade-Energy/Thermal-Lab/issues/new?template=bug_report.yml'))
     actions.add_command(label='Close window',command=a.close)
     connection=ttk.Frame(root,padding=(22,0,22,10));connection.pack(fill='x')
     ttk.Label(connection,text='Camera',style='Muted.TLabel').pack(side='left',padx=(0,10))
@@ -143,3 +145,4 @@ def build(app):
     ttk.Label(camera,text='Detected automatically for this Windows account. Close TopView before connecting.',wraplength=375,style='Muted.TLabel').pack(anchor='w')
     ttk.Label(root,textvariable=a.info,style='Muted.TLabel',padding=(22,6),wraplength=1250).pack(fill='x')
     root.after_idle(lambda:body.sashpos(0,max(580,root.winfo_width()-450)))
+

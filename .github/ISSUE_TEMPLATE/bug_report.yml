@@ -1,0 +1,56 @@
+name: Bug report
+description: Report a reproducible Thermal Lab problem
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: "Do not upload tokens, vendor DLLs, private recordings or customer data. Tested hardware is TC001 Max with TopView 1.30.003 on Windows x64."
+  - type: input
+    id: version
+    attributes:
+      label: Thermal Lab version
+      placeholder: 0.1.0-dev19
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Windows version and camera model
+    validations:
+      required: true
+  - type: input
+    id: topview
+    attributes:
+      label: TopView version and USB driver
+      description: State not applicable for playback-only problems.
+    validations:
+      required: true
+  - type: textarea
+    id: usb
+    attributes:
+      label: USB connections and camera ownership
+      description: Number of cameras, direct ports or hub, controller paths if known, and whether TopView/other sessions are closed.
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior and error message
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Sanitized logs or screenshots
+      description: Review attachments for personal paths, tokens and confidential measurements first.

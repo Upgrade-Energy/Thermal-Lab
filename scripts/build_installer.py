@@ -30,7 +30,7 @@ def fetch(cache,name,url,digest):
 
 
 def copy_source(target,thermal):
-    names=['lab_update.py','release.json','launch_installed.py','README.md']
+    names=['lab_update.py','release.json','launch_installed.py','README.md','LICENSE','THIRD-PARTY-NOTICES.md']
     if not thermal:names+=['run_app.py']
     for name in names:shutil.copy2(ROOT/name,target/name)
     for name in (['thermal_lab'] if thermal else ['powerlab']):
@@ -84,3 +84,4 @@ def main():
 
 
 if __name__=='__main__':main()
+

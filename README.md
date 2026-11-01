@@ -1,163 +1,95 @@
-# Upgrade Energy Thermal Lab
+# Thermal Lab — TOPDON TC001 Max thermal camera app
 
-Standalone thermal camera capture, numerical measurements and recording.
-**Power Lab is not required.** This repository owns thermal-camera development;
-Power Lab integrates through an optional, versioned local interface.
+Open-source Windows desktop app for live thermal/optical viewing, numerical
+measurements, alignment, recording, playback and CSV/PNG/MP4 export.
+**Tested camera: TOPDON TC001 Max. Power Lab is optional and is not required.**
 
-Version 0.1.0 DEV17 adds named hottest/coldest trackers that follow changing thermal pixels and save temperature plus position for recording review and CSV. It also packages the refreshed desktop, polygon regions, recording timer, camera names, and automatic measurement CSV previously available in the local development app.
+[Download Windows installer](https://github.com/Upgrade-Energy/Thermal-Lab/releases)
+· [User guide](docs/User-Guide.md)
+· [Report a bug](https://github.com/Upgrade-Energy/Thermal-Lab/issues/new?template=bug_report.yml)
+· [MIT license](LICENSE)
 
-The included DEV14 functionality improves [selected-subject fitting](docs/Subject-Alignment-DEV14.md)
-and adds zoomed shared-point guidance for targets such as faces. Automatic matching
-can still be ambiguous; perfect registration of every subject is not guaranteed.
-It includes the DEV13 [selected-area alignment fixes](docs/Selected-Area-Alignment-Fix.md)
-with outline matching, imported measurement rectangles and explicit preview/apply controls.
-Selected-area alignment does not require a checkerboard; ambiguous scenes offer paired-box guidance.
-It also includes an experimental [continuous regional overlay and measured camera calibration workflow](docs/Smart-Overlay.md).
-Unsupported regions remain thermal-only. Physical calibration and useful real-scene
-alignment accuracy are still pending a suitable thermal/optical target.
-It includes a [target auto-alignment tool and near/far profiles](docs/Desktop-Guide.md#auto-alignment-and-working-distance),
-with frozen previews, paired-box guidance and working-distance interpolation.
-Automatic matching is experimental; every result requires visual review.
-See [alignment verification and limits](docs/Auto-Alignment-Verification.md).
-It includes an optional [Power Lab integration service](docs/Power-Lab-Integration.md)
-with Power Lab browser camera selection, full numerical live views, and linked thermal/optical playback. Power Lab electrical runs
-remain simulated. It includes faster lossless optical compression, USB connection
-guidance, and immediate stale-frame clearing after camera failure. It preserves
-full resolution, every accepted frame and every numerical temperature value.
-It includes PNG snapshots and H.264 MP4 export with optional
-measurement labels and source-frame provenance. It includes editable playback points and regions with separate
-autosaved analysis layouts, recalculated histories and labeled CSV export.
-It includes continuous lossless optical recording and optical/blended
-playback alongside numerical thermal frames, temperature-history plots and CSV
-export. It also supports independent windows for multiple TOPDON TC001 Max
-cameras, with verified Windows device selection and separate measurement layouts.
-The native interface includes thermal/optical/blended/side-by-side views, optical alignment,
-named temperature points and rectangles, palettes, and numerical recording.
-USB diagnostics and TopView CSV import remain available as command-line tools.
-Optical storage uses lossless LZ4 compression; savings depend on the scene.
-Budget at least the original 2.4 GB/minute per camera at 25 fps plus numerical
-data, since noisy images may not compress. Existing raw archives remain readable.
-This is an indexed app-native archive; use Export MP4 in recording review to
-create a shareable video. MP4 is a presentation export, not the numerical archive.
-See [DEV8 quality and recovery verification](docs/Quality-Preserving-Recording-Verification.md)
-for the two-camera compression measurements, exact-data checks and recovery tests.
+## Install and connect
 
-See the [TopView feature comparison and proposed UI priorities](docs/TopView-Feature-Review.md)
-for overlay alignment, precise measurement placement and recording/playback scope.
+1. Download `Thermal-Lab-Setup-0.1.0-dev19.exe` from the DEV19 release assets.
+   Development releases are marked **Pre-release**; use the releases page, not `/releases/latest`.
+2. Run setup on Windows 10/11 x64. Python and desktop dependencies are included.
+   The installer is unsigned; Windows may display an unknown-publisher prompt.
+3. Separately install compatible [TOPDON TopView for Windows](https://www.topdon.com/pages/topdon-apps-thermal-imagers).
+   **Tested version: 1.30.003. Newer vendor versions are not automatically compatible.**
+4. Connect the TC001 Max, close TopView and other camera owners (including other
+   signed-in Windows sessions), then open Thermal Lab and connect the camera.
+   Camera settings includes **Find TopView** and validated **Browse** controls.
 
-## Open the desktop app
+## USB driver and camera limitations
 
-Run `Thermal-Lab-Setup-0.1.0-dev17.exe`, then open the **Thermal Lab** desktop shortcut.
-Python and desktop dependencies are bundled. See [installation and updates](docs/Windows-Installation.md).
-TopView and its camera drivers are still required for physical capture.
+- Windows **WinUSB** and the installed TopView native libraries are required.
+  The EXE does **not** install camera drivers or bundle proprietary TOPDON DLLs.
+- The adapter accepts only the tested `libirdvs.dll` SHA-256 documented in
+  [direct capture](docs/TC001-Max-Direct-Capture.md). Unknown libraries are rejected.
+  Automatic discovery finds a compatible installation; it does not install TopView.
+- Our direct raw-WinUSB prototype lost frame alignment on partial transfers.
+  The working capture path therefore depends on the vendor library for framing.
+  A generic USB driver alone is insufficient. Do not bypass the library hash check.
+- **Two cameras need separate USB controller paths.** Shared-hub tests failed;
+  replacing the hub did not solve the bandwidth constraint, and the tested native
+  FPS request did not reduce USB traffic. See [USB evidence](docs/Shared-Hub-Verification.md).
+- TC001, TC002 and other TOPDON cameras are **not qualified by the TC001 Max tests**.
+  Physical capture is Windows-only; Linux/macOS live capture is not supported.
+- Apparent temperatures are preserved numerically, but absolute accuracy and
+  emissivity/environment corrections remain unqualified. Alignment is experimental
+  and must be visually inspected. Host arrival times are not exposure synchronization.
 
-### Running from source
+## Features and evidence
 
-Install Python 3.12+ x64 with Tcl/Tk support, then install the desktop dependencies:
+Named points, rectangles, polygons and moving hot/cold pixel trackers; independent
+camera windows; optical/thermal blend and selected-subject alignment; lossless
+optical archives and numerical thermal frames; recording review and exports.
+Trackers follow extrema, not a recognized physical object. MP4 is a lossy display
+export: retain original archives for numerical analysis.
+
+- [User guide](docs/User-Guide.md) — setup, alignment, recording and troubleshooting
+- [Detailed desktop guide](docs/Desktop-Guide.md) and [tracking guide](docs/Tracking-Guide.md)
+- [DEV18 physical setup verification](docs/DEV18-Setup-Verification.md)
+- [DEV17 tracking verification](docs/DEV17-Tracking-Verification.md)
+- [Two-camera sustained test](docs/Sustained-Camera-Verification.md)
+- [Installation, updates and retained data](docs/Windows-Installation.md)
+- [Optional local Power Lab interface](docs/Power-Lab-Integration.md)
+
+DEV19 packages the public documentation, license and bug-report link on top of
+DEV18. CI regression and Windows installer checks do not constitute a new
+physical-camera qualification. Historical evidence is dated in each document.
+
+## Bugs and contributions
+
+Use **Workspace → Report a bug…** or [GitHub Issues](https://github.com/Upgrade-Energy/Thermal-Lab/issues/new/choose).
+The form requests the app/Windows/TopView versions, camera model, USB topology,
+reproduction steps, expected result and actual result. Reporting opens GitHub;
+it does not upload recordings or submit a report automatically. A GitHub account
+is needed to submit issues. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Develop from source
+
+Python 3.12+ x64 with Tcl/Tk:
 
 ```powershell
 python -m pip install ".[desktop]"
-python scripts/run_thermal_lab.py --topview-directory 'C:\path\to\TopView'
-```
-
-After installation, `thermal-lab` also launches the interface. Choose the
-TopView installation with Browse if no path was provided, select a camera, then
-Connect camera. **Open another camera window** selects the other connected
-camera in an independent window; connect and record there separately. Each window
-can close without stopping the other. For two Max cameras, use separate USB
-controller paths; the tested shared hub could not sustain both streams.
-The [shared-hub retest](docs/Shared-Hub-Verification.md) confirms the bandwidth
-constraint and shows that the tested native FPS request does not reduce traffic.
-TopView itself must be closed. See the [desktop guide](docs/Desktop-Guide.md).
-See [DEV5 optical verification](docs/Optical-Recording-Verification.md) for the
-two-camera recording checks and remaining limits.
-The [30-minute two-camera test](docs/Sustained-Camera-Verification.md) verified
-90,018 thermal/optical frame pairs, all recorded temperature histories and
-full-length video exports. It also documents brief source optical-image holds
-and the 146 GB combined archive size.
-
-## Review a recording
-
-Choose **Review recordings** in the live app, or launch the review interface
-without connecting any camera:
-
-```powershell
-python -m thermal_lab.review --session recordings/session-01
-```
-
-After installation, `thermal-lab-review` launches the same player. Open a
-finalized session folder, play/pause, step frames, drag the timeline or click a
-history plot to seek. Choose a point or region statistic from the history list.
-**Export history** writes all recorded measurement histories to a new CSV file.
-The source recording stays unchanged. See [playback verification](docs/Playback-Verification.md).
-
-The desktop uses NumPy and Pillow; the original capture/import CLI remains
-standard-library-only. No Power Lab application or Windows SDK is required.
-
-## Capture on Windows
-
-Use Python 3.12+ x64 and the tested TopView 1.30.003 installation and camera
-driver. There are no third-party Python runtime dependencies. TopView must be
-closed during capture; its installed native DLLs are required, but a Windows
-SDK and running TopView process are not. Proprietary binaries are not bundled.
-
-From this repository:
-
-```powershell
-python scripts/check_tc001.py --output recordings/usb-check-01.json
-python scripts/capture_tc001.py --topview-directory 'C:\path\to\TopView' --output recordings/session-01 --seconds 45
-```
-
-Use new output paths each time. Capture supports 1–600 seconds per camera.
-When multiple cameras are connected, pass `--camera-id` with the Windows instance
-ID reported by the diagnostic command. Run separate processes for concurrent CLI
-capture. It records full numerical frames in `thermal.jsonl.gz`, a seek index in
-`thermal.idx`, first/last raw frames, and `camera-session.json`. A successful
-session has status `COMPLETE`. `FAILED` or unfinished `RECORDING` sessions are
-incomplete. Times are host arrivals, not physical exposure times.
-
-The experimental adapter is locked to the tested camera DLL hash. Temperatures
-are apparent readings; host emissivity/environment corrections and absolute
-accuracy remain unqualified. See [hardware evidence and limits](docs/TC001-Max-Direct-Capture.md).
-
-## Import existing numerical captures
-
-```powershell
-python scripts/import_topview_csv.py --help
-python scripts/record_topview.py capture1.csv capture2.csv --unit C --camera-id camera1 --output recordings/import-01
-```
-
-Imported recordings preserve their source and use explicitly labeled import
-arrival times. They do not invent exposure timestamps or derive temperatures
-from colored images. The existing `powerlab-camera-import-v1` format identifier
-is retained for file compatibility; it does not imply an application dependency.
-
-## Development
-
-```powershell
+python scripts/run_thermal_lab.py
 python -m unittest discover -s tests -v
 ```
 
-The `thermal_lab` package is also installable with `python -m pip install .`.
-CI tests parsers, numerical decoding and recording without opening hardware.
-Hardware tests are run explicitly using the commands above.
+The Windows workflow builds from pinned runtime/wheel inputs, runs regression
+and Windows install/shortcut/reinstall/data-preservation checks, then publishes
+a versioned EXE and SHA-256 checksum. Existing release assets are never replaced.
+Source-only changes are not installed by the updater.
 
-Next: disconnect/recovery tests, advanced measurement tools,
-and environmental correction.
-A later Power Lab integration should exchange
-run IDs, recording commands and selected measurements with freshness metadata.
-No instrument-control code, web server, battery recipes or Power Lab package is
-included here.
+## License and origin
 
-## Origin
+[MIT](LICENSE), copyright Upgrade Energy. Dependencies retain their own licenses:
+[third-party notices](THIRD-PARTY-NOTICES.md). No TOPDON proprietary library or
+driver is licensed or redistributed by this project. Independent project; not an
+official TOPDON application.
 
-Extracted from Upgrade-Energy/Power-Lab, branch `development/lab-studio-v0.2`,
-base commit `d52d2418466b04d343776ffed695359a46e559e3`, including the local camera
-development verified on 7 September 2026. Historical evidence is labeled as
-pre-extraction. New changes to the camera adapter and tools belong here.
-The legacy `Local\PowerLabTC001MaxCapture` mutex name is intentionally retained
-to prevent old and new capture workers from opening the same camera together.
-
-## Windows installer and updates
-
-See [Windows installation and updates](docs/Windows-Installation.md). Run the standalone Setup EXE, then use **Check for updates** for future packaged releases.
+Extracted from Upgrade Energy Power Lab in September 2026. The application name,
+repository URL and legacy camera mutex are retained for existing updater and
+camera-ownership compatibility. See [extraction history](docs/Extraction-Verification.md).
